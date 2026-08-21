@@ -21,6 +21,7 @@
       --text-muted: #94a3b8;
       --border: #243049;
       --success: #22c55e;
+      --danger: #ef4444;
     }
 
     * {
@@ -43,11 +44,33 @@
       max-width: 500px;
     }
 
-    h1 {
-      text-align: center;
-      color: var(--accent);
+    .header-box {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
       margin-bottom: 1.25rem;
+    }
+
+    h1 {
+      margin: 0;
+      color: var(--accent);
       font-size: 1.8rem;
+    }
+
+    .btn-reset {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      padding: 0.4rem 0.8rem;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-reset:hover {
+      border-color: var(--danger);
+      color: var(--danger);
     }
 
     .nav {
@@ -130,7 +153,6 @@
       font-size: 0.95rem;
     }
 
-    /* Tracker Controls: Greutate & Bifa */
     .tracker-controls {
       display: flex;
       gap: 0.75rem;
@@ -174,7 +196,10 @@
 <body>
 
   <div class="container">
-    <h1>GymTrack</h1>
+    <div class="header-box">
+      <h1>GymTrack</h1>
+      <button class="btn-reset" onclick="resetBife()">Resetare Bife</button>
+    </div>
     <div class="nav" id="day-nav"></div>
     <div id="exercise-list"></div>
   </div>
@@ -208,6 +233,14 @@
       bicepsCurl: "Dumbbell_Bicep_Curl",
       pallofPress: "Pallof_Press"
     };
+
+    // Pre-încărcare imagini în memoria cache pentru animații fluente
+    Object.values(EX_FOLDERS).forEach(folder => {
+      const img0 = new Image();
+      img0.src = `./exercises/${folder}/0.jpg`;
+      const img1 = new Image();
+      img1.src = `./exercises/${folder}/1.jpg`;
+    });
 
     const DAYS = [
       {
@@ -267,7 +300,6 @@
         const exKey = ex[4];
         const initialSrc = `./exercises/${folderName}/0.jpg`;
         
-        // Citire date salvate în LocalStorage
         const savedWeight = localStorage.getItem(`gt_weight_${exKey}`) || '';
         const isDone = localStorage.getItem(`gt_done_${exKey}`) === 'true';
 
@@ -290,7 +322,7 @@
                      class="weight-input" 
                      placeholder="Kg (ex: 50)" 
                      value="${savedWeight}"
-                     onchange="saveWeight('${exKey}', this.value)">
+                     onkeyup="saveWeight('${exKey}', this.value)">
               <label class="checkbox-container">
                 <input type="checkbox" 
                        ${isDone ? 'checked' : ''} 
@@ -317,20 +349,29 @@
       }
     }
 
+    function resetBife() {
+      if (confirm("Vrei să resetezi toate bifele pentru un antrenament nou? (Greutățile vor rămâne salvate)")) {
+        Object.keys(localStorage).forEach(key => {
+          if (key.startsWith('gt_done_')) {
+            localStorage.removeItem(key);
+          }
+        });
+        renderExercises();
+      }
+    }
+
     function startAnimation() {
       if (animationInterval) clearInterval(animationInterval);
 
       animationInterval = setInterval(() => {
         const images = document.querySelectorAll('.exercise-img');
         images.forEach(img => {
-          if (img.complete && img.naturalWidth !== 0) {
-            const folder = img.getAttribute('data-folder');
-            const currentFrame = img.getAttribute('data-frame');
-            const nextFrame = currentFrame === '0' ? '1' : '0';
-            
-            img.src = `./exercises/${folder}/${nextFrame}.jpg`;
-            img.setAttribute('data-frame', nextFrame);
-          }
+          const folder = img.getAttribute('data-folder');
+          const currentFrame = img.getAttribute('data-frame');
+          const nextFrame = currentFrame === '0' ? '1' : '0';
+          
+          img.src = `./exercises/${folder}/${nextFrame}.jpg`;
+          img.setAttribute('data-frame', nextFrame);
         });
       }, 750);
     }
