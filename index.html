@@ -10,7 +10,7 @@
   <meta name="apple-mobile-web-app-title" content="GymTrack">
   
   <link rel="manifest" href="./manifest.webmanifest">
-  <meta name="theme-color" content="#11151f">
+  <meta name="theme-color" content="#0f131b">
   
   <style>
     :root {
@@ -19,8 +19,13 @@
       --accent: #38bdf8;
       --text: #f8fafc;
       --text-muted: #94a3b8;
-      --error: #f87171;
+      --border: #243049;
     }
+
+    * {
+      box-sizing: border-box;
+    }
+
     body {
       font-family: system-ui, -apple-system, sans-serif;
       background-color: var(--bg);
@@ -31,73 +36,106 @@
       flex-direction: column;
       align-items: center;
     }
+
     .container {
       width: 100%;
-      max-width: 600px;
+      max-width: 500px;
     }
+
     h1 {
       text-align: center;
       color: var(--accent);
-      margin-bottom: 1.5rem;
+      margin-bottom: 1.25rem;
+      font-size: 1.8rem;
     }
+
+    /* Meniu Navigare Zile */
     .nav {
       display: flex;
       gap: 0.5rem;
       margin-bottom: 1.5rem;
     }
+
     .nav button {
       flex: 1;
-      padding: 0.75rem;
-      border: none;
+      padding: 0.75rem 0.5rem;
+      border: 1px solid var(--border);
       background: var(--card);
-      color: var(--text);
+      color: var(--text-muted);
       font-weight: bold;
-      border-radius: 8px;
+      border-radius: 10px;
       cursor: pointer;
-      border: 1px solid transparent;
       transition: all 0.2s ease;
+      font-size: 0.9rem;
     }
+
     .nav button.active {
       border-color: var(--accent);
       color: var(--accent);
       background: #1e293b;
     }
+
+    /* Card Exercițiu */
     .exercise-card {
       background: var(--card);
-      border-radius: 12px;
-      padding: 1rem;
-      margin-bottom: 1rem;
+      border-radius: 14px;
+      padding: 1.25rem;
+      margin-bottom: 1.25rem;
       display: flex;
-      gap: 1rem;
+      flex-direction: column;
       align-items: center;
+      border: 1px solid var(--border);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
     }
-    .img-container {
-      width: 90px;
-      height: 90px;
-      flex-shrink: 0;
+
+    .gif-frame {
+      width: 100%;
+      max-width: 260px;
+      height: 190px;
+      background-color: #0b0e14;
+      border-radius: 10px;
+      overflow: hidden;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-bottom: 1rem;
+      border: 1px solid var(--border);
     }
+
     .exercise-img {
-      width: 90px;
-      height: 90px;
+      width: 100%;
+      height: 100%;
       object-fit: cover;
-      border-radius: 8px;
-      background-color: #243049;
       display: block;
     }
-    .exercise-info h3 {
-      margin: 0 0 0.5rem 0;
-      font-size: 1.1rem;
+
+    .exercise-info {
+      width: 100%;
+      text-align: center;
     }
+
+    .exercise-info h3 {
+      margin: 0 0 0.4rem 0;
+      font-size: 1.2rem;
+      color: var(--text);
+    }
+
     .exercise-info p {
       margin: 0;
       color: var(--text-muted);
-      font-size: 0.9rem;
+      font-size: 0.95rem;
     }
-    .error-log {
-      color: var(--error);
-      font-size: 0.75rem;
-      margin-top: 0.25rem;
-      word-break: break-all;
+
+    .badge {
+      display: inline-block;
+      background: #1e293b;
+      color: var(--accent);
+      padding: 0.25rem 0.6rem;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-top: 0.5rem;
+      border: 1px solid var(--border);
     }
   </style>
 </head>
@@ -110,30 +148,39 @@
   </div>
 
   <script>
+    // Dezactivăm Service Worker-ul vechi dacă exista în browser pentru a forța reîncărcarea curată
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistrations().then(registrations => {
+        for (let registration of registrations) {
+          registration.unregister();
+        }
+      });
+    }
+
     const EX_FOLDERS = {
-      legPress: "exercises/Leg_Press",
-      gobletSquat: "exercises/Goblet_Squat",
-      hyperextension: "exercises/Hyperextension_Back_Extension",
-      legExtension: "exercises/Leg_Extensions",
-      abductor: "exercises/Thigh_Abductor",
-      calfRaise: "exercises/Standing_Calf_Raises",
-      machineCrunch: "exercises/Ab_Crunch_Machine",
-      latPulldown: "exercises/Wide-Grip_Lat_Pulldown",
-      chestSupportedRow: "exercises/Bent_Over_Two-Dumbbell_Row",
-      chestPress: "exercises/Machine_Bench_Press",
-      shoulderPress: "exercises/Seated_Dumbbell_Press",
-      lateralRaise: "exercises/Side_Lateral_Raise",
-      reverseFly: "exercises/Reverse_Flyes",
-      deadBug: "exercises/Dead_Bug",
-      pecDeck: "exercises/Butterfly",
-      tricepsPushdown: "exercises/Triceps_Pushdown_-_Rope_Attachment",
-      bicepsCurl: "exercises/Dumbbell_Bicep_Curl",
-      pallofPress: "exercises/Pallof_Press"
+      legPress: "Leg_Press",
+      gobletSquat: "Goblet_Squat",
+      hyperextension: "Hyperextension_Back_Extension",
+      legExtension: "Leg_Extensions",
+      abductor: "Thigh_Abductor",
+      calfRaise: "Standing_Calf_Raises",
+      machineCrunch: "Ab_Crunch_Machine",
+      latPulldown: "Wide-Grip_Lat_Pulldown",
+      chestSupportedRow: "Bent_Over_Two-Dumbbell_Row",
+      chestPress: "Machine_Bench_Press",
+      shoulderPress: "Seated_Dumbbell_Press",
+      lateralRaise: "Side_Lateral_Raise",
+      reverseFly: "Reverse_Flyes",
+      deadBug: "Dead_Bug",
+      pecDeck: "Butterfly",
+      tricepsPushdown: "Triceps_Pushdown_-_Rope_Attachment",
+      bicepsCurl: "Dumbbell_Bicep_Curl",
+      pallofPress: "Pallof_Press"
     };
 
     const DAYS = [
       {
-        id: "d1", title: "Picioare + abdomen", label: "Ziua 1", exercises: [
+        id: "d1", title: "Picioare + Abdomen", label: "Ziua 1", exercises: [
           ["Presă pentru picioare", 4, "10-12", EX_FOLDERS.legPress],
           ["Goblet Squat", 3, "10", EX_FOLDERS.gobletSquat],
           ["Extensii lombare la bancă 45°", 3, "12-15", EX_FOLDERS.hyperextension],
@@ -184,34 +231,30 @@
       const listContainer = document.getElementById("exercise-list");
       const currentDayData = DAYS.find(d => d.id === activeDay);
       
-      listContainer.innerHTML = currentDayData.exercises.map((ex, index) => `
-        <div class="exercise-card">
-          <div class="img-container">
-            <img class="exercise-img" 
-                 id="img-${index}"
-                 src="./${ex[3]}/0.jpg" 
-                 data-folder="${ex[3]}" 
-                 data-frame="0" 
-                 alt="${ex[0]}"
-                 onerror="handleImageError(this, ${index})">
+      listContainer.innerHTML = currentDayData.exercises.map((ex, index) => {
+        const folderName = ex[3];
+        const initialSrc = `./exercises/${folderName}/0.jpg`;
+        
+        return `
+          <div class="exercise-card">
+            <div class="gif-frame">
+              <img class="exercise-img" 
+                   id="img-${index}"
+                   src="${initialSrc}" 
+                   data-folder="${folderName}" 
+                   data-frame="0" 
+                   alt="${ex[0]}">
+            </div>
+            <div class="exercise-info">
+              <h3>${ex[0]}</h3>
+              <p><strong>Serii:</strong> ${ex[1]} | <strong>Repetări:</strong> ${ex[2]}</p>
+              <div class="badge">${currentDayData.title}</div>
+            </div>
           </div>
-          <div class="exercise-info">
-            <h3>${ex[0]}</h3>
-            <p><strong>Serii:</strong> ${ex[1]} | <strong>Repetări:</strong> ${ex[2]}</p>
-            <div id="err-${index}" class="error-log"></div>
-          </div>
-        </div>
-      `).join("");
+        `;
+      }).join("");
 
       startAnimation();
-    }
-
-    function handleImageError(img, index) {
-      const folder = img.getAttribute('data-folder');
-      const errDiv = document.getElementById(`err-${index}`);
-      if (errDiv) {
-        errDiv.innerText = `⚠️ Imagine negăsită: ./${folder}/0.jpg`;
-      }
     }
 
     function startAnimation() {
@@ -225,11 +268,11 @@
             const currentFrame = img.getAttribute('data-frame');
             const nextFrame = currentFrame === '0' ? '1' : '0';
             
-            img.src = `./${folder}/${nextFrame}.jpg`;
+            img.src = `./exercises/${folder}/${nextFrame}.jpg`;
             img.setAttribute('data-frame', nextFrame);
           }
         });
-      }, 800);
+      }, 750);
     }
 
     function selectDay(dayId) {
@@ -238,16 +281,9 @@
       renderExercises();
     }
 
+    // Inițializare
     renderNav();
     renderExercises();
-
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js', { scope: './' })
-          .then(() => console.log('SW Înregistrat'))
-          .catch(err => console.log('SW Eroare:', err));
-      });
-    }
   </script>
 </body>
 </html>
