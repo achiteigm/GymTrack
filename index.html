@@ -41,14 +41,14 @@
     .day-tab.active small{color:var(--accent)}
     .card{background:linear-gradient(180deg,var(--surface),#151b25);border:1px solid var(--border);border-radius:20px;margin:0 0 16px;overflow:hidden;box-shadow:0 8px 24px rgba(0,0,0,.13)}
     .card.complete{border-color:rgba(34,197,94,.45)}
-    .ex-head{display:flex;flex-direction:column;gap:12px;padding:14px}
+    .ex-head{display:flex;flex-direction:column;gap:14px;padding:14px}
     
-    /* Frame Animat Exercițiu Mărit */
-    .visual{width:100%;height:180px;border-radius:14px;background:#000;display:grid;place-items:center;border:1px solid #303b4c;overflow:hidden}
-    .exercise-img{width:100%;height:100%;object-fit:contain;background-color:#000;display:block}
+    /* Frame Animat Exercițiu Maximizat */
+    .visual{width:100%;height:260px;border-radius:16px;background:#05070a;display:grid;place-items:center;border:1px solid #303b4c;overflow:hidden;box-shadow:inset 0 0 20px rgba(0,0,0,0.5)}
+    .exercise-img{width:100%;height:100%;object-fit:contain;background-color:#05070a;display:block}
     
     .ex-info{min-width:0;flex:1}
-    .ex-title{font-size:17px;font-weight:800;line-height:1.25}
+    .ex-title{font-size:18px;font-weight:800;line-height:1.25}
     .meta{color:var(--muted);font-size:13px;margin-top:4px}
     .last{color:var(--accent2);font-size:12px;margin-top:6px;font-weight:600}
     .set-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;padding:0 14px 14px}
@@ -80,9 +80,9 @@
     .toast{position:fixed;left:50%;bottom:92px;transform:translate(-50%,20px);opacity:0;pointer-events:none;background:#0c1118;border:1px solid #3b4658;color:var(--text);padding:10px 14px;border-radius:12px;font-size:12px;transition:.25s;z-index:40;white-space:nowrap}
     .toast.show{opacity:1;transform:translate(-50%,0)}
     
-    @media(min-width: 480px){
+    @media(min-width: 520px){
       .ex-head{flex-direction:row;align-items:center}
-      .visual{width:140px;height:140px;flex:none}
+      .visual{width:180px;height:180px;flex:none}
     }
     @media(max-width:480px){
       .set-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
@@ -251,7 +251,7 @@ function renderWorkout(){
                src="${initialSrc}" 
                data-folder="${folder}" 
                data-frame="0" 
-               onerror="this.onerror=null; this.src='https://via.placeholder.com/180/0f131b/38bdf8?text=GymTrack';" 
+               onerror="this.onerror=null; this.src='https://via.placeholder.com/300/0f131b/38bdf8?text=GymTrack';" 
                alt="${e[0]}">
         </div>
         <div class="ex-info">
