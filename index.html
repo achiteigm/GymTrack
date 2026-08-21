@@ -3,102 +3,320 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#0f131b">
+  <meta name="theme-color" content="#0b0e14">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="GymTrack">
   <link rel="manifest" href="manifest.webmanifest">
-  <title>GymTrack</title>
-  <!-- Chart.js CDN pentru Grafice -->
+  <title>GymTrack Pro</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     :root{
-      --bg:#0f131b; --surface:#171d28; --surface2:#202735; --border:#2a3343;
-      --text:#f5f7fb; --muted:#8f99aa; --accent:#38bdf8; --accent2:#7dd3fc;
-      --done:#22c55e; --danger:#ff667d; --shadow:0 14px 40px rgba(0,0,0,.25);
+      --bg:#0b0e14; 
+      --surface:rgba(23, 29, 40, 0.75); 
+      --surface2:#1e2635; 
+      --border:rgba(255, 255, 255, 0.08);
+      --text:#f8fafc; 
+      --muted:#94a3b8; 
+      --accent:#38bdf8; 
+      --accent-glow:rgba(56, 189, 248, 0.25);
+      --accent2:#7dd3fc;
+      --done:#22c55e; 
+      --done-glow:rgba(34, 197, 94, 0.35);
+      --danger:#ff5252; 
+      --radius-lg:22px;
+      --radius-md:14px;
+      --radius-sm:10px;
     }
+    
     *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
     html,body{height:100%}
-    body{margin:0;background:radial-gradient(circle at top,#171e2b 0,#0f131b 42%);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",sans-serif;overflow-x:hidden}
+    body{
+      margin:0;
+      background:#0b0e14;
+      background-image: 
+        radial-gradient(at 0% 0%, rgba(56, 189, 248, 0.08) 0px, transparent 50%),
+        radial-gradient(at 100% 100%, rgba(34, 197, 94, 0.05) 0px, transparent 50%);
+      background-attachment: fixed;
+      color:var(--text);
+      font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",Roboto,sans-serif;
+      overflow-x:hidden;
+    }
     button,input{font:inherit}
-    button{cursor:pointer}
-    .app{min-height:100%;padding-bottom:calc(86px + env(safe-area-inset-bottom))}
-    header{position:sticky;top:0;z-index:20;padding:calc(18px + env(safe-area-inset-top)) 18px 14px;background:linear-gradient(180deg,rgba(15,19,27,.98) 72%,rgba(15,19,27,.72),transparent)}
-    .eyebrow{margin:0 0 3px;text-transform:uppercase;letter-spacing:.14em;color:var(--accent);font-size:11px;font-weight:800}
-    h1{margin:0;font-size:28px;letter-spacing:-.03em}
-    .sub{margin:4px 0 0;color:var(--muted);font-size:14px}
-    .progress{display:flex;align-items:center;gap:10px;margin-top:14px}
-    .track{height:7px;flex:1;border-radius:99px;background:#222a36;overflow:hidden}
-    .fill{height:100%;width:0;background:linear-gradient(90deg,var(--accent),var(--done));transition:width .25s}
-    .progress span{min-width:46px;text-align:right;color:var(--muted);font-size:12px;font-variant-numeric:tabular-nums}
-    main{padding:8px 14px 20px;max-width:760px;margin:0 auto}
-    .screen{display:none}.screen.active{display:block}
-    .hero{padding:10px 4px 12px}
-    .hero h2{margin:0;font-size:19px}.hero p{margin:4px 0 0;color:var(--muted);font-size:13px}
-    .day-tabs{display:flex;gap:8px;overflow:auto;padding:2px 0 12px;scrollbar-width:none}
-    .day-tabs::-webkit-scrollbar{display:none}
-    .day-tab{border:1px solid var(--border);background:var(--surface);color:var(--muted);padding:10px 12px;border-radius:13px;min-width:100px;text-align:left}
-    .day-tab strong{display:block;color:var(--text);font-size:13px}.day-tab small{display:block;margin-top:2px;font-size:11px}
-    .day-tab.active{background:var(--surface2);border-color:#3a465c}
-    .day-tab.active small{color:var(--accent)}
-    .card{background:linear-gradient(180deg,var(--surface),#151b25);border:1px solid var(--border);border-radius:20px;margin:0 0 16px;overflow:hidden;box-shadow:0 8px 24px rgba(0,0,0,.13)}
-    .card.complete{border-color:rgba(34,197,94,.45)}
-    .ex-head{display:flex;flex-direction:column;gap:14px;padding:14px;position:relative}
-    .btn-delete-ex{position:absolute;top:10px;right:10px;background:transparent;border:0;color:var(--danger);font-size:16px;padding:4px}
+    button{cursor:pointer;transition:transform 0.15s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.2s, border-color 0.2s}
+    button:active{transform:scale(0.92)}
     
-    .visual{width:100%;height:260px;border-radius:16px;background:#05070a;display:grid;place-items:center;border:1px solid #303b4c;overflow:hidden;box-shadow:inset 0 0 20px rgba(0,0,0,0.5)}
+    .app{min-height:100%;padding-bottom:calc(92px + env(safe-area-inset-bottom))}
+    
+    header{
+      position:sticky;top:0;z-index:20;
+      padding:calc(16px + env(safe-area-inset-top)) 20px 16px;
+      background:rgba(11, 14, 20, 0.85);
+      backdrop-filter:blur(20px);
+      -webkit-backdrop-filter:blur(20px);
+      border-bottom:1px solid var(--border);
+    }
+    .eyebrow{margin:0 0 2px;text-transform:uppercase;letter-spacing:.18em;color:var(--accent);font-size:11px;font-weight:800}
+    h1{margin:0;font-size:26px;font-weight:800;letter-spacing:-.03em;color:#fff}
+    .sub{margin:2px 0 0;color:var(--muted);font-size:13px}
+    .progress{display:flex;align-items:center;gap:12px;margin-top:14px}
+    .track{height:8px;flex:1;border-radius:99px;background:rgba(255,255,255,0.06);overflow:hidden;border:1px solid rgba(255,255,255,0.03)}
+    .fill{height:100%;width:0;background:linear-gradient(90deg, var(--accent), var(--done));border-radius:99px;transition:width .4s cubic-bezier(0.4, 0, 0.2, 1);box-shadow:0 0 12px var(--accent-glow)}
+    .progress span{min-width:42px;text-align:right;color:var(--muted);font-size:12px;font-weight:700;font-variant-numeric:tabular-nums}
+    
+    main{padding:12px 16px 20px;max-width:760px;margin:0 auto}
+    .screen{display:none}.screen.active{display:block}
+    .hero{padding:10px 4px 16px}
+    .hero h2{margin:0;font-size:22px;font-weight:800}.hero p{margin:4px 0 0;color:var(--muted);font-size:13px}
+    
+    .day-tabs{display:flex;gap:10px;overflow:auto;padding:4px 0 16px;scrollbar-width:none}
+    .day-tabs::-webkit-scrollbar{display:none}
+    .day-tab{
+      border:1px solid var(--border);
+      background:var(--surface);
+      backdrop-filter:blur(10px);
+      color:var(--muted);
+      padding:12px 14px;
+      border-radius:var(--radius-md);
+      min-width:120px;
+      text-align:left;
+      flex-shrink: 0;
+    }
+    .day-tab strong{display:block;color:var(--text);font-size:14px;font-weight:700}
+    .day-tab small{display:block;margin-top:3px;font-size:11px;opacity:0.8}
+    .day-tab.active{
+      background:var(--surface2);
+      border-color:var(--accent);
+      box-shadow:0 4px 20px var(--accent-glow);
+    }
+    .day-tab.active strong{color:#fff}
+    .day-tab.active small{color:var(--accent);font-weight:600}
+    
+    .card{
+      background:var(--surface);
+      backdrop-filter:blur(12px);
+      border:1px solid var(--border);
+      border-radius:var(--radius-lg);
+      margin:0 0 16px;
+      overflow:hidden;
+      box-shadow:0 10px 30px rgba(0,0,0,0.3);
+    }
+    .card.complete{
+      border-color:rgba(34, 197, 94, 0.4);
+      box-shadow:0 8px 24px rgba(34, 197, 94, 0.1);
+    }
+    .ex-head{display:flex;flex-direction:column;gap:14px;padding:16px;position:relative}
+    .btn-delete-ex{
+      position:absolute;top:12px;right:12px;
+      background:rgba(255,255,255,0.05);
+      border:1px solid var(--border);
+      border-radius:50%;
+      width:28px;height:28px;
+      color:var(--muted);
+      display:grid;place-items:center;
+      font-size:13px;
+    }
+    .btn-delete-ex:hover{color:var(--danger);border-color:var(--danger)}
+    
+    .visual{
+      width:100%;height:220px;
+      border-radius:var(--radius-md);
+      background:#05070a;
+      display:grid;place-items:center;
+      border:1px solid rgba(255,255,255,0.06);
+      overflow:hidden;
+    }
     .exercise-img{width:100%;height:100%;object-fit:contain;background-color:#05070a;display:block}
     
     .ex-info{min-width:0;flex:1}
-    .ex-title{font-size:18px;font-weight:800;line-height:1.25;padding-right:20px}
-    .meta{color:var(--muted);font-size:13px;margin-top:4px}
-    .last{color:var(--accent2);font-size:12px;margin-top:6px;font-weight:600}
-    .set-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;padding:0 14px 14px}
-    .set-box{background:#111720;border:1px solid var(--border);border-radius:14px;padding:9px}
-    .set-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:7px}
-    .set-num{font-size:11px;color:var(--muted);font-weight:800}
-    .check{width:22px;height:22px;border:1px solid #3a4656;border-radius:7px;background:#171d28;color:transparent;display:grid;place-items:center;font-size:13px}
-    .check.on{background:var(--done);border-color:var(--done);color:#06140f}
-    .field{width:100%;border:1px solid #303a4a;background:#161c27;color:var(--text);border-radius:10px;padding:8px 7px;font-size:13px;outline:none}
-    .field:focus{border-color:#59677d}
-    .unit{font-size:10px;color:var(--muted);margin-top:3px;margin-bottom:4px}
-    .actions{display:flex;gap:8px;padding:0 14px 14px;flex-wrap:wrap}
-    .btn{border:1px solid var(--border);background:var(--surface2);color:var(--text);border-radius:12px;padding:10px 12px;font-weight:700;font-size:12px}
-    .btn.primary{background:var(--accent);border-color:var(--accent);color:#081420}
-    .btn.ghost{background:transparent}
-    .section{margin:14px 0 8px;color:var(--muted);font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase}
-    .history-item,.stat-card,.info-card,.chart-card,.calendar-card{background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:14px;margin-bottom:10px}
-    .chart-card canvas{max-height:180px;width:100%}
-    .history-item{display:flex;justify-content:space-between;gap:12px}.history-item strong{font-size:14px}.history-item span{display:block;color:var(--muted);font-size:12px;margin-top:4px}
-    .stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-    .stat-card strong{font-size:22px}.stat-card span{display:block;color:var(--muted);font-size:11px;margin-top:4px}
+    .ex-title{font-size:18px;font-weight:800;line-height:1.3;padding-right:30px;color:#fff}
+    .meta{color:var(--muted);font-size:13px;margin-top:4px;font-weight:500}
+    .last{
+      display:inline-block;
+      color:var(--accent2);
+      font-size:11px;
+      margin-top:8px;
+      font-weight:600;
+      background:rgba(56, 189, 248, 0.1);
+      padding:4px 8px;
+      border-radius:6px;
+      border:1px solid rgba(56, 189, 248, 0.2);
+    }
+    
+    .set-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;padding:0 16px 16px}
+    .set-box{
+      background:rgba(12, 16, 24, 0.6);
+      border:1px solid var(--border);
+      border-radius:var(--radius-md);
+      padding:10px 8px;
+    }
+    .set-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+    .set-num{font-size:10px;color:var(--muted);font-weight:800;letter-spacing:0.05em}
+    
+    .check{
+      width:26px;height:26px;
+      border:1px solid rgba(255,255,255,0.15);
+      border-radius:8px;
+      background:var(--surface2);
+      color:transparent;
+      display:grid;place-items:center;
+      font-size:12px;
+      transition:all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    .check.on{
+      background:var(--done);
+      border-color:var(--done);
+      color:#000;
+      font-weight:900;
+      transform:scale(1.1);
+      animation: pop 0.3s ease;
+      box-shadow:0 0 12px var(--done-glow);
+    }
+    @keyframes pop { 0% { transform: scale(1); } 50% { transform: scale(1.25); } 100% { transform: scale(1.1); } }
+    
+    .input-wrapper{position:relative;margin-bottom:6px}
+    .input-wrapper:last-child{margin-bottom:0}
+    .field{
+      width:100%;
+      border:1px solid rgba(255,255,255,0.08);
+      background:rgba(0,0,0,0.3);
+      color:var(--text);
+      border-radius:var(--radius-sm);
+      padding:7px 22px 7px 8px;
+      font-size:13px;
+      font-weight:700;
+      outline:none;
+    }
+    .field:focus{border-color:var(--accent);background:rgba(0,0,0,0.5)}
+    .field-unit{
+      position:absolute;
+      right:6px;top:50%;
+      transform:translateY(-50%);
+      font-size:9px;
+      font-weight:700;
+      color:var(--muted);
+      pointer-events:none;
+      text-transform:uppercase;
+    }
+    
+    .actions{display:flex;gap:10px;padding:8px 0 16px;flex-wrap:wrap}
+    .btn{
+      border:1px solid var(--border);
+      background:var(--surface2);
+      color:var(--text);
+      border-radius:var(--radius-md);
+      padding:12px 16px;
+      font-weight:700;
+      font-size:13px;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:8px;
+    }
+    .btn.primary{
+      background:linear-gradient(135deg, var(--accent), #0284c7);
+      border:none;
+      color:#fff;
+      box-shadow:0 4px 16px var(--accent-glow);
+    }
+    .btn.ghost{background:rgba(255,255,255,0.03)}
+    
+    .section{margin:18px 0 10px;color:var(--muted);font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase}
+    .history-item,.stat-card,.chart-card,.calendar-card{
+      background:var(--surface);
+      backdrop-filter:blur(10px);
+      border:1px solid var(--border);
+      border-radius:var(--radius-lg);
+      padding:16px;
+      margin-bottom:12px;
+    }
+    .stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .stat-card strong{font-size:24px;font-weight:800;color:var(--accent)}.stat-card span{display:block;color:var(--muted);font-size:12px;margin-top:2px}
 
-    /* STILURI CALENDAR */
-    .cal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
-    .cal-header strong{font-size:15px;color:var(--text)}
-    .cal-nav-btn{background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:4px 10px;font-size:12px}
+    .cal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+    .cal-header strong{font-size:15px;color:var(--text);font-weight:700}
+    .cal-nav-btn{background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:6px 12px;font-size:12px}
     .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;text-align:center}
-    .cal-day-name{font-size:10px;font-weight:800;color:var(--muted);padding-bottom:4px;text-transform:uppercase}
-    .cal-cell{aspect-ratio:1/1;display:flex;flex-direction:column;align-items:center;justify-content:center;border-radius:10px;background:#111720;border:1px solid var(--border);font-size:12px;color:var(--muted);position:relative}
+    .cal-day-name{font-size:10px;font-weight:800;color:var(--muted);padding-bottom:6px;text-transform:uppercase}
+    .cal-cell{
+      aspect-ratio:1/1;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      border-radius:var(--radius-sm);
+      background:rgba(0,0,0,0.25);
+      border:1px solid var(--border);
+      font-size:12px;
+      color:var(--muted);
+      position:relative;
+    }
     .cal-cell.empty{background:transparent;border:0}
     .cal-cell.today{border-color:var(--accent);color:var(--text);font-weight:700}
-    .cal-cell.trained{background:rgba(34,197,94,.18);border-color:var(--done);color:#ffffff;font-weight:800;box-shadow:0 0 10px rgba(34,197,94,.2)}
-    .cal-dot{width:4px;height:4px;border-radius:50%;background:var(--done);position:absolute;bottom:4px}
+    .cal-cell.trained{
+      background:rgba(34,197,94,0.15);
+      border-color:rgba(34,197,94,0.4);
+      color:#fff;
+      font-weight:800;
+    }
+    .cal-dot{width:4px;height:4px;border-radius:50%;background:var(--done);position:absolute;bottom:4px;box-shadow:0 0 6px var(--done)}
 
-    .empty{padding:28px 12px;text-align:center;color:var(--muted);background:var(--surface);border:1px dashed var(--border);border-radius:18px}
-    .install{background:linear-gradient(135deg,#202838,#18202d);border:1px solid #354158;padding:14px;border-radius:18px;margin-bottom:14px}
-    .install strong{display:block}.install p{margin:6px 0 0;color:var(--muted);font-size:12px;line-height:1.5}
-    .install button{margin-top:10px}
-    nav{position:fixed;left:0;right:0;bottom:0;z-index:30;padding:9px 12px calc(9px + env(safe-area-inset-bottom));background:rgba(20,25,34,.90);backdrop-filter:blur(16px);border-top:1px solid var(--border)}
-    .nav-inner{max-width:760px;margin:auto;display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
-    .nav-btn{border:0;background:transparent;color:var(--muted);padding:9px 5px;border-radius:12px;font-weight:700;font-size:11px}
-    .nav-btn.active{background:var(--surface2);color:var(--text)} .nav-btn b{display:block;font-size:17px;margin-bottom:2px}
-    .toast{position:fixed;left:50%;bottom:92px;transform:translate(-50%,20px);opacity:0;pointer-events:none;background:#0c1118;border:1px solid #3b4658;color:var(--text);padding:10px 14px;border-radius:12px;font-size:12px;transition:.25s;z-index:40;white-space:nowrap}
+    .empty{padding:32px 16px;text-align:center;color:var(--muted);background:var(--surface);border:1px dashed var(--border);border-radius:var(--radius-lg)}
+    .install{
+      background:linear-gradient(135deg, rgba(56, 189, 248, 0.1), rgba(30, 38, 53, 0.8));
+      border:1px solid rgba(56, 189, 248, 0.2);
+      padding:16px;
+      border-radius:var(--radius-lg);
+      margin-bottom:16px;
+    }
+    .install strong{display:block;color:#fff;font-size:14px}.install p{margin:6px 0 0;color:var(--muted);font-size:12px;line-height:1.4}
+    
+    nav{
+      position:fixed;left:0;right:0;bottom:0;z-index:30;
+      padding:10px 16px calc(10px + env(safe-area-inset-bottom));
+      background:rgba(11, 14, 20, 0.88);
+      backdrop-filter:blur(20px);
+      -webkit-backdrop-filter:blur(20px);
+      border-top:1px solid var(--border);
+    }
+    .nav-inner{max-width:760px;margin:auto;display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+    .nav-btn{
+      border:0;
+      background:transparent;
+      color:var(--muted);
+      padding:8px;
+      border-radius:var(--radius-md);
+      font-weight:600;
+      font-size:11px;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      gap:4px;
+    }
+    .nav-btn svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+    .nav-btn.active{background:rgba(255,255,255,0.06);color:var(--accent)}
+    .nav-btn.active svg{stroke:var(--accent)}
+    
+    .toast{
+      position:fixed;left:50%;bottom:96px;
+      transform:translate(-50%,20px);
+      opacity:0;pointer-events:none;
+      background:#161c26;
+      border:1px solid var(--border);
+      color:var(--text);
+      padding:10px 18px;
+      border-radius:99px;
+      font-size:13px;
+      font-weight:600;
+      transition:all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      z-index:40;
+      box-shadow:0 10px 25px rgba(0,0,0,0.5);
+    }
     .toast.show{opacity:1;transform:translate(-50%,0)}
     
     @media(min-width: 520px){
       .ex-head{flex-direction:row;align-items:center}
-      .visual{width:180px;height:180px;flex:none}
+      .visual{width:160px;height:160px;flex:none}
     }
     @media(max-width:480px){
       .set-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
@@ -118,23 +336,22 @@
   <section id="workoutScreen" class="screen active">
     <div class="install" id="installCard">
       <strong>Instalează GymTrack pe iPhone</strong>
-      <p>În Safari: Partajare → Adaugă la ecranul principal. Datele rămân pe telefon și aplicația funcționează offline.</p>
-      <button class="btn ghost" id="hideInstall">Ascunde</button>
+      <p>În Safari: Apasă Partajare → Adaugă la ecranul principal. Aplicația funcționează 100% offline.</p>
+      <button class="btn ghost" id="hideInstall" style="margin-top:10px;padding:6px 12px;font-size:11px;">Ascunde</button>
     </div>
     <div class="day-tabs" id="dayTabs"></div>
     <div id="workoutList"></div>
     <div class="actions">
-      <button class="btn primary" id="finishBtn">Finalizează antrenamentul</button>
-      <button class="btn ghost" id="addExBtn">+ Adaugă exercițiu</button>
-      <button class="btn ghost" id="resetBtn">Resetează ziua</button>
+      <button class="btn primary" id="finishBtn">✓ Finalizează antrenamentul</button>
+      <button class="btn ghost" id="addExBtn">+ Exercițiu nou</button>
+      <button class="btn ghost" id="resetBtn">↺ Resetează</button>
     </div>
   </section>
 
   <section id="historyScreen" class="screen">
-    <div class="hero"><h2>Istoric</h2><p>Sesiunile finalizate și salvările de date.</p></div>
+    <div class="hero"><h2>Istoric Sesiuni</h2><p>Evidența activității tale și sincronizarea datelor.</p></div>
     <div class="stats-grid" id="stats"></div>
 
-    <!-- CALENDAR CARD -->
     <div class="calendar-card">
       <div class="cal-header">
         <button class="cal-nav-btn" id="calPrev">◄</button>
@@ -149,20 +366,29 @@
       <button class="btn ghost" id="importBtn">Import Backup</button>
       <input type="file" id="importInput" accept=".json" style="display:none">
     </div>
-    <div class="section">Sesiuni recente</div>
+    <div class="section">Sesiuni Recente</div>
     <div id="historyList"></div>
   </section>
 
   <section id="progressScreen" class="screen">
-    <div class="hero"><h2>Progres</h2><p>Evoluția grafică pe fiecare exercițiu.</p></div>
+    <div class="hero"><h2>Evoluție Greutăți</h2><p>Graficul progresului pe fiecare exercițiu.</p></div>
     <div id="exerciseProgress"></div>
   </section>
 </main>
 
 <nav><div class="nav-inner">
-  <button class="nav-btn active" data-screen="workoutScreen"><b>●</b>Antrenament</button>
-  <button class="nav-btn" data-screen="historyScreen"><b>◷</b>Istoric</button>
-  <button class="nav-btn" data-screen="progressScreen"><b>↗</b>Progres</button>
+  <button class="nav-btn active" data-screen="workoutScreen">
+    <svg viewBox="0 0 24 24"><path d="M6.5 6.5h11M6.5 12h11M6.5 17.5h11M3 6.5h.01M3 12h.01M3 17.5h.01"/></svg>
+    Antrenament
+  </button>
+  <button class="nav-btn" data-screen="historyScreen">
+    <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+    Istoric
+  </button>
+  <button class="nav-btn" data-screen="progressScreen">
+    <svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+    Progres
+  </button>
 </div></nav>
 <div class="toast" id="toast"></div>
 </div>
@@ -230,9 +456,7 @@ const DEFAULT_DAYS = [
 
 const store = {
   key: "gymtrack:v3",
-  load(){
-    try{ return JSON.parse(localStorage.getItem(this.key) || "{}"); } catch{ return {}; }
-  },
+  load(){ try{ return JSON.parse(localStorage.getItem(this.key) || "{}"); } catch{ return {}; } },
   save(data){ localStorage.setItem(this.key, JSON.stringify(data)); }
 };
 
@@ -255,7 +479,7 @@ function toast(msg){
   t.textContent = msg;
   t.classList.add("show");
   clearTimeout(window._tt);
-  window._tt = setTimeout(() => t.classList.remove("show"), 1600);
+  window._tt = setTimeout(() => t.classList.remove("show"), 1800);
 }
 
 function renderWorkout(){
@@ -310,10 +534,14 @@ function renderWorkout(){
               <span class="set-num">SET ${si + 1}</span>
               <button class="check ${s.done ? "on" : ""}" data-e="${ei}" data-s="${si}">${s.done ? "✓" : ""}</button>
             </div>
-            <input class="field kg" inputmode="decimal" placeholder="kg" value="${s.kg}" data-e="${ei}" data-s="${si}">
-            <div class="unit">greutate</div>
-            <input class="field reps" inputmode="numeric" placeholder="rep" value="${s.reps}" data-e="${ei}" data-s="${si}">
-            <div class="unit">repetări</div>
+            <div class="input-wrapper">
+              <input class="field kg" inputmode="decimal" placeholder="0" value="${s.kg}" data-e="${ei}" data-s="${si}">
+              <span class="field-unit">kg</span>
+            </div>
+            <div class="input-wrapper">
+              <input class="field reps" inputmode="numeric" placeholder="0" value="${s.reps}" data-e="${ei}" data-s="${si}">
+              <span class="field-unit">rep</span>
+            </div>
           </div>
         `).join("")}
       </div>
@@ -323,6 +551,7 @@ function renderWorkout(){
   document.querySelectorAll(".check").forEach(b => b.onclick = () => {
     const e = +b.dataset.e, s = +b.dataset.s;
     w[e][s].done = !w[e][s].done;
+    if (w[e][s].done && navigator.vibrate) navigator.vibrate(40);
     save();
     renderWorkout();
     updateProgress();
@@ -393,7 +622,7 @@ function getLast(dayId, ei){
   if (!arr.length) return "";
   const sets = arr[0].sets.filter(s => s.kg || s.reps);
   if (!sets.length) return "";
-  return sets.map(s => `${s.kg || "—"} kg × ${s.reps || "—"}`).slice(0, 2).join(" · ");
+  return sets.map(s => `${s.kg || "—"}kg × ${s.reps || "—"}`).slice(0, 2).join(" · ");
 }
 
 function finishWorkout(){
@@ -413,7 +642,7 @@ function finishWorkout(){
   renderWorkout();
   renderHistory();
   renderProgress();
-  toast("Antrenamentul a fost salvat.");
+  toast("Antrenamentul a fost salvat!");
 }
 
 function resetDay(){
@@ -428,8 +657,8 @@ function renderHistory(){
   const total = sessions.reduce((n, s) => n + s.sets, 0);
   
   document.getElementById("stats").innerHTML = `
-    <div class="stat-card"><strong>${sessions.length}</strong><span>sesiuni</span></div>
-    <div class="stat-card"><strong>${total}</strong><span>seturi finalizate</span></div>
+    <div class="stat-card"><strong>${sessions.length}</strong><span>Sesiuni Totale</span></div>
+    <div class="stat-card"><strong>${total}</strong><span>Seturi Complete</span></div>
   `;
 
   renderCalendar();
@@ -437,10 +666,10 @@ function renderHistory(){
   document.getElementById("historyList").innerHTML = sessions.length ? sessions.slice(0, 20).map(s => `
     <div class="history-item">
       <div>
-        <strong>${s.title}</strong>
-        <span>${new Date(s.time).toLocaleDateString("ro-RO", {day: "2-digit", month: "2-digit", year: "numeric"})}</span>
+        <strong style="font-size:14px;color:#fff">${s.title}</strong>
+        <span style="font-size:12px;color:var(--muted);margin-top:2px">${new Date(s.time).toLocaleDateString("ro-RO", {day: "2-digit", month: "2-digit", year: "numeric"})}</span>
       </div>
-      <strong>${s.sets} seturi</strong>
+      <strong style="color:var(--accent);font-size:13px">${s.sets} seturi</strong>
     </div>
   `).join("") : `<div class="empty">Nu există sesiuni salvate încă.</div>`;
 }
@@ -462,7 +691,7 @@ function renderCalendar(){
 
   const firstDayIndex = new Date(year, month, 1).getDay();
   const daysInMonth = new Date(year, month + 1, 0).getDate();
-  const adjustedFirstDay = (firstDayIndex === 0 ? 6 : firstDayIndex - 1); // Aliniere Luni-Duminică
+  const adjustedFirstDay = (firstDayIndex === 0 ? 6 : firstDayIndex - 1);
 
   const grid = document.getElementById("calGrid");
   let html = `
@@ -530,9 +759,9 @@ function renderProgress(){
     card.className = "chart-card";
     const canvasId = `chart-${idx}`;
     card.innerHTML = `
-      <div style="display:flex;justify-content:space-between;margin-bottom:8px">
-        <strong>${name}</strong>
-        <span style="color:var(--accent);font-weight:700">Max: ${Math.max(...dataPoints)} kg</span>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+        <strong style="font-size:15px;color:#fff">${name}</strong>
+        <span style="color:var(--accent);font-weight:700;font-size:12px;background:rgba(56,189,248,0.1);padding:4px 8px;border-radius:6px">Max: ${Math.max(...dataPoints)} kg</span>
       </div>
       <canvas id="${canvasId}"></canvas>
     `;
@@ -547,7 +776,10 @@ function renderProgress(){
           label: "Kg Maxim",
           data: dataPoints,
           borderColor: "#38bdf8",
-          backgroundColor: "rgba(56, 189, 248, 0.1)",
+          backgroundColor: "rgba(56, 189, 248, 0.08)",
+          borderWidth: 2,
+          pointBackgroundColor: "#38bdf8",
+          pointRadius: 4,
           fill: true,
           tension: 0.3
         }]
@@ -556,15 +788,14 @@ function renderProgress(){
         responsive: true,
         plugins: { legend: { display: false } },
         scales: {
-          x: { ticks: { color: "#8f99aa" }, grid: { display: false } },
-          y: { ticks: { color: "#8f99aa" }, grid: { color: "#2a3343" } }
+          x: { ticks: { color: "#94a3b8", font: { size: 10 } }, grid: { display: false } },
+          y: { ticks: { color: "#94a3b8", font: { size: 10 } }, grid: { color: "rgba(255,255,255,0.05)" } }
         }
       }
     });
   });
 }
 
-/* BACKUP & RESTORE */
 document.getElementById("exportBtn").onclick = () => {
   const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(db, null, 2));
   const dlAnchor = document.createElement("a");
