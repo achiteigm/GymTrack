@@ -67,11 +67,24 @@
     .btn.primary{background:var(--accent);border-color:var(--accent);color:#081420}
     .btn.ghost{background:transparent}
     .section{margin:14px 0 8px;color:var(--muted);font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase}
-    .history-item,.stat-card,.info-card,.chart-card{background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:14px;margin-bottom:10px}
+    .history-item,.stat-card,.info-card,.chart-card,.calendar-card{background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:14px;margin-bottom:10px}
     .chart-card canvas{max-height:180px;width:100%}
     .history-item{display:flex;justify-content:space-between;gap:12px}.history-item strong{font-size:14px}.history-item span{display:block;color:var(--muted);font-size:12px;margin-top:4px}
     .stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
     .stat-card strong{font-size:22px}.stat-card span{display:block;color:var(--muted);font-size:11px;margin-top:4px}
+
+    /* STILURI CALENDAR */
+    .cal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+    .cal-header strong{font-size:15px;color:var(--text)}
+    .cal-nav-btn{background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:4px 10px;font-size:12px}
+    .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;text-align:center}
+    .cal-day-name{font-size:10px;font-weight:800;color:var(--muted);padding-bottom:4px;text-transform:uppercase}
+    .cal-cell{aspect-ratio:1/1;display:flex;flex-direction:column;align-items:center;justify-content:center;border-radius:10px;background:#111720;border:1px solid var(--border);font-size:12px;color:var(--muted);position:relative}
+    .cal-cell.empty{background:transparent;border:0}
+    .cal-cell.today{border-color:var(--accent);color:var(--text);font-weight:700}
+    .cal-cell.trained{background:rgba(34,197,94,.18);border-color:var(--done);color:#ffffff;font-weight:800;box-shadow:0 0 10px rgba(34,197,94,.2)}
+    .cal-dot{width:4px;height:4px;border-radius:50%;background:var(--done);position:absolute;bottom:4px}
+
     .empty{padding:28px 12px;text-align:center;color:var(--muted);background:var(--surface);border:1px dashed var(--border);border-radius:18px}
     .install{background:linear-gradient(135deg,#202838,#18202d);border:1px solid #354158;padding:14px;border-radius:18px;margin-bottom:14px}
     .install strong{display:block}.install p{margin:6px 0 0;color:var(--muted);font-size:12px;line-height:1.5}
@@ -120,6 +133,17 @@
   <section id="historyScreen" class="screen">
     <div class="hero"><h2>Istoric</h2><p>Sesiunile finalizate și salvările de date.</p></div>
     <div class="stats-grid" id="stats"></div>
+
+    <!-- CALENDAR CARD -->
+    <div class="calendar-card">
+      <div class="cal-header">
+        <button class="cal-nav-btn" id="calPrev">◄</button>
+        <strong id="calMonthTitle">Luna An</strong>
+        <button class="cal-nav-btn" id="calNext">►</button>
+      </div>
+      <div class="cal-grid" id="calGrid"></div>
+    </div>
+
     <div class="actions" style="padding: 10px 0;">
       <button class="btn ghost" id="exportBtn">Export Backup (JSON)</button>
       <button class="btn ghost" id="importBtn">Import Backup</button>
@@ -217,6 +241,7 @@ let currentDay = 0;
 let currentScreen = "workoutScreen";
 let animationInterval = null;
 let chartInstances = {};
+let calendarDate = new Date();
 
 function getWorkout(day){
   db.workouts ||= {};
@@ -404,6 +429,8 @@ function renderHistory(){
     <div class="stat-card"><strong>${sessions.length}</strong><span>sesiuni</span></div>
     <div class="stat-card"><strong>${total}</strong><span>seturi finalizate</span></div>
   `;
+
+  renderCalendar();
   
   document.getElementById("historyList").innerHTML = sessions.length ? sessions.slice(0, 20).map(s => `
     <div class="history-item">
@@ -415,6 +442,65 @@ function renderHistory(){
     </div>
   `).join("") : `<div class="empty">Nu există sesiuni salvate încă.</div>`;
 }
+
+function renderCalendar(){
+  const year = calendarDate.getFullYear();
+  const month = calendarDate.getMonth();
+  
+  const monthNames = ["Ianuarie", "Februarie", "Martie", "Aprilie", "Mai", "Iunie", "Iulie", "August", "Septembrie", "Octombrie", "Noiembrie", "Decembrie"];
+  document.getElementById("calMonthTitle").textContent = `${monthNames[month]} ${year}`;
+
+  const sessions = db.sessions || [];
+  const trainedDaysMap = {};
+  sessions.forEach(s => {
+    const d = new Date(s.time);
+    const key = `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+    trainedDaysMap[key] = true;
+  });
+
+  const firstDayIndex = new Date(year, month, 1).getDay();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const adjustedFirstDay = (firstDayIndex === 0 ? 6 : firstDayIndex - 1); // Aliniere Luni-Duminică
+
+  const grid = document.getElementById("calGrid");
+  let html = `
+    <div class="cal-day-name">Lu</div>
+    <div class="cal-day-name">Ma</div>
+    <div class="cal-day-name">Mi</div>
+    <div class="cal-day-name">Jo</div>
+    <div class="cal-day-name">Vi</div>
+    <div class="cal-day-name">Sâ</div>
+    <div class="cal-day-name">Du</div>
+  `;
+
+  for (let i = 0; i < adjustedFirstDay; i++) {
+    html += `<div class="cal-cell empty"></div>`;
+  }
+
+  const today = new Date();
+  for (let day = 1; day <= daysInMonth; day++) {
+    const isToday = today.getFullYear() === year && today.getMonth() === month && today.getDate() === day;
+    const isTrained = trainedDaysMap[`${year}-${month}-${day}`];
+    
+    let classes = "cal-cell";
+    if (isToday) classes += " today";
+    if (isTrained) classes += " trained";
+
+    html += `<div class="${classes}">${day} ${isTrained ? '<div class="cal-dot"></div>' : ''}</div>`;
+  }
+
+  grid.innerHTML = html;
+}
+
+document.getElementById("calPrev").onclick = () => {
+  calendarDate.setMonth(calendarDate.getMonth() - 1);
+  renderCalendar();
+};
+
+document.getElementById("calNext").onclick = () => {
+  calendarDate.setMonth(calendarDate.getMonth() + 1);
+  renderCalendar();
+};
 
 function renderProgress(){
   const groups = {};
