@@ -42,7 +42,7 @@
 
     .container {
       width: 100%;
-      max-width: 480px;
+      max-width: 500px;
     }
 
     .header {
@@ -54,7 +54,7 @@
     }
 
     h1 {
-      font-size: 1.75rem;
+      font-size: 1.8rem;
       font-weight: 700;
       color: var(--accent);
       letter-spacing: -0.5px;
@@ -64,8 +64,8 @@
       background: transparent;
       border: 1px solid var(--border);
       color: var(--text-muted);
-      padding: 0.4rem 0.75rem;
-      border-radius: 20px;
+      padding: 0.4rem 0.8rem;
+      border-radius: 8px;
       font-size: 0.8rem;
       font-weight: 500;
       cursor: pointer;
@@ -81,7 +81,7 @@
       display: flex;
       gap: 0.5rem;
       background: var(--card-bg);
-      padding: 4px;
+      padding: 5px;
       border-radius: 12px;
       border: 1px solid var(--border);
       margin-bottom: 1.25rem;
@@ -89,14 +89,14 @@
 
     .nav button {
       flex: 1;
-      padding: 0.6rem 0.2rem;
+      padding: 0.65rem 0.2rem;
       border: none;
       background: transparent;
       color: var(--text-muted);
       font-weight: 600;
       border-radius: 8px;
       cursor: pointer;
-      font-size: 0.85rem;
+      font-size: 0.9rem;
       transition: all 0.2s ease;
     }
 
@@ -120,7 +120,7 @@
 
     .exercise-card.completed {
       border-color: var(--success-border);
-      background: rgba(35, 134, 54, 0.05);
+      background: rgba(35, 134, 54, 0.08);
     }
 
     .exercise-header {
@@ -131,9 +131,9 @@
 
     /* Zona Cadrului pentru Imagine Animat/GIF */
     .gif-frame {
-      width: 80px;
-      height: 80px;
-      min-width: 80px;
+      width: 90px;
+      height: 90px;
+      min-width: 90px;
       background-color: #000;
       border-radius: 12px;
       overflow: hidden;
@@ -154,14 +154,14 @@
     }
 
     .exercise-info h3 {
-      font-size: 1.05rem;
+      font-size: 1.1rem;
       font-weight: 600;
-      margin-bottom: 0.25rem;
+      margin-bottom: 0.3rem;
       color: var(--text);
     }
 
     .exercise-info p {
-      font-size: 0.85rem;
+      font-size: 0.88rem;
       color: var(--text-muted);
     }
 
@@ -186,8 +186,8 @@
     }
 
     .weight-input {
-      width: 80px;
-      padding: 0.4rem 0.6rem;
+      width: 85px;
+      padding: 0.45rem 0.6rem;
       border-radius: 8px;
       border: 1px solid var(--border);
       background: var(--input-bg);
@@ -205,7 +205,7 @@
       display: flex;
       align-items: center;
       gap: 0.5rem;
-      font-size: 0.85rem;
+      font-size: 0.9rem;
       font-weight: 600;
       color: var(--text-muted);
       cursor: pointer;
@@ -260,14 +260,6 @@
       bicepsCurl: "Dumbbell_Bicep_Curl",
       pallofPress: "Pallof_Press"
     };
-
-    // Pre-încărcare imagini
-    Object.values(EX_FOLDERS).forEach(folder => {
-      const img0 = new Image();
-      img0.src = `./exercises/${folder}/0.jpg`;
-      const img1 = new Image();
-      img1.src = `./exercises/${folder}/1.jpg`;
-    });
 
     const DAYS = [
       {
@@ -339,11 +331,12 @@
                      src="${initialSrc}" 
                      data-folder="${folderName}" 
                      data-frame="0" 
+                     onerror="this.onerror=null; this.src='https://via.placeholder.com/90/0d1117/38bdf8?text=GymTrack';"
                      alt="${ex[0]}">
               </div>
               <div class="exercise-info">
                 <h3>${ex[0]}</h3>
-                <p>${ex[1]} serii × ${ex[2]} rep</p>
+                <p><strong>Serii:</strong> ${ex[1]} | <strong>Repetări:</strong> ${ex[2]}</p>
               </div>
             </div>
             
@@ -360,7 +353,7 @@
                 <input type="checkbox" 
                        ${isDone ? 'checked' : ''} 
                        onchange="toggleDone('${exKey}', this.checked)">
-                Gata
+                Efectuat
               </label>
             </div>
           </div>
@@ -403,8 +396,10 @@
           const currentFrame = img.getAttribute('data-frame');
           const nextFrame = currentFrame === '0' ? '1' : '0';
           
-          img.src = `./exercises/${folder}/${nextFrame}.jpg`;
-          img.setAttribute('data-frame', nextFrame);
+          if(!img.src.includes('placeholder')) {
+            img.src = `./exercises/${folder}/${nextFrame}.jpg`;
+            img.setAttribute('data-frame', nextFrame);
+          }
         });
       }, 750);
     }
