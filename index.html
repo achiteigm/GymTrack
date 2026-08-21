@@ -9,6 +9,8 @@
   <meta name="apple-mobile-web-app-title" content="GymTrack">
   <link rel="manifest" href="manifest.webmanifest">
   <title>GymTrack</title>
+  <!-- Chart.js CDN pentru Grafice -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     :root{
       --bg:#0f131b; --surface:#171d28; --surface2:#202735; --border:#2a3343;
@@ -41,14 +43,14 @@
     .day-tab.active small{color:var(--accent)}
     .card{background:linear-gradient(180deg,var(--surface),#151b25);border:1px solid var(--border);border-radius:20px;margin:0 0 16px;overflow:hidden;box-shadow:0 8px 24px rgba(0,0,0,.13)}
     .card.complete{border-color:rgba(34,197,94,.45)}
-    .ex-head{display:flex;flex-direction:column;gap:14px;padding:14px}
+    .ex-head{display:flex;flex-direction:column;gap:14px;padding:14px;position:relative}
+    .btn-delete-ex{position:absolute;top:10px;right:10px;background:transparent;border:0;color:var(--danger);font-size:16px;padding:4px}
     
-    /* Frame Animat Exercițiu Maximizat */
     .visual{width:100%;height:260px;border-radius:16px;background:#05070a;display:grid;place-items:center;border:1px solid #303b4c;overflow:hidden;box-shadow:inset 0 0 20px rgba(0,0,0,0.5)}
     .exercise-img{width:100%;height:100%;object-fit:contain;background-color:#05070a;display:block}
     
     .ex-info{min-width:0;flex:1}
-    .ex-title{font-size:18px;font-weight:800;line-height:1.25}
+    .ex-title{font-size:18px;font-weight:800;line-height:1.25;padding-right:20px}
     .meta{color:var(--muted);font-size:13px;margin-top:4px}
     .last{color:var(--accent2);font-size:12px;margin-top:6px;font-weight:600}
     .set-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;padding:0 14px 14px}
@@ -60,12 +62,13 @@
     .field{width:100%;border:1px solid #303a4a;background:#161c27;color:var(--text);border-radius:10px;padding:8px 7px;font-size:13px;outline:none}
     .field:focus{border-color:#59677d}
     .unit{font-size:10px;color:var(--muted);margin-top:3px;margin-bottom:4px}
-    .actions{display:flex;gap:8px;padding:0 14px 14px}
+    .actions{display:flex;gap:8px;padding:0 14px 14px;flex-wrap:wrap}
     .btn{border:1px solid var(--border);background:var(--surface2);color:var(--text);border-radius:12px;padding:10px 12px;font-weight:700;font-size:12px}
     .btn.primary{background:var(--accent);border-color:var(--accent);color:#081420}
     .btn.ghost{background:transparent}
     .section{margin:14px 0 8px;color:var(--muted);font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase}
-    .history-item,.stat-card,.info-card{background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:14px;margin-bottom:10px}
+    .history-item,.stat-card,.info-card,.chart-card{background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:14px;margin-bottom:10px}
+    .chart-card canvas{max-height:180px;width:100%}
     .history-item{display:flex;justify-content:space-between;gap:12px}.history-item strong{font-size:14px}.history-item span{display:block;color:var(--muted);font-size:12px;margin-top:4px}
     .stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
     .stat-card strong{font-size:22px}.stat-card span{display:block;color:var(--muted);font-size:11px;margin-top:4px}
@@ -107,18 +110,27 @@
     </div>
     <div class="day-tabs" id="dayTabs"></div>
     <div id="workoutList"></div>
-    <div class="actions"><button class="btn primary" id="finishBtn">Finalizează antrenamentul</button><button class="btn ghost" id="resetBtn">Resetează ziua</button></div>
+    <div class="actions">
+      <button class="btn primary" id="finishBtn">Finalizează antrenamentul</button>
+      <button class="btn ghost" id="addExBtn">+ Adaugă exercițiu</button>
+      <button class="btn ghost" id="resetBtn">Resetează ziua</button>
+    </div>
   </section>
 
   <section id="historyScreen" class="screen">
-    <div class="hero"><h2>Istoric</h2><p>Sesiunile finalizate și cele mai bune rezultate.</p></div>
+    <div class="hero"><h2>Istoric</h2><p>Sesiunile finalizate și salvările de date.</p></div>
     <div class="stats-grid" id="stats"></div>
+    <div class="actions" style="padding: 10px 0;">
+      <button class="btn ghost" id="exportBtn">Export Backup (JSON)</button>
+      <button class="btn ghost" id="importBtn">Import Backup</button>
+      <input type="file" id="importInput" accept=".json" style="display:none">
+    </div>
     <div class="section">Sesiuni recente</div>
     <div id="historyList"></div>
   </section>
 
   <section id="progressScreen" class="screen">
-    <div class="hero"><h2>Progres</h2><p>Ultima greutate și evoluția pe fiecare exercițiu.</p></div>
+    <div class="hero"><h2>Progres</h2><p>Evoluția grafică pe fiecare exercițiu.</p></div>
     <div id="exerciseProgress"></div>
   </section>
 </main>
@@ -153,7 +165,7 @@ const EX_FOLDERS = {
   pallofPress: "Pallof_Press"
 };
 
-const DAYS = [
+const DEFAULT_DAYS = [
   {
     id: "d1", title: "Picioare + abdomen", label: "Ziua 1", exercises: [
       ["Presă pentru picioare", 4, "10-12", EX_FOLDERS.legPress],
@@ -199,9 +211,12 @@ const store = {
 };
 
 let db = store.load();
+db.days ||= DEFAULT_DAYS;
+let DAYS = db.days;
 let currentDay = 0;
 let currentScreen = "workoutScreen";
 let animationInterval = null;
+let chartInstances = {};
 
 function getWorkout(day){
   db.workouts ||= {};
@@ -238,14 +253,15 @@ function renderWorkout(){
   });
 
   document.getElementById("workoutList").innerHTML = day.exercises.map((e, ei) => {
-    const folder = e[3];
-    const sets = w[ei];
+    const folder = e[3] || "Hyperextensions";
+    const sets = w[ei] || [];
     const done = sets.filter(s => s.done).length;
     const last = getLast(day.id, ei);
     const initialSrc = `./exercises/${folder}/0.jpg`;
 
     return `<article class="card ${done === e[1] ? "complete" : ""}">
       <div class="ex-head">
+        <button class="btn-delete-ex" onclick="deleteExercise(${ei})" title="Șterge exercițiul">✕</button>
         <div class="visual">
           <img class="exercise-img" 
                src="${initialSrc}" 
@@ -295,6 +311,29 @@ function renderWorkout(){
   updateProgress();
 }
 
+function addExercise(){
+  const name = prompt("Numele noului exercițiu:");
+  if (!name) return;
+  const setsCount = parseInt(prompt("Număr de serii:", "3")) || 3;
+  const repsCount = prompt("Repetări vizate:", "10-12") || "10-12";
+  
+  DAYS[currentDay].exercises.push([name, setsCount, repsCount, "Leg_Press"]);
+  db.workouts[DAYS[currentDay].id].push(Array.from({length: setsCount}, () => ({done: false, kg: "", reps: ""})));
+  save();
+  renderWorkout();
+  toast("Exercițiu adăugat!");
+}
+
+function deleteExercise(index){
+  if (confirm("Sigur vrei să ștergi acest exercițiu din rutina zilei?")){
+    DAYS[currentDay].exercises.splice(index, 1);
+    db.workouts[DAYS[currentDay].id].splice(index, 1);
+    save();
+    renderWorkout();
+    toast("Exercițiu șters.");
+  }
+}
+
 function startAnimation() {
   if (animationInterval) clearInterval(animationInterval);
   animationInterval = setInterval(() => {
@@ -320,7 +359,7 @@ function updateProgress(){
   document.getElementById("progressText").textContent = pct + "%";
 }
 
-function save(){ store.save(db); }
+function save(){ db.days = DAYS; store.save(db); }
 
 function getLast(dayId, ei){
   const arr = getRecords().filter(r => r.dayId === dayId && r.exerciseIndex === ei).sort((a, b) => b.time - a.time);
@@ -381,23 +420,94 @@ function renderProgress(){
   const groups = {};
   (db.records || []).forEach(r => { (groups[r.exercise] ||= []).push(r); });
   
-  document.getElementById("exerciseProgress").innerHTML = Object.keys(groups).length ? Object.entries(groups).map(([name, arr]) => {
-    const sorted = arr.sort((a, b) => b.time - a.time);
-    const last = sorted[0];
-    const all = last.sets.filter(s => s.kg || s.reps);
-    const bestKg = arr.flatMap(r => r.sets.map(s => parseFloat(String(s.kg).replace(",", ".")) || 0)).reduce((a, b) => Math.max(a, b), 0);
-    
-    return `
-      <div class="history-item">
-        <div>
-          <strong>${name}</strong>
-          <span>Ultima sesiune: ${all.length ? all.map(s => `${s.kg || "—"} kg × ${s.reps || "—"}`).join(" · ") : "fără date"}</span>
-        </div>
-        <strong>${bestKg ? bestKg + " kg" : "—"}</strong>
+  const container = document.getElementById("exerciseProgress");
+  container.innerHTML = "";
+  
+  Object.keys(chartInstances).forEach(k => chartInstances[k].destroy());
+  chartInstances = {};
+
+  if (!Object.keys(groups).length) {
+    container.innerHTML = `<div class="empty">Completează câteva sesiuni pentru a vedea progresul.</div>`;
+    return;
+  }
+
+  Object.entries(groups).forEach(([name, arr], idx) => {
+    const sorted = arr.sort((a, b) => a.time - b.time);
+    const labels = sorted.map(r => new Date(r.time).toLocaleDateString("ro-RO", {day: "2-digit", month: "2-digit"}));
+    const dataPoints = sorted.map(r => {
+      return r.sets.map(s => parseFloat(String(s.kg).replace(",", ".")) || 0).reduce((a, b) => Math.max(a, b), 0);
+    });
+
+    const card = document.createElement("div");
+    card.className = "chart-card";
+    const canvasId = `chart-${idx}`;
+    card.innerHTML = `
+      <div style="display:flex;justify-content:space-between;margin-bottom:8px">
+        <strong>${name}</strong>
+        <span style="color:var(--accent);font-weight:700">Max: ${Math.max(...dataPoints)} kg</span>
       </div>
+      <canvas id="${canvasId}"></canvas>
     `;
-  }).join("") : `<div class="empty">Completează câteva sesiuni pentru a vedea progresul.</div>`;
+    container.appendChild(card);
+
+    const ctx = document.getElementById(canvasId).getContext("2d");
+    chartInstances[canvasId] = new Chart(ctx, {
+      type: "line",
+      data: {
+        labels: labels,
+        datasets: [{
+          label: "Kg Maxim",
+          data: dataPoints,
+          borderColor: "#38bdf8",
+          backgroundColor: "rgba(56, 189, 248, 0.1)",
+          fill: true,
+          tension: 0.3
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { ticks: { color: "#8f99aa" }, grid: { display: false } },
+          y: { ticks: { color: "#8f99aa" }, grid: { color: "#2a3343" } }
+        }
+      }
+    });
+  });
 }
+
+/* BACKUP & RESTORE */
+document.getElementById("exportBtn").onclick = () => {
+  const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(db, null, 2));
+  const dlAnchor = document.createElement("a");
+  dlAnchor.setAttribute("href", dataStr);
+  dlAnchor.setAttribute("download", `GymTrack_Backup_${new Date().toISOString().slice(0,10)}.json`);
+  document.body.appendChild(dlAnchor);
+  dlAnchor.click();
+  dlAnchor.remove();
+  toast("Backup descărcat!");
+};
+
+document.getElementById("importBtn").onclick = () => document.getElementById("importInput").click();
+document.getElementById("importInput").onchange = (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (evt) => {
+    try {
+      db = JSON.parse(evt.target.result);
+      DAYS = db.days || DEFAULT_DAYS;
+      save();
+      renderWorkout();
+      renderHistory();
+      renderProgress();
+      toast("Date restaurate cu succes!");
+    } catch {
+      toast("Fișier invalid!");
+    }
+  };
+  reader.readAsText(file);
+};
 
 document.querySelectorAll(".nav-btn").forEach(b => b.onclick = () => {
   currentScreen = b.dataset.screen;
@@ -409,6 +519,7 @@ document.querySelectorAll(".nav-btn").forEach(b => b.onclick = () => {
 });
 
 document.getElementById("finishBtn").onclick = finishWorkout;
+document.getElementById("addExBtn").onclick = addExercise;
 document.getElementById("resetBtn").onclick = resetDay;
 document.getElementById("hideInstall").onclick = () => {
   document.getElementById("installCard").style.display = "none";
