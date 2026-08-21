@@ -135,7 +135,7 @@
 const EX_FOLDERS = {
   legPress: "Leg_Press",
   gobletSquat: "Goblet_Squat",
-  hyperextension: "Hyperextension",
+  hyperextension: "Hyperextensions",
   legExtension: "Leg_Extensions",
   abductor: "Thigh_Abductor",
   calfRaise: "Standing_Calf_Raises",
@@ -243,11 +243,6 @@ function renderWorkout(){
     const done = sets.filter(s => s.done).length;
     const last = getLast(day.id, ei);
     const initialSrc = `./exercises/${folder}/0.jpg`;
-    
-    // Fallback automat pentru extensii lombare dacă nu există folderul local exact
-    const fallbackSrc = folder === "Hyperextension" 
-      ? "https://upload.wikimedia.org/wikipedia/commons/2/22/Back-extension-1.png" 
-      : "https://via.placeholder.com/300/0f131b/38bdf8?text=GymTrack";
 
     return `<article class="card ${done === e[1] ? "complete" : ""}">
       <div class="ex-head">
@@ -256,7 +251,7 @@ function renderWorkout(){
                src="${initialSrc}" 
                data-folder="${folder}" 
                data-frame="0" 
-               onerror="this.onerror=null; this.src='${fallbackSrc}';" 
+               onerror="this.onerror=null; this.src='https://via.placeholder.com/300/0f131b/38bdf8?text=GymTrack';" 
                alt="${e[0]}">
         </div>
         <div class="ex-info">
@@ -308,7 +303,7 @@ function startAnimation() {
       const folder = img.getAttribute('data-folder');
       const currentFrame = img.getAttribute('data-frame');
       const nextFrame = currentFrame === '0' ? '1' : '0';
-      if (!img.src.includes('wikimedia') && !img.src.includes('placeholder')) {
+      if (!img.src.includes('placeholder')) {
         img.src = `./exercises/${folder}/${nextFrame}.jpg`;
         img.setAttribute('data-frame', nextFrame);
       }
