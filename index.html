@@ -20,6 +20,7 @@
       --text: #f8fafc;
       --text-muted: #94a3b8;
       --border: #243049;
+      --success: #22c55e;
     }
 
     * {
@@ -49,7 +50,6 @@
       font-size: 1.8rem;
     }
 
-    /* Meniu Navigare Zile */
     .nav {
       display: flex;
       gap: 0.5rem;
@@ -75,7 +75,6 @@
       background: #1e293b;
     }
 
-    /* Card Exercițiu */
     .exercise-card {
       background: var(--card);
       border-radius: 14px;
@@ -86,6 +85,11 @@
       align-items: center;
       border: 1px solid var(--border);
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+      transition: border-color 0.2s ease;
+    }
+
+    .exercise-card.completed {
+      border-color: var(--success);
     }
 
     .gif-frame {
@@ -121,21 +125,49 @@
     }
 
     .exercise-info p {
-      margin: 0;
+      margin: 0 0 0.75rem 0;
       color: var(--text-muted);
       font-size: 0.95rem;
     }
 
-    .badge {
-      display: inline-block;
-      background: #1e293b;
-      color: var(--accent);
-      padding: 0.25rem 0.6rem;
-      border-radius: 6px;
-      font-size: 0.85rem;
-      font-weight: 600;
+    /* Tracker Controls: Greutate & Bifa */
+    .tracker-controls {
+      display: flex;
+      gap: 0.75rem;
+      justify-content: center;
+      align-items: center;
+      width: 100%;
       margin-top: 0.5rem;
+      padding-top: 0.75rem;
+      border-top: 1px solid var(--border);
+    }
+
+    .weight-input {
+      width: 100px;
+      padding: 0.5rem;
+      border-radius: 6px;
       border: 1px solid var(--border);
+      background: #0b0e14;
+      color: var(--text);
+      text-align: center;
+      font-size: 0.9rem;
+    }
+
+    .checkbox-container {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      color: var(--text-muted);
+    }
+
+    .checkbox-container input {
+      width: 18px;
+      height: 18px;
+      accent-color: var(--success);
+      cursor: pointer;
     }
   </style>
 </head>
@@ -148,7 +180,6 @@
   </div>
 
   <script>
-    // Dezactivăm Service Worker-ul vechi dacă exista în browser pentru a forța reîncărcarea curată
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.getRegistrations().then(registrations => {
         for (let registration of registrations) {
@@ -181,36 +212,36 @@
     const DAYS = [
       {
         id: "d1", title: "Picioare + Abdomen", label: "Ziua 1", exercises: [
-          ["Presă pentru picioare", 4, "10-12", EX_FOLDERS.legPress],
-          ["Goblet Squat", 3, "10", EX_FOLDERS.gobletSquat],
-          ["Extensii lombare la bancă 45°", 3, "12-15", EX_FOLDERS.hyperextension],
-          ["Extensii cvadriceps la aparat", 3, "12-15", EX_FOLDERS.legExtension],
-          ["Abductor la aparat", 3, "15-20", EX_FOLDERS.abductor],
-          ["Ridicări pe vârfuri la aparat", 3, "15-20", EX_FOLDERS.calfRaise],
-          ["Crunch la aparat", 3, "12-15", EX_FOLDERS.machineCrunch]
+          ["Presă pentru picioare", 4, "10-12", EX_FOLDERS.legPress, "legPress"],
+          ["Goblet Squat", 3, "10", EX_FOLDERS.gobletSquat, "gobletSquat"],
+          ["Extensii lombare la bancă 45°", 3, "12-15", EX_FOLDERS.hyperextension, "hyperextension"],
+          ["Extensii cvadriceps la aparat", 3, "12-15", EX_FOLDERS.legExtension, "legExtension"],
+          ["Abductor la aparat", 3, "15-20", EX_FOLDERS.abductor, "abductor"],
+          ["Ridicări pe vârfuri la aparat", 3, "15-20", EX_FOLDERS.calfRaise, "calfRaise"],
+          ["Crunch la aparat", 3, "12-15", EX_FOLDERS.machineCrunch, "machineCrunch"]
         ]
       },
       {
         id: "d2", title: "Piept + Spate + Umeri + Core", label: "Ziua 2", exercises: [
-          ["Lat Pulldown", 3, "10-12", EX_FOLDERS.latPulldown],
-          ["Ramat sprijinit pe piept", 3, "10-12", EX_FOLDERS.chestSupportedRow],
-          ["Presă piept la aparat", 3, "10-12", EX_FOLDERS.chestPress],
-          ["Presă umeri la aparat", 3, "10-12", EX_FOLDERS.shoulderPress],
-          ["Ridicări laterale cu gantere", 3, "15", EX_FOLDERS.lateralRaise],
-          ["Reverse Pec Deck", 3, "12-15", EX_FOLDERS.reverseFly],
-          ["Dead Bug", 3, "10-12 / parte", EX_FOLDERS.deadBug]
+          ["Lat Pulldown", 3, "10-12", EX_FOLDERS.latPulldown, "latPulldown"],
+          ["Ramat sprijinit pe piept", 3, "10-12", EX_FOLDERS.chestSupportedRow, "chestSupportedRow"],
+          ["Presă piept la aparat", 3, "10-12", EX_FOLDERS.chestPress, "chestPress"],
+          ["Presă umeri la aparat", 3, "10-12", EX_FOLDERS.shoulderPress, "shoulderPress"],
+          ["Ridicări laterale cu gantere", 3, "15", EX_FOLDERS.lateralRaise, "lateralRaise"],
+          ["Reverse Pec Deck", 3, "12-15", EX_FOLDERS.reverseFly, "reverseFly"],
+          ["Dead Bug", 3, "10-12 / parte", EX_FOLDERS.deadBug, "deadBug"]
         ]
       },
       {
         id: "d3", title: "Full Body + Brațe", label: "Ziua 3", exercises: [
-          ["Presă pentru picioare", 3, "12", EX_FOLDERS.legPress],
-          ["Lat Pulldown priză îngustă", 3, "10-12", EX_FOLDERS.latPulldown],
-          ["Ramat la cablu", 3, "10-12", EX_FOLDERS.chestSupportedRow],
-          ["Presă piept înclinată", 3, "10-12", EX_FOLDERS.chestPress],
-          ["Pec Deck", 3, "12-15", EX_FOLDERS.pecDeck],
-          ["Extensii triceps la scripete", 3, "12-15", EX_FOLDERS.tricepsPushdown],
-          ["Flexii biceps la cablu", 3, "12-15", EX_FOLDERS.bicepsCurl],
-          ["Pallof Press la cablu", 3, "10-12 / parte", EX_FOLDERS.pallofPress]
+          ["Presă pentru picioare", 3, "12", EX_FOLDERS.legPress, "legPress_d3"],
+          ["Lat Pulldown priză îngustă", 3, "10-12", EX_FOLDERS.latPulldown, "latPulldown_d3"],
+          ["Ramat la cablu", 3, "10-12", EX_FOLDERS.chestSupportedRow, "chestRow_d3"],
+          ["Presă piept înclinată", 3, "10-12", EX_FOLDERS.chestPress, "chestPress_d3"],
+          ["Pec Deck", 3, "12-15", EX_FOLDERS.pecDeck, "pecDeck"],
+          ["Extensii triceps la scripete", 3, "12-15", EX_FOLDERS.tricepsPushdown, "tricepsPushdown"],
+          ["Flexii biceps la cablu", 3, "12-15", EX_FOLDERS.bicepsCurl, "bicepsCurl"],
+          ["Pallof Press la cablu", 3, "10-12 / parte", EX_FOLDERS.pallofPress, "pallofPress"]
         ]
       }
     ];
@@ -233,10 +264,15 @@
       
       listContainer.innerHTML = currentDayData.exercises.map((ex, index) => {
         const folderName = ex[3];
+        const exKey = ex[4];
         const initialSrc = `./exercises/${folderName}/0.jpg`;
         
+        // Citire date salvate în LocalStorage
+        const savedWeight = localStorage.getItem(`gt_weight_${exKey}`) || '';
+        const isDone = localStorage.getItem(`gt_done_${exKey}`) === 'true';
+
         return `
-          <div class="exercise-card">
+          <div class="exercise-card ${isDone ? 'completed' : ''}" id="card-${exKey}">
             <div class="gif-frame">
               <img class="exercise-img" 
                    id="img-${index}"
@@ -248,13 +284,37 @@
             <div class="exercise-info">
               <h3>${ex[0]}</h3>
               <p><strong>Serii:</strong> ${ex[1]} | <strong>Repetări:</strong> ${ex[2]}</p>
-              <div class="badge">${currentDayData.title}</div>
+            </div>
+            <div class="tracker-controls">
+              <input type="text" 
+                     class="weight-input" 
+                     placeholder="Kg (ex: 50)" 
+                     value="${savedWeight}"
+                     onchange="saveWeight('${exKey}', this.value)">
+              <label class="checkbox-container">
+                <input type="checkbox" 
+                       ${isDone ? 'checked' : ''} 
+                       onchange="toggleDone('${exKey}', this.checked)">
+                Efectuat
+              </label>
             </div>
           </div>
         `;
       }).join("");
 
       startAnimation();
+    }
+
+    function saveWeight(key, val) {
+      localStorage.setItem(`gt_weight_${key}`, val);
+    }
+
+    function toggleDone(key, isChecked) {
+      localStorage.setItem(`gt_done_${key}`, isChecked);
+      const card = document.getElementById(`card-${key}`);
+      if (card) {
+        card.classList.toggle('completed', isChecked);
+      }
     }
 
     function startAnimation() {
@@ -281,7 +341,6 @@
       renderExercises();
     }
 
-    // Inițializare
     renderNav();
     renderExercises();
   </script>
