@@ -1,417 +1,422 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ro">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>GymTrack</title>
-  
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0f131b">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="GymTrack">
-  
-  <link rel="manifest" href="./manifest.webmanifest">
-  <meta name="theme-color" content="#0d1117">
-  
+  <link rel="manifest" href="manifest.webmanifest">
+  <title>GymTrack</title>
   <style>
-    :root {
-      --bg: #0d1117;
-      --card-bg: #161b22;
-      --border: #30363d;
-      --accent: #38bdf8;
-      --text: #f0f6fc;
-      --text-muted: #8b949e;
-      --success: #238636;
-      --success-border: #2ea043;
-      --input-bg: #0d1117;
+    :root{
+      --bg:#0f131b; --surface:#171d28; --surface2:#202735; --border:#2a3343;
+      --text:#f5f7fb; --muted:#8f99aa; --accent:#38bdf8; --accent2:#7dd3fc;
+      --done:#22c55e; --danger:#ff667d; --shadow:0 14px 40px rgba(0,0,0,.25);
     }
-
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      background-color: var(--bg);
-      color: var(--text);
-      padding: 1rem;
-      display: flex;
-      justify-content: center;
-    }
-
-    .container {
-      width: 100%;
-      max-width: 500px;
-    }
-
-    .header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 1.25rem;
-      padding: 0.5rem 0;
-    }
-
-    h1 {
-      font-size: 1.8rem;
-      font-weight: 700;
-      color: var(--accent);
-      letter-spacing: -0.5px;
-    }
-
-    .btn-reset {
-      background: transparent;
-      border: 1px solid var(--border);
-      color: var(--text-muted);
-      padding: 0.4rem 0.8rem;
-      border-radius: 8px;
-      font-size: 0.8rem;
-      font-weight: 500;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-
-    .btn-reset:active {
-      background: var(--border);
-    }
-
-    /* Tab-uri Navigare */
-    .nav {
-      display: flex;
-      gap: 0.5rem;
-      background: var(--card-bg);
-      padding: 5px;
-      border-radius: 12px;
-      border: 1px solid var(--border);
-      margin-bottom: 1.25rem;
-    }
-
-    .nav button {
-      flex: 1;
-      padding: 0.65rem 0.2rem;
-      border: none;
-      background: transparent;
-      color: var(--text-muted);
-      font-weight: 600;
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 0.9rem;
-      transition: all 0.2s ease;
-    }
-
-    .nav button.active {
-      background: var(--accent);
-      color: #000;
-    }
-
-    /* Card Exercițiu */
-    .exercise-card {
-      background: var(--card-bg);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 1rem;
-      margin-bottom: 1rem;
-      display: flex;
-      flex-direction: column;
-      gap: 0.85rem;
-      transition: border-color 0.2s, background-color 0.2s;
-    }
-
-    .exercise-card.completed {
-      border-color: var(--success-border);
-      background: rgba(35, 134, 54, 0.08);
-    }
-
-    .exercise-header {
-      display: flex;
-      gap: 1rem;
-      align-items: center;
-    }
-
-    /* Zona Cadrului pentru Imagine Animat/GIF */
-    .gif-frame {
-      width: 90px;
-      height: 90px;
-      min-width: 90px;
-      background-color: #000;
-      border-radius: 12px;
-      overflow: hidden;
-      border: 1px solid var(--border);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-
-    .exercise-img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-
-    .exercise-info {
-      flex: 1;
-    }
-
-    .exercise-info h3 {
-      font-size: 1.1rem;
-      font-weight: 600;
-      margin-bottom: 0.3rem;
-      color: var(--text);
-    }
-
-    .exercise-info p {
-      font-size: 0.88rem;
-      color: var(--text-muted);
-    }
-
-    /* Zona de Control: Greutate & Bifa */
-    .tracker-controls {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding-top: 0.75rem;
-      border-top: 1px solid var(--border);
-    }
-
-    .weight-box {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-
-    .weight-box span {
-      font-size: 0.85rem;
-      color: var(--text-muted);
-    }
-
-    .weight-input {
-      width: 85px;
-      padding: 0.45rem 0.6rem;
-      border-radius: 8px;
-      border: 1px solid var(--border);
-      background: var(--input-bg);
-      color: var(--text);
-      font-size: 0.9rem;
-      text-align: center;
-      outline: none;
-    }
-
-    .weight-input:focus {
-      border-color: var(--accent);
-    }
-
-    .checkbox-container {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      font-size: 0.9rem;
-      font-weight: 600;
-      color: var(--text-muted);
-      cursor: pointer;
-    }
-
-    .checkbox-container input {
-      width: 20px;
-      height: 20px;
-      accent-color: var(--success-border);
-      cursor: pointer;
-    }
+    *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+    html,body{height:100%}
+    body{margin:0;background:radial-gradient(circle at top,#171e2b 0,#0f131b 42%);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",sans-serif;overflow-x:hidden}
+    button,input{font:inherit}
+    button{cursor:pointer}
+    .app{min-height:100%;padding-bottom:calc(86px + env(safe-area-inset-bottom))}
+    header{position:sticky;top:0;z-index:20;padding:calc(18px + env(safe-area-inset-top)) 18px 14px;background:linear-gradient(180deg,rgba(15,19,27,.98) 72%,rgba(15,19,27,.72),transparent)}
+    .eyebrow{margin:0 0 3px;text-transform:uppercase;letter-spacing:.14em;color:var(--accent);font-size:11px;font-weight:800}
+    h1{margin:0;font-size:28px;letter-spacing:-.03em}
+    .sub{margin:4px 0 0;color:var(--muted);font-size:14px}
+    .progress{display:flex;align-items:center;gap:10px;margin-top:14px}
+    .track{height:7px;flex:1;border-radius:99px;background:#222a36;overflow:hidden}
+    .fill{height:100%;width:0;background:linear-gradient(90deg,var(--accent),var(--done));transition:width .25s}
+    .progress span{min-width:46px;text-align:right;color:var(--muted);font-size:12px;font-variant-numeric:tabular-nums}
+    main{padding:8px 14px 20px;max-width:760px;margin:0 auto}
+    .screen{display:none}.screen.active{display:block}
+    .hero{padding:10px 4px 12px}
+    .hero h2{margin:0;font-size:19px}.hero p{margin:4px 0 0;color:var(--muted);font-size:13px}
+    .day-tabs{display:flex;gap:8px;overflow:auto;padding:2px 0 12px;scrollbar-width:none}
+    .day-tabs::-webkit-scrollbar{display:none}
+    .day-tab{border:1px solid var(--border);background:var(--surface);color:var(--muted);padding:10px 12px;border-radius:13px;min-width:100px;text-align:left}
+    .day-tab strong{display:block;color:var(--text);font-size:13px}.day-tab small{display:block;margin-top:2px;font-size:11px}
+    .day-tab.active{background:var(--surface2);border-color:#3a465c}
+    .day-tab.active small{color:var(--accent)}
+    .card{background:linear-gradient(180deg,var(--surface),#151b25);border:1px solid var(--border);border-radius:20px;margin:0 0 12px;overflow:hidden;box-shadow:0 8px 24px rgba(0,0,0,.13)}
+    .card.complete{border-color:rgba(34,197,94,.45)}
+    .ex-head{display:flex;gap:12px;padding:14px}
+    
+    /* Frame Animat Exercițiu */
+    .visual{width:78px;height:78px;flex:none;border-radius:16px;background:#000;display:grid;place-items:center;border:1px solid #303b4c;overflow:hidden}
+    .exercise-img{width:100%;height:100%;object-fit:cover;display:block}
+    
+    .ex-info{min-width:0;flex:1}
+    .ex-title{font-size:15px;font-weight:800;line-height:1.25}
+    .meta{color:var(--muted);font-size:12px;margin-top:4px}
+    .last{color:var(--accent2);font-size:12px;margin-top:7px}
+    .set-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;padding:0 14px 14px}
+    .set-box{background:#111720;border:1px solid var(--border);border-radius:14px;padding:9px}
+    .set-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:7px}
+    .set-num{font-size:11px;color:var(--muted);font-weight:800}
+    .check{width:22px;height:22px;border:1px solid #3a4656;border-radius:7px;background:#171d28;color:transparent;display:grid;place-items:center;font-size:13px}
+    .check.on{background:var(--done);border-color:var(--done);color:#06140f}
+    .field{width:100%;border:1px solid #303a4a;background:#161c27;color:var(--text);border-radius:10px;padding:8px 7px;font-size:13px;outline:none}
+    .field:focus{border-color:#59677d}
+    .unit{font-size:10px;color:var(--muted);margin-top:3px;margin-bottom:4px}
+    .actions{display:flex;gap:8px;padding:0 14px 14px}
+    .btn{border:1px solid var(--border);background:var(--surface2);color:var(--text);border-radius:12px;padding:10px 12px;font-weight:700;font-size:12px}
+    .btn.primary{background:var(--accent);border-color:var(--accent);color:#081420}
+    .btn.ghost{background:transparent}
+    .section{margin:14px 0 8px;color:var(--muted);font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase}
+    .history-item,.stat-card,.info-card{background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:14px;margin-bottom:10px}
+    .history-item{display:flex;justify-content:space-between;gap:12px}.history-item strong{font-size:14px}.history-item span{display:block;color:var(--muted);font-size:12px;margin-top:4px}
+    .stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .stat-card strong{font-size:22px}.stat-card span{display:block;color:var(--muted);font-size:11px;margin-top:4px}
+    .empty{padding:28px 12px;text-align:center;color:var(--muted);background:var(--surface);border:1px dashed var(--border);border-radius:18px}
+    .install{background:linear-gradient(135deg,#202838,#18202d);border:1px solid #354158;padding:14px;border-radius:18px;margin-bottom:14px}
+    .install strong{display:block}.install p{margin:6px 0 0;color:var(--muted);font-size:12px;line-height:1.5}
+    .install button{margin-top:10px}
+    nav{position:fixed;left:0;right:0;bottom:0;z-index:30;padding:9px 12px calc(9px + env(safe-area-inset-bottom));background:rgba(20,25,34,.90);backdrop-filter:blur(16px);border-top:1px solid var(--border)}
+    .nav-inner{max-width:760px;margin:auto;display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
+    .nav-btn{border:0;background:transparent;color:var(--muted);padding:9px 5px;border-radius:12px;font-weight:700;font-size:11px}
+    .nav-btn.active{background:var(--surface2);color:var(--text)} .nav-btn b{display:block;font-size:17px;margin-bottom:2px}
+    .toast{position:fixed;left:50%;bottom:92px;transform:translate(-50%,20px);opacity:0;pointer-events:none;background:#0c1118;border:1px solid #3b4658;color:var(--text);padding:10px 14px;border-radius:12px;font-size:12px;transition:.25s;z-index:40;white-space:nowrap}
+    .toast.show{opacity:1;transform:translate(-50%,0)}
+    @media(max-width:480px){.set-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
   </style>
 </head>
 <body>
+<div class="app">
+<header>
+  <p class="eyebrow" id="eyebrow">GymTrack</p>
+  <h1 id="title">Picioare + abdomen</h1>
+  <p class="sub" id="subtitle">Antrenament 1</p>
+  <div class="progress"><div class="track"><div class="fill" id="fill"></div></div><span id="progressText">0%</span></div>
+</header>
 
-  <div class="container">
-    <div class="header">
-      <h1>GymTrack</h1>
-      <button class="btn-reset" onclick="resetBife()">Resetare</button>
+<main>
+  <section id="workoutScreen" class="screen active">
+    <div class="install" id="installCard">
+      <strong>Instalează GymTrack pe iPhone</strong>
+      <p>În Safari: Partajare → Adaugă la ecranul principal. Datele rămân pe telefon și aplicația funcționează offline.</p>
+      <button class="btn ghost" id="hideInstall">Ascunde</button>
     </div>
-    
-    <div class="nav" id="day-nav"></div>
-    <div id="exercise-list"></div>
-  </div>
+    <div class="day-tabs" id="dayTabs"></div>
+    <div id="workoutList"></div>
+    <div class="actions"><button class="btn primary" id="finishBtn">Finalizează antrenamentul</button><button class="btn ghost" id="resetBtn">Resetează ziua</button></div>
+  </section>
 
-  <script>
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.getRegistrations().then(registrations => {
-        for (let registration of registrations) {
-          registration.unregister();
-        }
-      });
-    }
+  <section id="historyScreen" class="screen">
+    <div class="hero"><h2>Istoric</h2><p>Sesiunile finalizate și cele mai bune rezultate.</p></div>
+    <div class="stats-grid" id="stats"></div>
+    <div class="section">Sesiuni recente</div>
+    <div id="historyList"></div>
+  </section>
 
-    const EX_FOLDERS = {
-      legPress: "Leg_Press",
-      gobletSquat: "Goblet_Squat",
-      hyperextension: "Hyperextension_Back_Extension",
-      legExtension: "Leg_Extensions",
-      abductor: "Thigh_Abductor",
-      calfRaise: "Standing_Calf_Raises",
-      machineCrunch: "Ab_Crunch_Machine",
-      latPulldown: "Wide-Grip_Lat_Pulldown",
-      chestSupportedRow: "Bent_Over_Two-Dumbbell_Row",
-      chestPress: "Machine_Bench_Press",
-      shoulderPress: "Seated_Dumbbell_Press",
-      lateralRaise: "Side_Lateral_Raise",
-      reverseFly: "Reverse_Flyes",
-      deadBug: "Dead_Bug",
-      pecDeck: "Butterfly",
-      tricepsPushdown: "Triceps_Pushdown_-_Rope_Attachment",
-      bicepsCurl: "Dumbbell_Bicep_Curl",
-      pallofPress: "Pallof_Press"
-    };
+  <section id="progressScreen" class="screen">
+    <div class="hero"><h2>Progres</h2><p>Ultima greutate și evoluția pe fiecare exercițiu.</p></div>
+    <div id="exerciseProgress"></div>
+  </section>
+</main>
 
-    const DAYS = [
-      {
-        id: "d1", title: "Picioare + Abdomen", label: "Ziua 1", exercises: [
-          ["Presă pentru picioare", 4, "10-12", EX_FOLDERS.legPress, "legPress"],
-          ["Goblet Squat", 3, "10", EX_FOLDERS.gobletSquat, "gobletSquat"],
-          ["Extensii lombare la bancă 45°", 3, "12-15", EX_FOLDERS.hyperextension, "hyperextension"],
-          ["Extensii cvadriceps la aparat", 3, "12-15", EX_FOLDERS.legExtension, "legExtension"],
-          ["Abductor la aparat", 3, "15-20", EX_FOLDERS.abductor, "abductor"],
-          ["Ridicări pe vârfuri la aparat", 3, "15-20", EX_FOLDERS.calfRaise, "calfRaise"],
-          ["Crunch la aparat", 3, "12-15", EX_FOLDERS.machineCrunch, "machineCrunch"]
-        ]
-      },
-      {
-        id: "d2", title: "Piept + Spate + Umeri + Core", label: "Ziua 2", exercises: [
-          ["Lat Pulldown", 3, "10-12", EX_FOLDERS.latPulldown, "latPulldown"],
-          ["Ramat sprijinit pe piept", 3, "10-12", EX_FOLDERS.chestSupportedRow, "chestSupportedRow"],
-          ["Presă piept la aparat", 3, "10-12", EX_FOLDERS.chestPress, "chestPress"],
-          ["Presă umeri la aparat", 3, "10-12", EX_FOLDERS.shoulderPress, "shoulderPress"],
-          ["Ridicări laterale cu gantere", 3, "15", EX_FOLDERS.lateralRaise, "lateralRaise"],
-          ["Reverse Pec Deck", 3, "12-15", EX_FOLDERS.reverseFly, "reverseFly"],
-          ["Dead Bug", 3, "10-12 / parte", EX_FOLDERS.deadBug, "deadBug"]
-        ]
-      },
-      {
-        id: "d3", title: "Full Body + Brațe", label: "Ziua 3", exercises: [
-          ["Presă pentru picioare", 3, "12", EX_FOLDERS.legPress, "legPress_d3"],
-          ["Lat Pulldown priză îngustă", 3, "10-12", EX_FOLDERS.latPulldown, "latPulldown_d3"],
-          ["Ramat la cablu", 3, "10-12", EX_FOLDERS.chestSupportedRow, "chestRow_d3"],
-          ["Presă piept înclinată", 3, "10-12", EX_FOLDERS.chestPress, "chestPress_d3"],
-          ["Pec Deck", 3, "12-15", EX_FOLDERS.pecDeck, "pecDeck"],
-          ["Extensii triceps la scripete", 3, "12-15", EX_FOLDERS.tricepsPushdown, "tricepsPushdown"],
-          ["Flexii biceps la cablu", 3, "12-15", EX_FOLDERS.bicepsCurl, "bicepsCurl"],
-          ["Pallof Press la cablu", 3, "10-12 / parte", EX_FOLDERS.pallofPress, "pallofPress"]
-        ]
-      }
-    ];
+<nav><div class="nav-inner">
+  <button class="nav-btn active" data-screen="workoutScreen"><b>●</b>Antrenament</button>
+  <button class="nav-btn" data-screen="historyScreen"><b>◷</b>Istoric</button>
+  <button class="nav-btn" data-screen="progressScreen"><b>↗</b>Progres</button>
+</div></nav>
+<div class="toast" id="toast"></div>
+</div>
 
-    let activeDay = "d1";
-    let animationInterval = null;
+<script>
+const EX_FOLDERS = {
+  legPress: "Leg_Press",
+  gobletSquat: "Goblet_Squat",
+  hyperextension: "Hyperextension_Back_Extension",
+  legExtension: "Leg_Extensions",
+  abductor: "Thigh_Abductor",
+  calfRaise: "Standing_Calf_Raises",
+  machineCrunch: "Ab_Crunch_Machine",
+  latPulldown: "Wide-Grip_Lat_Pulldown",
+  chestSupportedRow: "Bent_Over_Two-Dumbbell_Row",
+  chestPress: "Machine_Bench_Press",
+  shoulderPress: "Seated_Dumbbell_Press",
+  lateralRaise: "Side_Lateral_Raise",
+  reverseFly: "Reverse_Flyes",
+  deadBug: "Dead_Bug",
+  pecDeck: "Butterfly",
+  tricepsPushdown: "Triceps_Pushdown_-_Rope_Attachment",
+  bicepsCurl: "Dumbbell_Bicep_Curl",
+  pallofPress: "Pallof_Press"
+};
 
-    function renderNav() {
-      const navContainer = document.getElementById("day-nav");
-      navContainer.innerHTML = DAYS.map(day => `
-        <button class="${day.id === activeDay ? 'active' : ''}" onclick="selectDay('${day.id}')">
-          ${day.label}
-        </button>
-      `).join("");
-    }
+const DAYS = [
+  {
+    id: "d1", title: "Picioare + abdomen", label: "Ziua 1", exercises: [
+      ["Presă pentru picioare", 4, "10-12", EX_FOLDERS.legPress],
+      ["Goblet Squat", 3, "10", EX_FOLDERS.gobletSquat],
+      ["Extensii lombare la bancă 45°", 3, "12-15", EX_FOLDERS.hyperextension],
+      ["Extensii cvadriceps la aparat", 3, "12-15", EX_FOLDERS.legExtension],
+      ["Abductor la aparat", 3, "15-20", EX_FOLDERS.abductor],
+      ["Ridicări pe vârfuri la aparat", 3, "15-20", EX_FOLDERS.calfRaise],
+      ["Crunch la aparat", 3, "12-15", EX_FOLDERS.machineCrunch]
+    ]
+  },
+  {
+    id: "d2", title: "Piept + Spate + Umeri + Core", label: "Ziua 2", exercises: [
+      ["Lat Pulldown", 3, "10-12", EX_FOLDERS.latPulldown],
+      ["Ramat sprijinit pe piept", 3, "10-12", EX_FOLDERS.chestSupportedRow],
+      ["Presă piept la aparat", 3, "10-12", EX_FOLDERS.chestPress],
+      ["Presă umeri la aparat", 3, "10-12", EX_FOLDERS.shoulderPress],
+      ["Ridicări laterale cu gantere", 3, "15", EX_FOLDERS.lateralRaise],
+      ["Reverse Pec Deck", 3, "12-15", EX_FOLDERS.reverseFly],
+      ["Dead Bug", 3, "10-12 / parte", EX_FOLDERS.deadBug]
+    ]
+  },
+  {
+    id: "d3", title: "Full Body + Brațe", label: "Ziua 3", exercises: [
+      ["Presă pentru picioare", 3, "12", EX_FOLDERS.legPress],
+      ["Lat Pulldown priză îngustă", 3, "10-12", EX_FOLDERS.latPulldown],
+      ["Ramat la cablu", 3, "10-12", EX_FOLDERS.chestSupportedRow],
+      ["Presă piept înclinată", 3, "10-12", EX_FOLDERS.chestPress],
+      ["Pec Deck", 3, "12-15", EX_FOLDERS.pecDeck],
+      ["Extensii triceps la scripete", 3, "12-15", EX_FOLDERS.tricepsPushdown],
+      ["Flexii biceps la cablu", 3, "12-15", EX_FOLDERS.bicepsCurl],
+      ["Pallof Press la cablu", 3, "10-12 / parte", EX_FOLDERS.pallofPress]
+    ]
+  }
+];
 
-    function renderExercises() {
-      const listContainer = document.getElementById("exercise-list");
-      const currentDayData = DAYS.find(d => d.id === activeDay);
-      
-      listContainer.innerHTML = currentDayData.exercises.map((ex, index) => {
-        const folderName = ex[3];
-        const exKey = ex[4];
-        const initialSrc = `./exercises/${folderName}/0.jpg`;
-        
-        const savedWeight = localStorage.getItem(`gt_weight_${exKey}`) || '';
-        const isDone = localStorage.getItem(`gt_done_${exKey}`) === 'true';
+const store = {
+  key: "gymtrack:v3",
+  load(){
+    try{ return JSON.parse(localStorage.getItem(this.key) || "{}"); } catch{ return {}; }
+  },
+  save(data){ localStorage.setItem(this.key, JSON.stringify(data)); }
+};
 
-        return `
-          <div class="exercise-card ${isDone ? 'completed' : ''}" id="card-${exKey}">
-            <div class="exercise-header">
-              <div class="gif-frame">
-                <img class="exercise-img" 
-                     id="img-${index}"
-                     src="${initialSrc}" 
-                     data-folder="${folderName}" 
-                     data-frame="0" 
-                     onerror="this.onerror=null; this.src='https://via.placeholder.com/90/0d1117/38bdf8?text=GymTrack';"
-                     alt="${ex[0]}">
-              </div>
-              <div class="exercise-info">
-                <h3>${ex[0]}</h3>
-                <p><strong>Serii:</strong> ${ex[1]} | <strong>Repetări:</strong> ${ex[2]}</p>
-              </div>
+let db = store.load();
+let currentDay = 0;
+let currentScreen = "workoutScreen";
+let animationInterval = null;
+
+function getWorkout(day){
+  db.workouts ||= {};
+  return db.workouts[DAYS[day].id] ||= DAYS[day].exercises.map(e => Array.from({length: e[1]}, () => ({done: false, kg: "", reps: ""})));
+}
+function getRecords(){ db.records ||= []; return db.records; }
+function toast(msg){
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  clearTimeout(window._tt);
+  window._tt = setTimeout(() => t.classList.remove("show"), 1600);
+}
+
+function renderWorkout(){
+  const day = DAYS[currentDay];
+  const w = getWorkout(currentDay);
+  
+  document.getElementById("eyebrow").textContent = day.label;
+  document.getElementById("title").textContent = day.title;
+  document.getElementById("subtitle").textContent = day.exercises.length + " exerciții";
+  
+  document.getElementById("dayTabs").innerHTML = DAYS.map((d, i) => 
+    `<button class="day-tab ${i === currentDay ? "active" : ""}" data-day="${i}">
+      <strong>${d.label}</strong>
+      <small>${d.title}</small>
+    </button>`
+  ).join("");
+  
+  document.querySelectorAll(".day-tab").forEach(b => b.onclick = () => {
+    currentDay = +b.dataset.day;
+    renderWorkout();
+    updateProgress();
+  });
+
+  document.getElementById("workoutList").innerHTML = day.exercises.map((e, ei) => {
+    const folder = e[3];
+    const sets = w[ei];
+    const done = sets.filter(s => s.done).length;
+    const last = getLast(day.id, ei);
+    const initialSrc = `./exercises/${folder}/0.jpg`;
+
+    return `<article class="card ${done === e[1] ? "complete" : ""}">
+      <div class="ex-head">
+        <div class="visual">
+          <img class="exercise-img" 
+               src="${initialSrc}" 
+               data-folder="${folder}" 
+               data-frame="0" 
+               onerror="this.onerror=null; this.src='https://via.placeholder.com/78/0f131b/38bdf8?text=GymTrack';" 
+               alt="${e[0]}">
+        </div>
+        <div class="ex-info">
+          <div class="ex-title">${e[0]}</div>
+          <div class="meta">${e[1]} serii · ${e[2]} repetări</div>
+          ${last ? `<div class="last">Ultimul: ${last}</div>` : ""}
+        </div>
+      </div>
+      <div class="set-grid">
+        ${sets.map((s, si) => `
+          <div class="set-box">
+            <div class="set-top">
+              <span class="set-num">SET ${si + 1}</span>
+              <button class="check ${s.done ? "on" : ""}" data-e="${ei}" data-s="${si}">${s.done ? "✓" : ""}</button>
             </div>
-            
-            <div class="tracker-controls">
-              <div class="weight-box">
-                <span>Greutate:</span>
-                <input type="text" 
-                       class="weight-input" 
-                       placeholder="kg" 
-                       value="${savedWeight}"
-                       onkeyup="saveWeight('${exKey}', this.value)">
-              </div>
-              <label class="checkbox-container">
-                <input type="checkbox" 
-                       ${isDone ? 'checked' : ''} 
-                       onchange="toggleDone('${exKey}', this.checked)">
-                Efectuat
-              </label>
-            </div>
+            <input class="field kg" inputmode="decimal" placeholder="kg" value="${s.kg}" data-e="${ei}" data-s="${si}">
+            <div class="unit">greutate</div>
+            <input class="field reps" inputmode="numeric" placeholder="rep" value="${s.reps}" data-e="${ei}" data-s="${si}">
+            <div class="unit">repetări</div>
           </div>
-        `;
-      }).join("");
+        `).join("")}
+      </div>
+    </article>`;
+  }).join("");
 
-      startAnimation();
-    }
+  document.querySelectorAll(".check").forEach(b => b.onclick = () => {
+    const e = +b.dataset.e, s = +b.dataset.s;
+    w[e][s].done = !w[e][s].done;
+    save();
+    renderWorkout();
+    updateProgress();
+  });
 
-    function saveWeight(key, val) {
-      localStorage.setItem(`gt_weight_${key}`, val);
-    }
+  document.querySelectorAll(".field").forEach(inp => inp.oninput = () => {
+    const e = +inp.dataset.e, s = +inp.dataset.s;
+    w[e][s][inp.classList.contains("kg") ? "kg" : "reps"] = inp.value;
+    save();
+  });
 
-    function toggleDone(key, isChecked) {
-      localStorage.setItem(`gt_done_${key}`, isChecked);
-      const card = document.getElementById(`card-${key}`);
-      if (card) {
-        card.classList.toggle('completed', isChecked);
+  startAnimation();
+  updateProgress();
+}
+
+function startAnimation() {
+  if (animationInterval) clearInterval(animationInterval);
+  animationInterval = setInterval(() => {
+    const images = document.querySelectorAll('.exercise-img');
+    images.forEach(img => {
+      const folder = img.getAttribute('data-folder');
+      const currentFrame = img.getAttribute('data-frame');
+      const nextFrame = currentFrame === '0' ? '1' : '0';
+      if (!img.src.includes('placeholder')) {
+        img.src = `./exercises/${folder}/${nextFrame}.jpg`;
+        img.setAttribute('data-frame', nextFrame);
       }
-    }
+    });
+  }, 750);
+}
 
-    function resetBife() {
-      if (confirm("Resetezi bifele pentru o nouă zi de antrenament?")) {
-        Object.keys(localStorage).forEach(key => {
-          if (key.startsWith('gt_done_')) {
-            localStorage.removeItem(key);
-          }
-        });
-        renderExercises();
-      }
-    }
+function updateProgress(){
+  const w = getWorkout(currentDay);
+  let done = 0, total = 0;
+  w.forEach(a => a.forEach(s => { total++; if (s.done) done++; }));
+  const pct = total ? Math.round(done / total * 100) : 0;
+  document.getElementById("fill").style.width = pct + "%";
+  document.getElementById("progressText").textContent = pct + "%";
+}
 
-    function startAnimation() {
-      if (animationInterval) clearInterval(animationInterval);
+function save(){ store.save(db); }
 
-      animationInterval = setInterval(() => {
-        const images = document.querySelectorAll('.exercise-img');
-        images.forEach(img => {
-          const folder = img.getAttribute('data-folder');
-          const currentFrame = img.getAttribute('data-frame');
-          const nextFrame = currentFrame === '0' ? '1' : '0';
-          
-          if(!img.src.includes('placeholder')) {
-            img.src = `./exercises/${folder}/${nextFrame}.jpg`;
-            img.setAttribute('data-frame', nextFrame);
-          }
-        });
-      }, 750);
-    }
+function getLast(dayId, ei){
+  const arr = getRecords().filter(r => r.dayId === dayId && r.exerciseIndex === ei).sort((a, b) => b.time - a.time);
+  if (!arr.length) return "";
+  const sets = arr[0].sets.filter(s => s.kg || s.reps);
+  if (!sets.length) return "";
+  return sets.map(s => `${s.kg || "—"} kg × ${s.reps || "—"}`).slice(0, 2).join(" · ");
+}
 
-    function selectDay(dayId) {
-      activeDay = dayId;
-      renderNav();
-      renderExercises();
-    }
+function finishWorkout(){
+  const day = DAYS[currentDay], w = getWorkout(currentDay);
+  const flat = w.flat();
+  if (!flat.some(s => s.done)){ toast("Bifează cel puțin un set."); return; }
+  
+  day.exercises.forEach((e, ei) => {
+    db.records.push({ time: Date.now(), dayId: day.id, exerciseIndex: ei, exercise: e[0], sets: w[ei].map(x => ({...x})) });
+  });
+  
+  db.sessions ||= [];
+  db.sessions.push({ time: Date.now(), dayId: day.id, title: day.title, sets: flat.filter(s => s.done).length });
+  db.workouts[day.id] = day.exercises.map(e => Array.from({length: e[1]}, () => ({done: false, kg: "", reps: ""})));
+  
+  save();
+  renderWorkout();
+  renderHistory();
+  renderProgress();
+  toast("Antrenamentul a fost salvat.");
+}
 
-    renderNav();
-    renderExercises();
-  </script>
+function resetDay(){
+  db.workouts[DAYS[currentDay].id] = DAYS[currentDay].exercises.map(e => Array.from({length: e[1]}, () => ({done: false, kg: "", reps: ""})));
+  save();
+  renderWorkout();
+  toast("Ziua a fost resetată.");
+}
+
+function renderHistory(){
+  const sessions = (db.sessions || []).slice().sort((a, b) => b.time - a.time);
+  const total = sessions.reduce((n, s) => n + s.sets, 0);
+  
+  document.getElementById("stats").innerHTML = `
+    <div class="stat-card"><strong>${sessions.length}</strong><span>sesiuni</span></div>
+    <div class="stat-card"><strong>${total}</strong><span>seturi finalizate</span></div>
+  `;
+  
+  document.getElementById("historyList").innerHTML = sessions.length ? sessions.slice(0, 20).map(s => `
+    <div class="history-item">
+      <div>
+        <strong>${s.title}</strong>
+        <span>${new Date(s.time).toLocaleDateString("ro-RO", {day: "2-digit", month: "2-digit", year: "numeric"})}</span>
+      </div>
+      <strong>${s.sets} seturi</strong>
+    </div>
+  `).join("") : `<div class="empty">Nu există sesiuni salvate încă.</div>`;
+}
+
+function renderProgress(){
+  const groups = {};
+  (db.records || []).forEach(r => { (groups[r.exercise] ||= []).push(r); });
+  
+  document.getElementById("exerciseProgress").innerHTML = Object.keys(groups).length ? Object.entries(groups).map(([name, arr]) => {
+    const sorted = arr.sort((a, b) => b.time - a.time);
+    const last = sorted[0];
+    const all = last.sets.filter(s => s.kg || s.reps);
+    const bestKg = arr.flatMap(r => r.sets.map(s => parseFloat(String(s.kg).replace(",", ".")) || 0)).reduce((a, b) => Math.max(a, b), 0);
+    
+    return `
+      <div class="history-item">
+        <div>
+          <strong>${name}</strong>
+          <span>Ultima sesiune: ${all.length ? all.map(s => `${s.kg || "—"} kg × ${s.reps || "—"}`).join(" · ") : "fără date"}</span>
+        </div>
+        <strong>${bestKg ? bestKg + " kg" : "—"}</strong>
+      </div>
+    `;
+  }).join("") : `<div class="empty">Completează câteva sesiuni pentru a vedea progresul.</div>`;
+}
+
+document.querySelectorAll(".nav-btn").forEach(b => b.onclick = () => {
+  currentScreen = b.dataset.screen;
+  document.querySelectorAll(".nav-btn").forEach(x => x.classList.remove("active"));
+  b.classList.add("active");
+  document.querySelectorAll(".screen").forEach(x => x.classList.toggle("active", x.id === currentScreen));
+  if (currentScreen === "historyScreen") renderHistory();
+  if (currentScreen === "progressScreen") renderProgress();
+});
+
+document.getElementById("finishBtn").onclick = finishWorkout;
+document.getElementById("resetBtn").onclick = resetDay;
+document.getElementById("hideInstall").onclick = () => {
+  document.getElementById("installCard").style.display = "none";
+  localStorage.setItem("gymtrack:hideInstall", "1");
+};
+
+if (localStorage.getItem("gymtrack:hideInstall") === "1") {
+  document.getElementById("installCard").style.display = "none";
+}
+
+if ("serviceWorker" in navigator) navigator.serviceWorker.register("./sw.js").catch(() => {});
+
+renderWorkout();
+renderHistory();
+renderProgress();
+</script>
 </body>
 </html>
