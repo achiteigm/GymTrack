@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GymTrack</title>
+  
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="GymTrack">
+  
+  <link rel="manifest" href="./manifest.webmanifest">
+  <meta name="theme-color" content="#11151f">
+  
+  <style>
+    :root {
+      --bg: #0f131b;
+      --card: #182030;
+      --accent: #38bdf8;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --error: #f87171;
+    }
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      margin: 0;
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .container {
+      width: 100%;
+      max-width: 600px;
+    }
+    h1 {
+      text-align: center;
+      color: var(--accent);
+      margin-bottom: 1.5rem;
+    }
+    .nav {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1.5rem;
+    }
+    .nav button {
+      flex: 1;
+      padding: 0.75rem;
+      border: none;
+      background: var(--card);
+      color: var(--text);
+      font-weight: bold;
+      border-radius: 8px;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: all 0.2s ease;
+    }
+    .nav button.active {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: #1e293b;
+    }
+    .exercise-card {
+      background: var(--card);
+      border-radius: 12px;
+      padding: 1rem;
+      margin-bottom: 1rem;
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+    }
+    .img-container {
+      width: 90px;
+      height: 90px;
+      flex-shrink: 0;
+    }
+    .exercise-img {
+      width: 90px;
+      height: 90px;
+      object-fit: cover;
+      border-radius: 8px;
+      background-color: #243049;
+      display: block;
+    }
+    .exercise-info h3 {
+      margin: 0 0 0.5rem 0;
+      font-size: 1.1rem;
+    }
+    .exercise-info p {
+      margin: 0;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+    .error-log {
+      color: var(--error);
+      font-size: 0.75rem;
+      margin-top: 0.25rem;
+      word-break: break-all;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h1>GymTrack</h1>
+    <div class="nav" id="day-nav"></div>
+    <div id="exercise-list"></div>
+  </div>
+
+  <script>
+    const EX_FOLDERS = {
+      legPress: "exercises/Leg_Press",
+      gobletSquat: "exercises/Goblet_Squat",
+      hyperextension: "exercises/Hyperextension_Back_Extension",
+      legExtension: "exercises/Leg_Extensions",
+      abductor: "exercises/Thigh_Abductor",
+      calfRaise: "exercises/Standing_Calf_Raises",
+      machineCrunch: "exercises/Ab_Crunch_Machine",
+      latPulldown: "exercises/Wide-Grip_Lat_Pulldown",
+      chestSupportedRow: "exercises/Bent_Over_Two-Dumbbell_Row",
+      chestPress: "exercises/Machine_Bench_Press",
+      shoulderPress: "exercises/Seated_Dumbbell_Press",
+      lateralRaise: "exercises/Side_Lateral_Raise",
+      reverseFly: "exercises/Reverse_Flyes",
+      deadBug: "exercises/Dead_Bug",
+      pecDeck: "exercises/Butterfly",
+      tricepsPushdown: "exercises/Triceps_Pushdown_-_Rope_Attachment",
+      bicepsCurl: "exercises/Dumbbell_Bicep_Curl",
+      pallofPress: "exercises/Pallof_Press"
+    };
+
+    const DAYS = [
+      {
+        id: "d1", title: "Picioare + abdomen", label: "Ziua 1", exercises: [
+          ["Presă pentru picioare", 4, "10-12", EX_FOLDERS.legPress],
+          ["Goblet Squat", 3, "10", EX_FOLDERS.gobletSquat],
+          ["Extensii lombare la bancă 45°", 3, "12-15", EX_FOLDERS.hyperextension],
+          ["Extensii cvadriceps la aparat", 3, "12-15", EX_FOLDERS.legExtension],
+          ["Abductor la aparat", 3, "15-20", EX_FOLDERS.abductor],
+          ["Ridicări pe vârfuri la aparat", 3, "15-20", EX_FOLDERS.calfRaise],
+          ["Crunch la aparat", 3, "12-15", EX_FOLDERS.machineCrunch]
+        ]
+      },
+      {
+        id: "d2", title: "Piept + Spate + Umeri + Core", label: "Ziua 2", exercises: [
+          ["Lat Pulldown", 3, "10-12", EX_FOLDERS.latPulldown],
+          ["Ramat sprijinit pe piept", 3, "10-12", EX_FOLDERS.chestSupportedRow],
+          ["Presă piept la aparat", 3, "10-12", EX_FOLDERS.chestPress],
+          ["Presă umeri la aparat", 3, "10-12", EX_FOLDERS.shoulderPress],
+          ["Ridicări laterale cu gantere", 3, "15", EX_FOLDERS.lateralRaise],
+          ["Reverse Pec Deck", 3, "12-15", EX_FOLDERS.reverseFly],
+          ["Dead Bug", 3, "10-12 / parte", EX_FOLDERS.deadBug]
+        ]
+      },
+      {
+        id: "d3", title: "Full Body + Brațe", label: "Ziua 3", exercises: [
+          ["Presă pentru picioare", 3, "12", EX_FOLDERS.legPress],
+          ["Lat Pulldown priză îngustă", 3, "10-12", EX_FOLDERS.latPulldown],
+          ["Ramat la cablu", 3, "10-12", EX_FOLDERS.chestSupportedRow],
+          ["Presă piept înclinată", 3, "10-12", EX_FOLDERS.chestPress],
+          ["Pec Deck", 3, "12-15", EX_FOLDERS.pecDeck],
+          ["Extensii triceps la scripete", 3, "12-15", EX_FOLDERS.tricepsPushdown],
+          ["Flexii biceps la cablu", 3, "12-15", EX_FOLDERS.bicepsCurl],
+          ["Pallof Press la cablu", 3, "10-12 / parte", EX_FOLDERS.pallofPress]
+        ]
+      }
+    ];
+
+    let activeDay = "d1";
+    let animationInterval = null;
+
+    function renderNav() {
+      const navContainer = document.getElementById("day-nav");
+      navContainer.innerHTML = DAYS.map(day => `
+        <button class="${day.id === activeDay ? 'active' : ''}" onclick="selectDay('${day.id}')">
+          ${day.label}
+        </button>
+      `).join("");
+    }
+
+    function renderExercises() {
+      const listContainer = document.getElementById("exercise-list");
+      const currentDayData = DAYS.find(d => d.id === activeDay);
+      
+      listContainer.innerHTML = currentDayData.exercises.map((ex, index) => `
+        <div class="exercise-card">
+          <div class="img-container">
+            <img class="exercise-img" 
+                 id="img-${index}"
+                 src="./${ex[3]}/0.jpg" 
+                 data-folder="${ex[3]}" 
+                 data-frame="0" 
+                 alt="${ex[0]}"
+                 onerror="handleImageError(this, ${index})">
+          </div>
+          <div class="exercise-info">
+            <h3>${ex[0]}</h3>
+            <p><strong>Serii:</strong> ${ex[1]} | <strong>Repetări:</strong> ${ex[2]}</p>
+            <div id="err-${index}" class="error-log"></div>
+          </div>
+        </div>
+      `).join("");
+
+      startAnimation();
+    }
+
+    function handleImageError(img, index) {
+      const folder = img.getAttribute('data-folder');
+      const errDiv = document.getElementById(`err-${index}`);
+      if (errDiv) {
+        errDiv.innerText = `⚠️ Imagine negăsită: ./${folder}/0.jpg`;
+      }
+    }
+
+    function startAnimation() {
+      if (animationInterval) clearInterval(animationInterval);
+
+      animationInterval = setInterval(() => {
+        const images = document.querySelectorAll('.exercise-img');
+        images.forEach(img => {
+          if (img.complete && img.naturalWidth !== 0) {
+            const folder = img.getAttribute('data-folder');
+            const currentFrame = img.getAttribute('data-frame');
+            const nextFrame = currentFrame === '0' ? '1' : '0';
+            
+            img.src = `./${folder}/${nextFrame}.jpg`;
+            img.setAttribute('data-frame', nextFrame);
+          }
+        });
+      }, 800);
+    }
+
+    function selectDay(dayId) {
+      activeDay = dayId;
+      renderNav();
+      renderExercises();
+    }
+
+    renderNav();
+    renderExercises();
+
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js', { scope: './' })
+          .then(() => console.log('SW Înregistrat'))
+          .catch(err => console.log('SW Eroare:', err));
+      });
+    }
+  </script>
+</body>
+</html>

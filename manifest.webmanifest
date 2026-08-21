@@ -1,0 +1,10 @@
+{
+  "name":"GymTrack",
+  "short_name":"GymTrack",
+  "start_url":"./",
+  "display":"standalone",
+  "background_color":"#0f131b",
+  "theme_color":"#11151f",
+  "lang":"ro",
+  "icons":[{"src":"icon.svg","sizes":"any","type":"image/svg+xml","purpose":"any maskable"}]
+}
