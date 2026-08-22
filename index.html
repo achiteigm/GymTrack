@@ -58,10 +58,10 @@
       -webkit-backdrop-filter:blur(20px);
       border-bottom:1px solid var(--border);
     }
-    .header-top{display:flex;justify-content:space-between;align-items:flex-start}
+    .header-top{display:flex;justify-content:space-between;align-items:center;}
     .eyebrow{margin:0 0 2px;text-transform:uppercase;letter-spacing:.18em;color:var(--accent);font-size:11px;font-weight:800}
-    h1{margin:0;font-size:26px;font-weight:800;letter-spacing:-.03em;color:#fff}
-    .sub{margin:2px 0 0;color:var(--muted);font-size:13px}
+    h1{margin:0;font-size:22px;font-weight:800;letter-spacing:-.03em;color:#fff}
+    .sub{margin:2px 0 0;color:var(--muted);font-size:12px}
 
     .timer-container{display:flex;align-items:center;gap:6px;}
     .timer-badge{
@@ -70,7 +70,7 @@
       gap:6px;
       background:rgba(56, 189, 248, 0.12);
       border:1px solid rgba(56, 189, 248, 0.3);
-      padding:6px 12px;
+      padding:6px 10px;
       border-radius:99px;
       color:var(--accent);
       font-size:13px;
@@ -83,6 +83,7 @@
       animation:pulse 1.5s infinite;
     }
     .timer-badge.paused .timer-dot{background:var(--gold);animation:none;}
+    .timer-badge.stopped .timer-dot{background:var(--muted);animation:none;}
     .timer-btn{
       background:var(--surface2);
       border:1px solid var(--border);
@@ -92,13 +93,18 @@
       padding:6px 10px;
       border-radius:99px;
     }
+    .timer-btn.stop-btn{
+      background:rgba(255, 82, 82, 0.15);
+      border-color:rgba(255, 82, 82, 0.3);
+      color:var(--danger);
+    }
     @keyframes pulse{
       0%{opacity:1;transform:scale(1);}
       50%{opacity:0.4;transform:scale(0.8);}
       100%{opacity:1;transform:scale(1);}
     }
 
-    .progress{display:flex;align-items:center;gap:12px;margin-top:14px}
+    .progress{display:flex;align-items:center;gap:12px;margin-top:12px}
     .track{height:8px;flex:1;border-radius:99px;background:rgba(255,255,255,0.06);overflow:hidden;border:1px solid rgba(255,255,255,0.03)}
     .fill{height:100%;width:0;background:linear-gradient(90deg, var(--accent), var(--done));border-radius:99px;transition:width .4s cubic-bezier(0.4, 0, 0.2, 1);box-shadow:0 0 12px var(--accent-glow)}
     .progress span{min-width:42px;text-align:right;color:var(--muted);font-size:12px;font-weight:700;font-variant-numeric:tabular-nums}
@@ -111,7 +117,7 @@
       flex-direction:column;
       align-items:center;
       justify-content:center;
-      min-height:calc(80vh - 100px);
+      min-height:calc(75vh - 100px);
       text-align:center;
       padding:20px;
     }
@@ -351,24 +357,6 @@
     }
     @keyframes pop { 0% { transform: scale(1); } 50% { transform: scale(1.25); } 100% { transform: scale(1.1); } }
 
-    .pr-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 2px;
-      background: rgba(245, 158, 11, 0.15);
-      border: 1px solid rgba(245, 158, 11, 0.4);
-      color: var(--gold);
-      font-size: 9px;
-      font-weight: 900;
-      padding: 3px 6px;
-      border-radius: 6px;
-      letter-spacing: 0.05em;
-      flex:none;
-      box-shadow: 0 0 8px var(--gold-glow);
-      animation: fadeIn 0.3s ease;
-    }
-    @keyframes fadeIn { from { opacity: 0; transform: scale(0.8); } to { opacity: 1; transform: scale(1); } }
-
     /* Modal */
     .modal-backdrop{
       position:fixed;inset:0;z-index:100;
@@ -487,18 +475,6 @@
     .cal-legend{display:flex;align-items:center;gap:6px;justify-content:flex-end;margin-top:10px;font-size:10px;color:var(--muted);}
     .cal-legend-swatch{width:12px;height:12px;border-radius:3px;}
 
-    .chip-row{display:flex;gap:8px;overflow:auto;padding-bottom:14px;scrollbar-width:none}
-    .chip-row::-webkit-scrollbar{display:none}
-    .chip{
-      border:1px solid var(--border);background:var(--surface);color:var(--muted);
-      padding:8px 14px;border-radius:99px;font-size:12px;font-weight:700;
-      white-space:nowrap;flex:none;
-    }
-    .chip.active{background:rgba(56,189,248,.15);border-color:var(--accent);color:var(--accent);}
-
-    .history-actions{display:flex;gap:8px;margin-top:10px;}
-    .history-actions .btn{flex:1;}
-
     .empty{padding:32px 16px;text-align:center;color:var(--muted);background:var(--surface);border:1px dashed var(--border);border-radius:var(--radius-lg)}
     .install{
       background:linear-gradient(135deg, rgba(56, 189, 248, 0.1), rgba(30, 38, 53, 0.8));
@@ -562,12 +538,12 @@
 </head>
 <body>
 <div class="app">
-<header id="appHeader" style="display:none;">
+<header id="appHeader">
   <div class="header-top">
     <div>
-      <p class="eyebrow" id="eyebrow">GymTrack</p>
-      <h1 id="title">Picioare + abdomen</h1>
-      <p class="sub" id="subtitle">Antrenament</p>
+      <p class="eyebrow" id="eyebrow">GymTrack Pro</p>
+      <h1 id="title">Acasă</h1>
+      <p class="sub" id="subtitle">Sesiune curentă</p>
     </div>
     <div class="timer-container">
       <div class="timer-badge" id="workoutTimer">
@@ -575,9 +551,10 @@
         <span id="timerText">00:00</span>
       </div>
       <button class="timer-btn" id="timerToggleBtn" title="Pauză / Reluare">Pauză</button>
+      <button class="timer-btn stop-btn" id="timerStopBtn" title="Oprește Antrenamentul">Oprește</button>
     </div>
   </div>
-  <div class="progress"><div class="track"><div class="fill" id="fill"></div></div><span id="progressText">0%</span></div>
+  <div class="progress" id="headerProgressContainer"><div class="track"><div class="fill" id="fill"></div></div><span id="progressText">0%</span></div>
 </header>
 
 <main>
@@ -768,15 +745,12 @@ let DAYS = db.days;
 let currentDay = 0;
 let currentScreen = "homeScreen";
 let timerInterval = null;
-let chartInstances = {};
 let calendarDate = new Date();
-let selectedProgressExercises = [];
 
 function triggerHaptic(type = "light"){
   if (!navigator.vibrate) return;
   switch (type) {
     case "light": navigator.vibrate(30); break;
-    case "pr": navigator.vibrate([40, 60, 80]); break;
     case "finish": navigator.vibrate([100, 50, 100, 50, 200]); break;
     case "warn": navigator.vibrate([20, 100, 50]); break;
   }
@@ -793,11 +767,15 @@ function updateTimerDisplay(){
   
   const badge = document.getElementById("workoutTimer");
   const toggleBtn = document.getElementById("timerToggleBtn");
-  if (db.timerPaused) {
+  
+  badge.classList.remove("paused", "stopped");
+  if (!db.activeTimerStart && elapsed === 0) {
+    badge.classList.add("stopped");
+    toggleBtn.textContent = "Pauză";
+  } else if (db.timerPaused) {
     badge.classList.add("paused");
     toggleBtn.textContent = "Reluare";
   } else {
-    badge.classList.remove("paused");
     toggleBtn.textContent = "Pauză";
   }
 }
@@ -823,22 +801,40 @@ function startWorkoutTimer(){
 }
 
 function toggleTimerPause(){
-  if (!db.activeTimerStart) return;
+  if (!db.activeTimerStart && (db.activeTimerElapsed || 0) === 0) {
+    toast("Pornește mai întâi un antrenament!");
+    return;
+  }
   if (!db.timerPaused) {
-    // Trecem în pauză: salvăm timpul scurs până acum și resetăm startul
     let currentElapsed = db.activeTimerElapsed || 0;
     db.activeTimerElapsed = currentElapsed + Math.max(0, Math.floor((Date.now() - db.activeTimerStart) / 1000));
     db.activeTimerStart = null;
     db.timerPaused = true;
     toast("Cronometru pus pe pauză");
   } else {
-    // Reluăm: setăm noul start
     db.activeTimerStart = Date.now();
     db.timerPaused = false;
     toast("Cronometru reluat");
   }
   save();
   updateTimerDisplay();
+}
+
+function confirmStopTimer(){
+  if (!db.activeTimerStart && (db.activeTimerElapsed || 0) === 0) {
+    toast("Nu există niciun antrenament pornit.");
+    return;
+  }
+  openModal({
+    title: "Oprește Antrenamentul",
+    desc: "Sigur dorești să oprești cronometrul? Progresul nesalvat nu va fi înregistrat în istoric.",
+    confirmText: "Da, oprește",
+    danger: true,
+    onConfirm: () => {
+      resetWorkoutTimer();
+      toast("Antrenament oprit.");
+    }
+  });
 }
 
 function resetWorkoutTimer(){
@@ -913,7 +909,32 @@ function openModal({title, desc, fields = [], confirmText = "OK", cancelText = "
   };
 }
 
-/* UI Rendering & Logic */
+/* UI Header & Screen Logic */
+function updateHeaderInfo(){
+  const eyebrowEl = document.getElementById("eyebrow");
+  const titleEl = document.getElementById("title");
+  const progressContainer = document.getElementById("headerProgressContainer");
+
+  if(currentScreen === "workoutScreen"){
+    const day = DAYS[currentDay];
+    eyebrowEl.textContent = day.label;
+    titleEl.textContent = day.title;
+    progressContainer.style.display = "flex";
+  } else if(currentScreen === "homeScreen"){
+    eyebrowEl.textContent = "GymTrack Pro";
+    titleEl.textContent = "Acasă";
+    progressContainer.style.display = "none";
+  } else if(currentScreen === "historyScreen"){
+    eyebrowEl.textContent = "GymTrack Pro";
+    titleEl.textContent = "Istoric";
+    progressContainer.style.display = "none";
+  } else if(currentScreen === "progressScreen"){
+    eyebrowEl.textContent = "GymTrack Pro";
+    titleEl.textContent = "Progres";
+    progressContainer.style.display = "none";
+  }
+}
+
 function renderHomeScreen(){
   document.getElementById("userNameDisplay").textContent = db.userName ? db.userName : "Sportivule";
   const streakBadge = document.getElementById("streakBadge");
@@ -944,10 +965,9 @@ function switchDay(i){
 
 function renderWorkout(){
   renderDayTabs();
-  const day = DAYS[currentDay];
-  document.getElementById("eyebrow").textContent = day.label;
-  document.getElementById("title").textContent = day.title;
+  updateHeaderInfo();
   
+  const day = DAYS[currentDay];
   const workoutData = getWorkout(currentDay);
   const list = document.getElementById("workoutList");
   
@@ -1001,7 +1021,7 @@ function renderWorkout(){
   }).join("");
   
   const pct = totalSets > 0 ? Math.round((doneSets / totalSets) * 100) : 0;
-  document.getElementById("fill.style") ? document.getElementById("fill").style.width = `${pct}%` : document.getElementById("fill").style.width = `${pct}%`;
+  document.getElementById("fill").style.width = `${pct}%`;
   document.getElementById("progressText").textContent = `${pct}%`;
 }
 
@@ -1132,7 +1152,7 @@ function renderCalendar(){
   titleEl.textContent = `${monthNames[month]} ${year}`;
   
   const firstDayIndex = new Date(year, month, 1).getDay();
-  const adjustedFirstDay = (firstDayIndex === 0) ? 6 : firstDayIndex - 1; // Luni = 0
+  const adjustedFirstDay = (firstDayIndex === 0) ? 6 : firstDayIndex - 1;
   const totalDays = new Date(year, month + 1, 0).getDate();
   
   const records = getRecords();
@@ -1183,7 +1203,6 @@ function renderProgress(){
     return;
   }
   
-  // Calcul scor pe grupe musculare bazat pe volum
   const categoryScores = { legs: 0, back: 0, chest: 0, shoulders: 0, arms: 0, core: 0 };
   records.forEach(r => {
     if(r.categoryVolumes){
@@ -1204,7 +1223,7 @@ function renderProgress(){
           const percentage = Math.round((score / maxScore) * 100);
           return `
             <div>
-              <div style="display:flex;justify-content:between;font-size:13px;margin-bottom:4px;">
+              <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px;">
                 <strong style="color:var(--text);">${CATEGORY_LABELS[key]}</strong>
                 <span style="color:var(--muted);">${score > 1000 ? (score/1000).toFixed(1) + 'k kg' : score + ' kg'}</span>
               </div>
@@ -1228,18 +1247,15 @@ function showScreen(screenId){
     else b.classList.remove("active");
   });
   
-  const header = document.getElementById("appHeader");
+  updateHeaderInfo();
+  
   if(screenId === "workoutScreen"){
-    header.style.display = "block";
     renderWorkout();
   } else if(screenId === "historyScreen"){
-    header.style.display = "none";
     renderHistory();
   } else if(screenId === "progressScreen"){
-    header.style.display = "none";
     renderProgress();
   } else {
-    header.style.display = "none";
     renderHomeScreen();
   }
 }
@@ -1247,8 +1263,10 @@ function showScreen(screenId){
 /* Event Listeners & Initialization */
 document.addEventListener("DOMContentLoaded", () => {
   renderHomeScreen();
+  updateHeaderInfo();
+  updateTimerDisplay();
+  if (db.activeTimerStart && !db.timerPaused) runTimerInterval();
   
-  // Butonul START principal pornește cronometrul și deschide zona de antrenament
   document.getElementById("heroStartBtn").onclick = () => {
     startWorkoutTimer();
     showScreen("workoutScreen");
@@ -1256,6 +1274,10 @@ document.addEventListener("DOMContentLoaded", () => {
   
   document.getElementById("timerToggleBtn").onclick = () => {
     toggleTimerPause();
+  };
+  
+  document.getElementById("timerStopBtn").onclick = () => {
+    confirmStopTimer();
   };
   
   document.querySelectorAll(".nav-btn").forEach(btn => {
