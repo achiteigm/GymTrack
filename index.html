@@ -44,7 +44,7 @@
       font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",Roboto,sans-serif;
       overflow-x:hidden;
     }
-    button,input{font:inherit}
+    button,input,select{font:inherit}
     button{cursor:pointer;transition:transform 0.15s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.2s, border-color 0.2s;border:0;}
     button:active{transform:scale(0.92)}
     
@@ -131,8 +131,22 @@
       color:var(--muted);
       font-size:15px;
       max-width:320px;
-      margin:0 0 32px;
+      margin:0 0 18px;
       line-height:1.4;
+    }
+    .streak-badge{
+      display:none;
+      align-items:center;
+      gap:6px;
+      background:rgba(245, 158, 11, 0.12);
+      border:1px solid rgba(245, 158, 11, 0.35);
+      color:var(--gold);
+      font-size:13px;
+      font-weight:800;
+      padding:8px 16px;
+      border-radius:99px;
+      margin-bottom:18px;
+      box-shadow:0 0 15px rgba(245, 158, 11, 0.15);
     }
     .edit-name-btn{
       background:none;
@@ -361,6 +375,8 @@
       border-radius:20px;
       padding:22px;
       width:100%;max-width:360px;
+      max-height:82vh;
+      overflow-y:auto;
       box-shadow:0 20px 60px rgba(0,0,0,.5);
       transform:scale(.94);
       transition:transform .2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
@@ -370,7 +386,7 @@
     .modal p{margin:0 0 16px;color:var(--muted);font-size:13px;line-height:1.45;}
     .modal .input-wrapper{margin-bottom:10px;position:static;}
     .modal .field{padding:11px 12px;font-size:14px;}
-    .modal-actions{display:flex;gap:10px;margin-top:14px;}
+    .modal-actions{display:flex;gap:10px;margin-top:14px;position:sticky;bottom:-22px;background:var(--surface2);padding-top:6px;}
     .modal-actions .btn{flex:1;justify-content:center;}
     
     .input-wrapper{position:relative;margin-bottom:6px}
@@ -387,6 +403,7 @@
       outline:none;
     }
     .field:focus{border-color:var(--accent);background:rgba(0,0,0,0.5)}
+    select.field{-webkit-appearance:none;appearance:none;}
     
     .actions{display:flex;gap:10px;padding:8px 0 16px;flex-wrap:wrap}
     .btn{
@@ -409,6 +426,8 @@
       box-shadow:0 4px 16px var(--accent-glow);
     }
     .btn.ghost{background:rgba(255,255,255,0.03)}
+    .btn.small{padding:6px 12px;font-size:11px;}
+    .btn.danger-outline{color:var(--danger);border-color:var(--danger);}
     
     .section{margin:18px 0 10px;color:var(--muted);font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase}
     .history-item,.stat-card,.chart-card,.calendar-card{
@@ -465,6 +484,9 @@
       white-space:nowrap;flex:none;
     }
     .chip.active{background:rgba(56,189,248,.15);border-color:var(--accent);color:var(--accent);}
+
+    .history-actions{display:flex;gap:8px;margin-top:10px;}
+    .history-actions .btn{flex:1;}
 
     .empty{padding:32px 16px;text-align:center;color:var(--muted);background:var(--surface);border:1px dashed var(--border);border-radius:var(--radius-lg)}
     .install{
@@ -551,6 +573,7 @@
       <div class="welcome-badge">GymTrack Pro</div>
       <h2 class="welcome-title">Bine ai venit, <span id="userNameDisplay">Sportivule</span>!</h2>
       <p class="home-sub">Ești gata pentru o nouă sesiune? Apasă Start pentru a-ți alege ziua de antrenament.</p>
+      <div class="streak-badge" id="streakBadge">🔥 0 săptămâni la rând</div>
       <button class="edit-name-btn" id="editNameBtn">✎ Schimbă numele</button>
       <button class="btn-start-hero" id="heroStartBtn">
         <svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
@@ -608,7 +631,7 @@
 
   <!-- Progres -->
   <section id="progressScreen" class="screen">
-    <div class="hero"><h2>Evoluție Greutăți</h2><p>Alege până la 3 exerciții pentru a le compara pe același grafic.</p></div>
+    <div class="hero"><h2>Evoluție Greutăți</h2><p>Scorul de forță arată volumul relativ pe grupă musculară — 100 e grupa ta cea mai antrenată.</p></div>
     <div id="exerciseProgress"></div>
   </section>
 </main>
@@ -663,6 +686,25 @@ const EX_FOLDERS = {
   pallofPress: "Pallof_Press",
   leverageInclineChestPress: "Leverage_Incline_Chest_Press"
 };
+
+/* folder -> muscle-group category, used for the strength radar */
+const FOLDER_CATEGORY = {
+  Leg_Press: "legs", Goblet_Squat: "legs", Hyperextensions: "back", Leg_Extensions: "legs",
+  Thigh_Abductor: "legs", Standing_Calf_Raises: "legs", Ab_Crunch_Machine: "core",
+  "Wide-Grip_Lat_Pulldown": "back", "Close-Grip_Front_Lat_Pulldown": "back",
+  "Bent_Over_Two-Dumbbell_Row": "back", Seated_Cable_Rows: "back",
+  Machine_Bench_Press: "chest", Seated_Dumbbell_Press: "shoulders", Side_Lateral_Raise: "shoulders",
+  Reverse_Flyes: "shoulders", Reverse_Machine_Flyes: "shoulders", Dead_Bug: "core",
+  Butterfly: "chest", "Triceps_Pushdown_-_Rope_Attachment": "arms", Dumbbell_Bicep_Curl: "arms",
+  Pallof_Press: "core", Leverage_Incline_Chest_Press: "chest"
+};
+const CATEGORY_LABELS = { legs: "Picioare", back: "Spate", chest: "Piept", shoulders: "Umeri", arms: "Brațe", core: "Core" };
+const CATEGORY_OPTIONS = Object.keys(CATEGORY_LABELS).map(k => ({ value: k, label: CATEGORY_LABELS[k] }));
+
+function getExerciseCategory(e){
+  // e = [name, sets, reps, folder, category?]
+  return e[4] || FOLDER_CATEGORY[e[3]] || "core";
+}
 
 const DEFAULT_DAYS = [
   {
@@ -784,11 +826,16 @@ function openModal({title, desc, fields = [], confirmText = "OK", cancelText = "
   body.innerHTML = `
     ${title ? `<h3>${title}</h3>` : ""}
     ${desc ? `<p>${desc}</p>` : ""}
-    ${fields.map(f => `
-      <div class="input-wrapper">
-        <input class="field" id="mf-${f.id}" type="${f.type || "text"}" inputmode="${f.inputmode || "text"}" placeholder="${f.placeholder || ""}" value="${f.value || ""}">
-      </div>
-    `).join("")}
+    ${fields.map(f => {
+      if (f.type === "select") {
+        return `<div class="input-wrapper"><select class="field" id="mf-${f.id}">
+          ${f.options.map(o => `<option value="${o.value}" ${o.value === f.value ? "selected" : ""}>${o.label}</option>`).join("")}
+        </select></div>`;
+      }
+      return `<div class="input-wrapper">
+        <input class="field" id="mf-${f.id}" type="${f.type || "text"}" inputmode="${f.inputmode || "text"}" placeholder="${f.placeholder || ""}" value="${f.value ?? ""}">
+      </div>`;
+    }).join("")}
     <div class="modal-actions">
       <button class="btn ghost" id="modalCancel">${cancelText}</button>
       <button class="btn ${danger ? "" : "primary"}" id="modalConfirm" style="${danger ? "background:var(--danger);color:#fff;" : ""}">${confirmText}</button>
@@ -819,6 +866,7 @@ function switchScreen(screenId){
   
   document.getElementById("appHeader").style.display = (currentScreen === "workoutScreen") ? "block" : "none";
 
+  if (currentScreen === "homeScreen") renderStreak();
   if (currentScreen === "workoutScreen") renderWorkout();
   if (currentScreen === "historyScreen") renderHistory();
   if (currentScreen === "progressScreen") renderProgress();
@@ -1015,13 +1063,14 @@ function addExercise(){
     fields: [
       { id: "name", placeholder: "Numele exercițiului" },
       { id: "sets", type: "number", inputmode: "numeric", placeholder: "Număr de serii", value: "3" },
-      { id: "reps", placeholder: "Repetări (ex: 10-12)", value: "10-12" }
+      { id: "reps", placeholder: "Repetări (ex: 10-12)", value: "10-12" },
+      { id: "category", type: "select", options: CATEGORY_OPTIONS, value: "legs" }
     ],
     confirmText: "Adaugă",
     onConfirm: (v) => {
       if (!v.name) return;
       const setsCount = parseInt(v.sets) || 3;
-      DAYS[currentDay].exercises.push([v.name, setsCount, v.reps || "10-12", "Leg_Press"]);
+      DAYS[currentDay].exercises.push([v.name, setsCount, v.reps || "10-12", "Leg_Press", v.category || "legs"]);
       db.workouts[DAYS[currentDay].id].push(Array.from({ length: setsCount }, () => ({ done: false, kg: "", reps: "" })));
       save();
       renderWorkout();
@@ -1114,6 +1163,36 @@ function resetCurrentWorkout(){
   });
 }
 
+/* ---------- Streak (consecutive weeks trained) ---------- */
+function getWeekStart(date){
+  const d = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+  const day = (d.getDay() + 6) % 7; // Monday = 0
+  d.setDate(d.getDate() - day);
+  d.setHours(0, 0, 0, 0);
+  return d.getTime();
+}
+function computeWeekStreak(){
+  const recs = getRecords();
+  if (!recs.length) return 0;
+  const weeks = new Set(recs.map(r => getWeekStart(new Date(r.date))));
+  const weekMs = 7 * 86400000;
+  let cursor = getWeekStart(new Date());
+  if (!weeks.has(cursor)) cursor -= weekMs; // current week in progress shouldn't break the streak
+  let streak = 0;
+  while (weeks.has(cursor)) { streak++; cursor -= weekMs; }
+  return streak;
+}
+function renderStreak(){
+  const streak = computeWeekStreak();
+  const el = document.getElementById("streakBadge");
+  if (streak > 0) {
+    el.style.display = "inline-flex";
+    el.textContent = `🔥 ${streak} ${streak === 1 ? "săptămână" : "săptămâni"} la rând`;
+  } else {
+    el.style.display = "none";
+  }
+}
+
 function renderHistory(){
   const recs = getRecords().slice().reverse();
   const totalWorkouts = recs.length;
@@ -1151,8 +1230,52 @@ function renderHistory(){
       <div style="font-size:12px;line-height:1.5;color:var(--text);">
         ${r.sets.map(s => `• ${s.exercise}: <strong>${s.kg || 0}kg</strong> × ${s.reps || 0}`).join("<br>")}
       </div>
+      <div class="history-actions">
+        <button class="btn ghost small" onclick="editHistoryRecord(${r.id})">✎ Editează</button>
+        <button class="btn ghost small danger-outline" onclick="deleteHistoryRecord(${r.id})">🗑 Șterge</button>
+      </div>
     </div>`;
   }).join("");
+}
+
+function editHistoryRecord(id){
+  const rec = db.records.find(r => r.id === id);
+  if (!rec) return;
+  const fields = [];
+  rec.sets.forEach((s, i) => {
+    fields.push({ id: `s${i}_kg`, placeholder: `${s.exercise} — kg`, value: s.kg, inputmode: "decimal" });
+    fields.push({ id: `s${i}_reps`, placeholder: `${s.exercise} — repetări`, value: s.reps, inputmode: "numeric" });
+  });
+  openModal({
+    title: "Editează sesiunea",
+    desc: `${rec.dayTitle} · ${new Date(rec.date).toLocaleDateString("ro-RO")}`,
+    fields,
+    confirmText: "Salvează",
+    onConfirm: (v) => {
+      rec.sets.forEach((s, i) => {
+        s.kg = v[`s${i}_kg`];
+        s.reps = v[`s${i}_reps`];
+      });
+      save();
+      renderHistory();
+      toast("Sesiune actualizată.");
+    }
+  });
+}
+
+function deleteHistoryRecord(id){
+  openModal({
+    title: "Ștergi sesiunea?",
+    desc: "Această acțiune e permanentă și va actualiza statisticile, streak-ul și scorul de forță.",
+    confirmText: "Șterge",
+    danger: true,
+    onConfirm: () => {
+      db.records = db.records.filter(r => r.id !== id);
+      save();
+      renderHistory();
+      toast("Sesiune ștearsă.");
+    }
+  });
 }
 
 function renderCalendar(){
@@ -1170,7 +1293,6 @@ function renderCalendar(){
   
   const totalDays = lastDay.getDate();
 
-  /* volume-based heatmap instead of a flat "trained" dot */
   const volumePerDay = {};
   getRecords().forEach(r => {
     const rd = new Date(r.date);
@@ -1217,6 +1339,46 @@ function renderCalendar(){
 document.getElementById("calPrev").onclick = () => { calendarDate.setMonth(calendarDate.getMonth() - 1); renderCalendar(); };
 document.getElementById("calNext").onclick = () => { calendarDate.setMonth(calendarDate.getMonth() + 1); renderCalendar(); };
 
+function renderStrengthRadar(){
+  const nameToCategory = {};
+  DAYS.forEach(d => d.exercises.forEach(e => { nameToCategory[e[0]] = getExerciseCategory(e); }));
+
+  const categories = ["legs", "back", "chest", "shoulders", "arms", "core"];
+  const volumeByCat = Object.fromEntries(categories.map(c => [c, 0]));
+
+  getRecords().forEach(r => {
+    r.sets.forEach(s => {
+      const cat = nameToCategory[s.exercise];
+      if (!cat) return;
+      volumeByCat[cat] += (parseFloat(s.kg) || 0) * (parseFloat(s.reps) || 0);
+    });
+  });
+
+  const maxVol = Math.max(1, ...Object.values(volumeByCat));
+  const data = categories.map(c => Math.round((volumeByCat[c] / maxVol) * 100));
+  const labels = categories.map(c => CATEGORY_LABELS[c]);
+
+  if (chartInstances.radar) chartInstances.radar.destroy();
+  const ctx = document.getElementById("strengthRadar").getContext("2d");
+  chartInstances.radar = new Chart(ctx, {
+    type: "radar",
+    data: { labels, datasets: [{ label: "Scor relativ", data, backgroundColor: "rgba(56,189,248,.2)", borderColor: "#38bdf8", pointBackgroundColor: "#38bdf8", borderWidth: 2 }] },
+    options: {
+      responsive: true,
+      scales: {
+        r: {
+          min: 0, max: 100,
+          ticks: { display: false, stepSize: 25 },
+          grid: { color: "rgba(255,255,255,.08)" },
+          angleLines: { color: "rgba(255,255,255,.08)" },
+          pointLabels: { color: "#94a3b8", font: { size: 11, weight: 700 } }
+        }
+      },
+      plugins: { legend: { display: false } }
+    }
+  });
+}
+
 function renderProgress(){
   const recs = getRecords();
   const exMap = {}; // exName -> [{ts, kg}]
@@ -1233,22 +1395,37 @@ function renderProgress(){
   });
 
   const container = document.getElementById("exerciseProgress");
-  const keys = Object.keys(exMap);
 
-  if (!keys.length) {
-    container.innerHTML = `<div class="empty">Completează antrenamente cu greutăți pentru a vedea graficele de evoluție.</div>`;
+  if (!recs.length) {
+    container.innerHTML = `<div class="empty">Completează antrenamente pentru a vedea scorul de forță și graficele de evoluție.</div>`;
     return;
   }
 
-  selectedProgressExercises = selectedProgressExercises.filter(k => keys.includes(k));
-  if (!selectedProgressExercises.length) selectedProgressExercises = [keys[0]];
+  const keys = Object.keys(exMap);
+  let overlaySection = `<div class="empty">Adaugă greutăți la seturi pentru a vedea graficul de evoluție per exercițiu.</div>`;
+
+  if (keys.length) {
+    selectedProgressExercises = selectedProgressExercises.filter(k => keys.includes(k));
+    if (!selectedProgressExercises.length) selectedProgressExercises = [keys[0]];
+
+    overlaySection = `
+      <div class="section">Comparație exerciții</div>
+      <div class="chip-row" id="progressChips">
+        ${keys.map(k => `<button class="chip ${selectedProgressExercises.includes(k) ? "active" : ""}" data-ex="${k}">${k}</button>`).join("")}
+      </div>
+      <div class="chart-card"><canvas id="overlayChart" height="220"></canvas></div>
+    `;
+  }
 
   container.innerHTML = `
-    <div class="chip-row" id="progressChips">
-      ${keys.map(k => `<button class="chip ${selectedProgressExercises.includes(k) ? "active" : ""}" data-ex="${k}">${k}</button>`).join("")}
-    </div>
-    <div class="chart-card"><canvas id="overlayChart" height="220"></canvas></div>
+    <div class="section">Scor de forță pe grupe musculare</div>
+    <div class="chart-card"><canvas id="strengthRadar" height="220"></canvas></div>
+    ${overlaySection}
   `;
+
+  renderStrengthRadar();
+
+  if (!keys.length) return;
 
   document.querySelectorAll("#progressChips .chip").forEach(c => c.onclick = () => {
     const ex = c.dataset.ex;
