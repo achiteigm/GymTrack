@@ -631,7 +631,7 @@
 
   <!-- Progres -->
   <section id="progressScreen" class="screen">
-    <div class="hero"><h2>Evoluție Greutăți</h2><p>Scorul de forță arată volumul relativ pe grupă musculară — 100 e grupa ta cea mai antrenată.</p></div>
+    <div class="hero"><h2>Evoluție Greutăți</h2><p>Scorul de forță arată volumul relativ per grupă musculară — 100 e grupa ta cea mai antrenată.</p></div>
     <div id="exerciseProgress"></div>
   </section>
 </main>
@@ -702,7 +702,6 @@ const CATEGORY_LABELS = { legs: "Picioare", back: "Spate", chest: "Piept", shoul
 const CATEGORY_OPTIONS = Object.keys(CATEGORY_LABELS).map(k => ({ value: k, label: CATEGORY_LABELS[k] }));
 
 function getExerciseCategory(e){
-  // e = [name, sets, reps, folder, category?]
   return e[4] || FOLDER_CATEGORY[e[3]] || "core";
 }
 
@@ -774,9 +773,6 @@ function triggerHaptic(type = "light"){
 
 let timerInterval = null;
 
-/* Timestamp-based timer: survives backgrounding/closing the app because the
-   displayed value is always (now - start), recomputed from a persisted
-   timestamp — not a counter that only advances while JS is actively running. */
 function updateTimerDisplay(){
   let elapsed = 0;
   if (db.activeTimerStart) elapsed = Math.max(0, Math.floor((Date.now() - db.activeTimerStart) / 1000));
@@ -810,11 +806,6 @@ function resetWorkoutTimer(){
   updateTimerDisplay();
 }
 
-// Whenever the app comes back to the foreground (reopened, tab refocused,
-// resumed from background), immediately recompute the elapsed time and make
-// sure the interval is (re)running — the interval itself may have been
-// paused by the OS/browser while backgrounded, but the timestamp math means
-// no time is lost.
 document.addEventListener("visibilitychange", () => {
   if (document.visibilityState === "visible") {
     updateTimerDisplay();
@@ -842,7 +833,6 @@ function toast(msg){
   window._tt = setTimeout(() => t.classList.remove("show"), 2400);
 }
 
-/* ---------- Custom modal (replaces prompt/confirm/alert) ---------- */
 function openModal({title, desc, fields = [], confirmText = "OK", cancelText = "Anulează", danger = false, onConfirm}){
   const backdrop = document.getElementById("modalBackdrop");
   const body = document.getElementById("modalBody");
@@ -890,7 +880,7 @@ function switchScreen(screenId){
   document.getElementById("appHeader").style.display = (currentScreen === "workoutScreen") ? "block" : "none";
 
   if (currentScreen === "homeScreen") renderStreak();
-  if (currentScreen === "workoutScreen") { startWorkoutTimer(); renderWorkout(); }
+  if (currentScreen === "workoutScreen") { renderWorkout(); }
   if (currentScreen === "historyScreen") renderHistory();
   if (currentScreen === "progressScreen") renderProgress();
 }
@@ -1183,10 +1173,9 @@ function resetCurrentWorkout(){
   });
 }
 
-/* ---------- Streak (consecutive weeks trained) ---------- */
 function getWeekStart(date){
   const d = new Date(date.getFullYear(), date.getMonth(), date.getDate());
-  const day = (d.getDay() + 6) % 7; // Monday = 0
+  const day = (d.getDay() + 6) % 7;
   d.setDate(d.getDate() - day);
   d.setHours(0, 0, 0, 0);
   return d.getTime();
@@ -1197,7 +1186,7 @@ function computeWeekStreak(){
   const weeks = new Set(recs.map(r => getWeekStart(new Date(r.date))));
   const weekMs = 7 * 86400000;
   let cursor = getWeekStart(new Date());
-  if (!weeks.has(cursor)) cursor -= weekMs; // current week in progress shouldn't break the streak
+  if (!weeks.has(cursor)) cursor -= weekMs;
   let streak = 0;
   while (weeks.has(cursor)) { streak++; cursor -= weekMs; }
   return streak;
@@ -1401,7 +1390,7 @@ function renderStrengthRadar(){
 
 function renderProgress(){
   const recs = getRecords();
-  const exMap = {}; // exName -> [{ts, kg}]
+  const exMap = {};
 
   recs.forEach(r => {
     const ts = new Date(r.date).getTime();
@@ -1500,7 +1489,6 @@ function updateWelcome(){
   document.getElementById("userNameDisplay").textContent = db.userName || "Sportivule";
 }
 
-// BACKUP & FORCE UPDATE LOGIC
 document.getElementById("exportBtn").onclick = () => {
   const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(db, null, 2));
   const dlAnchor = document.createElement('a');
@@ -1549,12 +1537,13 @@ document.getElementById("forceUpdateBtn").onclick = async () => {
   setTimeout(() => window.location.reload(true), 1000);
 };
 
-// INITIALIZARE
 document.querySelectorAll(".nav-btn").forEach(b => {
   b.onclick = () => switchScreen(b.dataset.screen);
 });
 
+// MODIFICAREA CHEIE: Pornirea timerului are loc strict la apăsarea butonului START de pe ecranul principal
 document.getElementById("heroStartBtn").onclick = () => {
+  startWorkoutTimer();
   switchScreen("workoutScreen");
 };
 
@@ -1583,7 +1572,6 @@ if (window.navigator.standalone === true || window.matchMedia('(display-mode: st
 
 updateWelcome();
 switchScreen("homeScreen");
-if (db.activeTimerStart) runTimerInterval();
 </script>
 </body>
 </html>
