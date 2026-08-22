@@ -631,7 +631,7 @@
 
   <!-- Progres -->
   <section id="progressScreen" class="screen">
-    <div class="hero"><h2>Evoluție Greutăți</h2><p>Scorul de forță arată volumul relativ per grupă musculară — 100 e grupa ta cea mai antrenată.</p></div>
+    <div class="hero"><h2>Evoluție Greutăți</h2><p>Scorul de forță arată volumul relativ pe grupă musculară — 100 e grupa ta cea mai antrenată.</p></div>
     <div id="exerciseProgress"></div>
   </section>
 </main>
@@ -1489,6 +1489,7 @@ function updateWelcome(){
   document.getElementById("userNameDisplay").textContent = db.userName || "Sportivule";
 }
 
+// BACKUP & FORCE UPDATE LOGIC
 document.getElementById("exportBtn").onclick = () => {
   const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(db, null, 2));
   const dlAnchor = document.createElement('a');
@@ -1537,11 +1538,12 @@ document.getElementById("forceUpdateBtn").onclick = async () => {
   setTimeout(() => window.location.reload(true), 1000);
 };
 
+// INITIALIZARE
 document.querySelectorAll(".nav-btn").forEach(b => {
   b.onclick = () => switchScreen(b.dataset.screen);
 });
 
-// MODIFICAREA CHEIE: Pornirea timerului are loc strict la apăsarea butonului START de pe ecranul principal
+// TIMERUL PORNEȘTE STRICT CÂND APESI BUTONUL DE START HERO
 document.getElementById("heroStartBtn").onclick = () => {
   startWorkoutTimer();
   switchScreen("workoutScreen");
@@ -1572,6 +1574,7 @@ if (window.navigator.standalone === true || window.matchMedia('(display-mode: st
 
 updateWelcome();
 switchScreen("homeScreen");
+if (db.activeTimerStart) runTimerInterval();
 </script>
 </body>
 </html>
