@@ -773,35 +773,58 @@ function triggerHaptic(type = "light"){
 }
 
 let timerInterval = null;
-let timerSeconds = 0;
 
-function startTimer(){
+/* Timestamp-based timer: survives backgrounding/closing the app because the
+   displayed value is always (now - start), recomputed from a persisted
+   timestamp — not a counter that only advances while JS is actively running. */
+function updateTimerDisplay(){
+  let elapsed = 0;
+  if (db.activeTimerStart) elapsed = Math.max(0, Math.floor((Date.now() - db.activeTimerStart) / 1000));
+  const mins = Math.floor(elapsed / 60);
+  const secs = elapsed % 60;
+  document.getElementById("timerText").textContent = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+}
+
+function runTimerInterval(){
   if (timerInterval) return;
-  timerInterval = setInterval(() => {
-    timerSeconds++;
-    updateTimerDisplay();
-  }, 1000);
+  updateTimerDisplay();
+  timerInterval = setInterval(updateTimerDisplay, 1000);
 }
 
-function stopTimer(){
-  if (timerInterval) {
-    clearInterval(timerInterval);
-    timerInterval = null;
+function stopTimerInterval(){
+  if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+}
+
+function startWorkoutTimer(){
+  if (!db.activeTimerStart) {
+    db.activeTimerStart = Date.now();
+    save();
   }
+  runTimerInterval();
 }
 
-function resetTimer(){
-  stopTimer();
-  timerSeconds = 0;
+function resetWorkoutTimer(){
+  stopTimerInterval();
+  db.activeTimerStart = null;
+  save();
   updateTimerDisplay();
 }
 
-function updateTimerDisplay(){
-  const mins = Math.floor(timerSeconds / 60);
-  const secs = timerSeconds % 60;
-  const formatted = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
-  document.getElementById("timerText").textContent = formatted;
-}
+// Whenever the app comes back to the foreground (reopened, tab refocused,
+// resumed from background), immediately recompute the elapsed time and make
+// sure the interval is (re)running — the interval itself may have been
+// paused by the OS/browser while backgrounded, but the timestamp math means
+// no time is lost.
+document.addEventListener("visibilitychange", () => {
+  if (document.visibilityState === "visible") {
+    updateTimerDisplay();
+    if (db.activeTimerStart) runTimerInterval();
+  }
+});
+window.addEventListener("pageshow", () => {
+  updateTimerDisplay();
+  if (db.activeTimerStart) runTimerInterval();
+});
 
 function save(){ store.save(db); }
 
@@ -867,7 +890,7 @@ function switchScreen(screenId){
   document.getElementById("appHeader").style.display = (currentScreen === "workoutScreen") ? "block" : "none";
 
   if (currentScreen === "homeScreen") renderStreak();
-  if (currentScreen === "workoutScreen") renderWorkout();
+  if (currentScreen === "workoutScreen") { startWorkoutTimer(); renderWorkout(); }
   if (currentScreen === "historyScreen") renderHistory();
   if (currentScreen === "progressScreen") renderProgress();
 }
@@ -904,8 +927,6 @@ function updateProgress(){
   const pct = totalSets ? Math.round((doneSets / totalSets) * 100) : 0;
   document.getElementById("fill").style.width = pct + "%";
   document.getElementById("progressText").textContent = pct + "%";
-  
-  if (doneSets > 0) startTimer();
 }
 
 function adjustSet(e, s, type, dir){
@@ -1140,7 +1161,7 @@ function finishWorkout(){
 
   db.workouts[day.id] = day.exercises.map(e => Array.from({ length: e[1] }, () => ({ done: false, kg: "", reps: "" })));
   save();
-  resetTimer();
+  resetWorkoutTimer();
   triggerHaptic("finish");
   toast("Antrenament salvat în istoric! Bravo!");
   switchScreen("historyScreen");
@@ -1156,7 +1177,6 @@ function resetCurrentWorkout(){
       const day = DAYS[currentDay];
       db.workouts[day.id] = day.exercises.map(e => Array.from({ length: e[1] }, () => ({ done: false, kg: "", reps: "" })));
       save();
-      resetTimer();
       renderWorkout();
       toast("Sesiunea a fost resetată.");
     }
@@ -1563,6 +1583,7 @@ if (window.navigator.standalone === true || window.matchMedia('(display-mode: st
 
 updateWelcome();
 switchScreen("homeScreen");
+if (db.activeTimerStart) runTimerInterval();
 </script>
 </body>
 </html>
