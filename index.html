@@ -607,6 +607,9 @@ let animationInterval = null;
 let chartInstances = {};
 let calendarDate = new Date();
 
+// Stare pentru modificările manuale ale utilizatorului (per exercițiu și set)
+const customModifiedSets = {};
+
 // Stare Cronometru
 let timerInterval = null;
 let timerSeconds = 0;
@@ -744,9 +747,43 @@ function renderWorkout(){
     updateProgress();
   });
 
+  // Logica de completare automată pentru campurile kg și reps
   document.querySelectorAll(".field").forEach(inp => inp.oninput = () => {
     const e = +inp.dataset.e, s = +inp.dataset.s;
-    w[e][s][inp.classList.contains("kg") ? "kg" : "reps"] = inp.value;
+    const type = inp.classList.contains("kg") ? "kg" : "reps";
+    const val = inp.value;
+
+    // Actualizăm starea în modelul de date
+    w[e][s][type] = val;
+
+    // Cheie unică pentru exercițiul și tipul curent (kg sau reps)
+    const customKey = `${currentDay}_${e}_${type}`;
+    customModifiedSets[customKey] ||= {};
+
+    if (s === 0) {
+      // Dacă modificăm Primul Set (Set 1)
+      for (let i = 1; i < w[e].length; i++) {
+        // Actualizăm celelalte seturi DOAR dacă nu au fost modificate manual de către utilizator
+        if (!customModifiedSets[customKey][i]) {
+          w[e][i][type] = val;
+          const targetInput = document.querySelector(`.field.${type}[data-e="${e}"][data-s="${i}"]`);
+          if (targetInput) targetInput.value = val;
+        }
+      }
+    } else {
+      // Dacă modificăm Setul 2, 3 sau 4
+      if (val === "") {
+        // Resetăm starea manuală dacă câmpul este golit și preluăm valoarea din Set 1
+        customModifiedSets[customKey][s] = false;
+        const set1Val = w[e][0][type];
+        w[e][s][type] = set1Val;
+        inp.value = set1Val;
+      } else {
+        // Marcăm că acest set are o valoare personalizată introdusă manual
+        customModifiedSets[customKey][s] = true;
+      }
+    }
+
     save();
   });
 
@@ -877,48 +914,117 @@ function renderCalendar(){
   
   const monthNames = ["Ianuarie", "Februarie", "Martie", "Aprilie", "Mai", "Iunie", "Iulie", "August", "Septembrie", "Octombrie", "Noiembrie", "Decembrie"];
   document.getElementById("calMonthTitle").textContent = `${monthNames[month]} ${year}`;
-
+  
+  const firstDay = new Date(year, month, 1);
+  const lastDay = new Date(year, month + 1, 0);
+  
+  let startDay = firstDay.getDay() - 1;
+  if (startDay === -1) startDay = 6;
+  
+  const daysInMonth = lastDay.getDate();
+  const today = new Date();
+  
   const sessions = db.sessions || [];
-  const trainedDaysMap = {};
-  sessions.forEach(s => {
-    const d = new Date(s.time);
-    const key = `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
-    trainedDaysMap[key] = true;
-  });
+  const trainedDays = new Set(
+    sessions.map(s => {
+      const d = new Date(s.time);
+      return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+    })
+  );
 
-  const firstDayIndex = new Date(year, month, 1).getDay();
-  const daysInMonth = new Date(year, month + 1, 0).getDate();
-  const adjustedFirstDay = (firstDayIndex === 0 ? 6 : firstDayIndex - 1);
+  let html = ['Lu','Ma','Mi','Jo','Vi','Sâ','Du'].map(d => `<div class="cal-day-name">${d}</div>`).join("");
 
-  const grid = document.getElementById("calGrid");
-  let html = `
-    <div class="cal-day-name">Lu</div>
-    <div class="cal-day-name">Ma</div>
-    <div class="cal-day-name">Mi</div>
-    <div class="cal-day-name">Jo</div>
-    <div class="cal-day-name">Vi</div>
-    <div class="cal-day-name">Sâ</div>
-    <div class="cal-day-name">Du</div>
-  `;
-
-  for (let i = 0; i < adjustedFirstDay; i++) {
+  for (let i = 0; i < startDay; i++) {
     html += `<div class="cal-cell empty"></div>`;
   }
 
-  const today = new Date();
   for (let day = 1; day <= daysInMonth; day++) {
     const isToday = today.getFullYear() === year && today.getMonth() === month && today.getDate() === day;
-    const isTrained = trainedDaysMap[`${year}-${month}-${day}`];
-    
+    const key = `${year}-${month}-${day}`;
+    const hasTrained = trainedDays.has(key);
+
     let classes = "cal-cell";
     if (isToday) classes += " today";
-    if (isTrained) classes += " trained";
+    if (hasTrained) classes += " trained";
 
-    html += `<div class="${classes}">${day} ${isTrained ? '<div class="cal-dot"></div>' : ''}</div>`;
+    html += `<div class="${classes}">${day}${hasTrained ? '<div class="cal-dot"></div>' : ''}</div>`;
   }
 
-  grid.innerHTML = html;
+  document.getElementById("calGrid").innerHTML = html;
 }
+
+function renderProgress(){
+  const records = getRecords();
+  const exMap = {};
+
+  records.forEach(r => {
+    if (!exMap[r.exercise]) exMap[r.exercise] = [];
+    const maxKg = Math.max(...r.sets.map(s => parseFloat(s.kg) || 0));
+    if (maxKg > 0) {
+      exMap[r.exercise].push({
+        date: new Date(r.time).toLocaleDateString("ro-RO", {day: "2-digit", month: "2-digit"}),
+        kg: maxKg
+      });
+    }
+  });
+
+  const container = document.getElementById("exerciseProgress");
+  const exercises = Object.keys(exMap);
+
+  if (!exercises.length) {
+    container.innerHTML = `<div class="empty">Efectuează și salvează antrenamente pentru a vedea graficele de progres.</div>`;
+    return;
+  }
+
+  container.innerHTML = exercises.map((ex, i) => `
+    <div class="chart-card">
+      <strong style="color:#fff;font-size:15px;display:block;margin-bottom:12px">${ex}</strong>
+      <canvas id="chart-${i}"></canvas>
+    </div>
+  `).join("");
+
+  exercises.forEach((ex, i) => {
+    const data = exMap[ex].slice(-10);
+    const ctx = document.getElementById(`chart-${i}`).getContext('2d');
+    
+    if (chartInstances[i]) chartInstances[i].destroy();
+
+    chartInstances[i] = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: data.map(d => d.date),
+        datasets: [{
+          label: 'Max KG',
+          data: data.map(d => d.kg),
+          borderColor: '#38bdf8',
+          backgroundColor: 'rgba(56, 189, 248, 0.1)',
+          fill: true,
+          tension: 0.3,
+          pointBackgroundColor: '#38bdf8',
+          pointRadius: 4
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#94a3b8' } },
+          y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#94a3b8' } }
+        }
+      }
+    });
+  });
+}
+
+// Event Listeners pentru Navigație și Butoane
+document.querySelectorAll(".nav-btn").forEach(btn => {
+  btn.onclick = () => switchScreen(btn.dataset.screen);
+});
+
+document.getElementById("heroStartBtn").onclick = () => {
+  startTimer();
+  switchScreen("workoutScreen");
+};
 
 document.getElementById("calPrev").onclick = () => {
   calendarDate.setMonth(calendarDate.getMonth() - 1);
@@ -930,92 +1036,36 @@ document.getElementById("calNext").onclick = () => {
   renderCalendar();
 };
 
-function renderProgress(){
-  const groups = {};
-  (db.records || []).forEach(r => { (groups[r.exercise] ||= []).push(r); });
-  
-  const container = document.getElementById("exerciseProgress");
-  container.innerHTML = "";
-  
-  Object.keys(chartInstances).forEach(k => chartInstances[k].destroy());
-  chartInstances = {};
+document.getElementById("finishBtn").onclick = finishWorkout;
+document.getElementById("addExBtn").onclick = addExercise;
+document.getElementById("resetBtn").onclick = resetDay;
 
-  if (!Object.keys(groups).length) {
-    container.innerHTML = `<div class="empty">Completează câteva sesiuni pentru a vedea progresul.</div>`;
-    return;
-  }
-
-  Object.entries(groups).forEach(([name, arr], idx) => {
-    const sorted = arr.sort((a, b) => a.time - b.time);
-    const labels = sorted.map(r => new Date(r.time).toLocaleDateString("ro-RO", {day: "2-digit", month: "2-digit"}));
-    const dataPoints = sorted.map(r => {
-      return r.sets.map(s => parseFloat(String(s.kg).replace(",", ".")) || 0).reduce((a, b) => Math.max(a, b), 0);
-    });
-
-    const card = document.createElement("div");
-    card.className = "chart-card";
-    const canvasId = `chart-${idx}`;
-    card.innerHTML = `
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-        <strong style="font-size:15px;color:#fff">${name}</strong>
-        <span style="color:var(--accent);font-weight:700;font-size:12px;background:rgba(56,189,248,0.1);padding:4px 8px;border-radius:6px">Max: ${Math.max(...dataPoints)} kg</span>
-      </div>
-      <canvas id="${canvasId}"></canvas>
-    `;
-    container.appendChild(card);
-
-    const ctx = document.getElementById(canvasId).getContext("2d");
-    chartInstances[canvasId] = new Chart(ctx, {
-      type: "line",
-      data: {
-        labels: labels,
-        datasets: [{
-          label: "Kg Maxim",
-          data: dataPoints,
-          borderColor: "#38bdf8",
-          backgroundColor: "rgba(56, 189, 248, 0.08)",
-          borderWidth: 2,
-          pointBackgroundColor: "#38bdf8",
-          pointRadius: 4,
-          fill: true,
-          tension: 0.3
-        }]
-      },
-      options: {
-        responsive: true,
-        plugins: { legend: { display: false } },
-        scales: {
-          x: { ticks: { color: "#94a3b8", font: { size: 10 } }, grid: { display: false } },
-          y: { ticks: { color: "#94a3b8", font: { size: 10 } }, grid: { color: "rgba(255,255,255,0.05)" } }
-        }
-      }
-    });
-  });
-}
-
-document.getElementById("exportBtn").onclick = () => {
-  const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(db, null, 2));
-  const dlAnchor = document.createElement("a");
-  dlAnchor.setAttribute("href", dataStr);
-  dlAnchor.setAttribute("download", `GymTrack_Backup_${new Date().toISOString().slice(0,10)}.json`);
-  document.body.appendChild(dlAnchor);
-  dlAnchor.click();
-  dlAnchor.remove();
-  toast("Backup descărcat!");
+document.getElementById("hideInstall").onclick = () => {
+  document.getElementById("installCard").style.display = "none";
 };
 
+// Export Backup
+document.getElementById("exportBtn").onclick = () => {
+  const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(db));
+  const dlAnchorElem = document.createElement('a');
+  dlAnchorElem.setAttribute("href", dataStr);
+  dlAnchorElem.setAttribute("download", `GymTrack_Backup_${new Date().toISOString().slice(0,10)}.json`);
+  dlAnchorElem.click();
+};
+
+// Import Backup
 document.getElementById("importBtn").onclick = () => document.getElementById("importInput").click();
 document.getElementById("importInput").onchange = (e) => {
   const file = e.target.files[0];
   if (!file) return;
   const reader = new FileReader();
-  reader.onload = (evt) => {
+  reader.onload = (event) => {
     try {
-      db = JSON.parse(evt.target.result);
+      db = JSON.parse(event.target.result);
       DAYS = db.days || DEFAULT_DAYS;
-      save();
-      switchScreen("homeScreen");
-      toast("Date restaurate cu succes!");
+      store.save(db);
+      toast("Datele au fost importate!");
+      renderHistory();
     } catch {
       toast("Fișier invalid!");
     }
@@ -1023,29 +1073,8 @@ document.getElementById("importInput").onchange = (e) => {
   reader.readAsText(file);
 };
 
-// Eveniment Buton Hero Start
-document.getElementById("heroStartBtn").onclick = () => {
-  startTimer();
-  switchScreen("workoutScreen");
-};
-
-document.querySelectorAll(".nav-btn").forEach(b => b.onclick = () => {
-  switchScreen(b.dataset.screen);
-});
-
-document.getElementById("finishBtn").onclick = finishWorkout;
-document.getElementById("addExBtn").onclick = addExercise;
-document.getElementById("resetBtn").onclick = resetDay;
-document.getElementById("hideInstall").onclick = () => {
-  document.getElementById("installCard").style.display = "none";
-  localStorage.setItem("gymtrack:hideInstall", "1");
-};
-
-if (localStorage.getItem("gymtrack:hideInstall") === "1") {
-  document.getElementById("installCard").style.display = "none";
-}
-
-if ("serviceWorker" in navigator) navigator.serviceWorker.register("./sw.js").catch(() => {});
+// Inițializare
+switchScreen("homeScreen");
 </script>
 </body>
 </html>
