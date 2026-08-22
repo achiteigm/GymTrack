@@ -104,25 +104,35 @@
       text-align:center;
       padding:20px;
     }
-    .home-logo{
-      font-size:14px;
-      font-weight:800;
-      letter-spacing:0.25em;
-      text-transform:uppercase;
+    .welcome-badge{
+      display:inline-block;
+      padding:6px 16px;
+      border-radius:99px;
+      background:rgba(56, 189, 248, 0.1);
+      border:1px solid rgba(56, 189, 248, 0.25);
       color:var(--accent);
-      margin-bottom:8px;
+      font-size:12px;
+      font-weight:800;
+      letter-spacing:0.12em;
+      text-transform:uppercase;
+      margin-bottom:12px;
+      box-shadow:0 0 15px rgba(56, 189, 248, 0.15);
     }
-    .home-title{
+    .welcome-title{
       font-size:32px;
       font-weight:900;
       margin:0 0 8px;
       letter-spacing:-0.03em;
+      background:linear-gradient(135deg, #ffffff 30%, var(--accent2));
+      -webkit-background-clip:text;
+      -webkit-text-fill-color:transparent;
     }
     .home-sub{
       color:var(--muted);
       font-size:15px;
       max-width:320px;
-      margin:0 0 40px;
+      margin:0 0 45px;
+      line-height:1.4;
     }
     .btn-start-hero{
       position:relative;
@@ -427,7 +437,7 @@
     <div>
       <p class="eyebrow" id="eyebrow">GymTrack</p>
       <h1 id="title">Picioare + abdomen</h1>
-      <p class="sub" id="subtitle">Antrenament 1</p>
+      <p class="sub" id="subtitle">Antrenament</p>
     </div>
     <div class="timer-badge" id="workoutTimer">
       <span class="timer-dot"></span>
@@ -441,9 +451,9 @@
   <!-- Pagina de Start (Home) -->
   <section id="homeScreen" class="screen active">
     <div class="home-screen">
-      <div class="home-logo">GymTrack Pro</div>
-      <h2 class="home-title" id="homeDayLabel">Ziua 1</h2>
-      <p class="home-sub" id="homeDayTitle">Picioare + abdomen</p>
+      <div class="welcome-badge">GymTrack Pro</div>
+      <h2 class="welcome-title">Bine ai venit, Emilia!</h2>
+      <p class="home-sub">Ești gata pentru o nouă sesiune? Apasă Start pentru a-ți alege ziua de antrenament.</p>
       
       <button class="btn-start-hero" id="heroStartBtn">
         <svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
@@ -642,12 +652,6 @@ function toast(msg){
   window._tt = setTimeout(() => t.classList.remove("show"), 1800);
 }
 
-function updateHomeScreen(){
-  const day = DAYS[currentDay];
-  document.getElementById("homeDayLabel").textContent = day.label;
-  document.getElementById("homeDayTitle").textContent = day.title;
-}
-
 function switchScreen(screenId){
   currentScreen = screenId;
   document.querySelectorAll(".nav-btn").forEach(x => {
@@ -660,7 +664,6 @@ function switchScreen(screenId){
   // Header-ul apare doar în ecranul de antrenament
   document.getElementById("appHeader").style.display = (currentScreen === "workoutScreen") ? "block" : "none";
 
-  if (currentScreen === "homeScreen") updateHomeScreen();
   if (currentScreen === "workoutScreen") renderWorkout();
   if (currentScreen === "historyScreen") renderHistory();
   if (currentScreen === "progressScreen") renderProgress();
@@ -685,7 +688,6 @@ function renderWorkout(){
     currentDay = +b.dataset.day;
     renderWorkout();
     updateProgress();
-    updateHomeScreen();
   });
 
   document.getElementById("workoutList").innerHTML = day.exercises.map((e, ei) => {
@@ -1044,9 +1046,6 @@ if (localStorage.getItem("gymtrack:hideInstall") === "1") {
 }
 
 if ("serviceWorker" in navigator) navigator.serviceWorker.register("./sw.js").catch(() => {});
-
-// Initializare
-updateHomeScreen();
 </script>
 </body>
 </html>
