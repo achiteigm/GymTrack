@@ -545,7 +545,7 @@
       <h1 id="title">Acasă</h1>
       <p class="sub" id="subtitle">Sesiune curentă</p>
     </div>
-    <div class="timer-container">
+    <div class="timer-container" id="headerTimerContainer">
       <div class="timer-badge" id="workoutTimer">
         <span class="timer-dot"></span>
         <span id="timerText">00:00</span>
@@ -914,24 +914,29 @@ function updateHeaderInfo(){
   const eyebrowEl = document.getElementById("eyebrow");
   const titleEl = document.getElementById("title");
   const progressContainer = document.getElementById("headerProgressContainer");
+  const timerContainer = document.getElementById("headerTimerContainer");
 
   if(currentScreen === "workoutScreen"){
     const day = DAYS[currentDay];
     eyebrowEl.textContent = day.label;
     titleEl.textContent = day.title;
     progressContainer.style.display = "flex";
+    timerContainer.style.display = "flex";
   } else if(currentScreen === "homeScreen"){
     eyebrowEl.textContent = "GymTrack Pro";
     titleEl.textContent = "Acasă";
     progressContainer.style.display = "none";
+    timerContainer.style.display = "none";
   } else if(currentScreen === "historyScreen"){
     eyebrowEl.textContent = "GymTrack Pro";
     titleEl.textContent = "Istoric";
     progressContainer.style.display = "none";
+    timerContainer.style.display = "flex";
   } else if(currentScreen === "progressScreen"){
     eyebrowEl.textContent = "GymTrack Pro";
     titleEl.textContent = "Progres";
     progressContainer.style.display = "none";
+    timerContainer.style.display = "flex";
   }
 }
 
