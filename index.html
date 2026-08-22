@@ -23,6 +23,8 @@
       --accent2:#7dd3fc;
       --done:#22c55e; 
       --done-glow:rgba(34, 197, 94, 0.35);
+      --gold:#f59e0b;
+      --gold-glow:rgba(245, 158, 11, 0.3);
       --danger:#ff5252; 
       --radius-lg:22px;
       --radius-md:14px;
@@ -94,7 +96,7 @@
     main{padding:12px 16px 20px;max-width:760px;margin:0 auto}
     .screen{display:none}.screen.active{display:block}
     
-    /* Pagina de Start (Home) */
+    /* Home */
     .home-screen{
       display:flex;
       flex-direction:column;
@@ -256,6 +258,7 @@
       border:1px solid var(--border);
       border-radius:var(--radius-md);
       padding:10px 8px;
+      position:relative;
     }
     .set-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
     .set-num{font-size:10px;color:var(--muted);font-weight:800;letter-spacing:0.05em}
@@ -280,6 +283,25 @@
       box-shadow:0 0 12px var(--done-glow);
     }
     @keyframes pop { 0% { transform: scale(1); } 50% { transform: scale(1.25); } 100% { transform: scale(1.1); } }
+
+    /* Stil Insignă Subtilă PR */
+    .pr-badge {
+      display: none;
+      align-items: center;
+      gap: 2px;
+      background: rgba(245, 158, 11, 0.15);
+      border: 1px solid rgba(245, 158, 11, 0.4);
+      color: var(--gold);
+      font-size: 9px;
+      font-weight: 900;
+      padding: 1px 5px;
+      border-radius: 4px;
+      letter-spacing: 0.05em;
+      box-shadow: 0 0 8px var(--gold-glow);
+      animation: fadeIn 0.3s ease;
+    }
+    .pr-badge.visible { display: inline-flex; }
+    @keyframes fadeIn { from { opacity: 0; transform: scale(0.8); } to { opacity: 1; transform: scale(1); } }
     
     .input-wrapper{position:relative;margin-bottom:6px}
     .input-wrapper:last-child{margin-bottom:0}
@@ -418,6 +440,7 @@
       transition:all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
       z-index:40;
       box-shadow:0 10px 25px rgba(0,0,0,0.5);
+      text-align:center;
     }
     .toast.show{opacity:1;transform:translate(-50%,0)}
     
@@ -448,7 +471,7 @@
 </header>
 
 <main>
-  <!-- Pagina de Start (Home) -->
+  <!-- Home -->
   <section id="homeScreen" class="screen active">
     <div class="home-screen">
       <div class="welcome-badge">GymTrack Pro</div>
@@ -462,7 +485,7 @@
     </div>
   </section>
 
-  <!-- Pagina de Antrenament -->
+  <!-- Antrenament -->
   <section id="workoutScreen" class="screen">
     <div class="install" id="installCard">
       <strong>Instalează GymTrack pe iPhone</strong>
@@ -478,7 +501,7 @@
     </div>
   </section>
 
-  <!-- Pagina de Istoric -->
+  <!-- Istoric -->
   <section id="historyScreen" class="screen">
     <div class="hero"><h2>Istoric Sesiuni</h2><p>Evidența activității tale și sincronizarea datelor.</p></div>
     <div class="stats-grid" id="stats"></div>
@@ -501,7 +524,7 @@
     <div id="historyList"></div>
   </section>
 
-  <!-- Pagina de Progres -->
+  <!-- Progres -->
   <section id="progressScreen" class="screen">
     <div class="hero"><h2>Evoluție Greutăți</h2><p>Graficul progresului pe fiecare exercițiu.</p></div>
     <div id="exerciseProgress"></div>
@@ -607,8 +630,18 @@ let animationInterval = null;
 let chartInstances = {};
 let calendarDate = new Date();
 
-// Stare pentru modificările manuale ale utilizatorului (per exercițiu și set)
 const customModifiedSets = {};
+
+// Sistem Haptic
+function triggerHaptic(type = "light"){
+  if (!navigator.vibrate) return;
+  switch (type) {
+    case "light": navigator.vibrate(30); break;
+    case "pr": navigator.vibrate([40, 60, 80]); break;
+    case "finish": navigator.vibrate([100, 50, 100, 50, 200]); break;
+    case "warn": navigator.vibrate([20, 100, 50]); break;
+  }
+}
 
 // Stare Cronometru
 let timerInterval = null;
@@ -647,12 +680,13 @@ function getWorkout(day){
   return db.workouts[DAYS[day].id] ||= DAYS[day].exercises.map(e => Array.from({length: e[1]}, () => ({done: false, kg: "", reps: ""})));
 }
 function getRecords(){ db.records ||= []; return db.records; }
+
 function toast(msg){
   const t = document.getElementById("toast");
-  t.textContent = msg;
+  t.innerHTML = msg;
   t.classList.add("show");
   clearTimeout(window._tt);
-  window._tt = setTimeout(() => t.classList.remove("show"), 1800);
+  window._tt = setTimeout(() => t.classList.remove("show"), 2200);
 }
 
 function switchScreen(screenId){
@@ -664,12 +698,24 @@ function switchScreen(screenId){
     x.classList.toggle("active", x.id === currentScreen);
   });
   
-  // Header-ul apare doar în ecranul de antrenament
   document.getElementById("appHeader").style.display = (currentScreen === "workoutScreen") ? "block" : "none";
 
   if (currentScreen === "workoutScreen") renderWorkout();
   if (currentScreen === "historyScreen") renderHistory();
   if (currentScreen === "progressScreen") renderProgress();
+}
+
+// Obține maximul istoric absolut pentru un exercițiu
+function getMaxWeightForEx(exName){
+  const records = getRecords().filter(r => r.exercise === exName);
+  let max = 0;
+  records.forEach(r => {
+    r.sets.forEach(s => {
+      const val = parseFloat(s.kg) || 0;
+      if (val > max) max = val;
+    });
+  });
+  return max;
 }
 
 function renderWorkout(){
@@ -698,6 +744,7 @@ function renderWorkout(){
     const sets = w[ei] || [];
     const done = sets.filter(s => s.done).length;
     const last = getLast(day.id, ei);
+    const maxHistorical = getMaxWeightForEx(e[0]);
     const initialSrc = `./exercises/${folder}/0.jpg`;
 
     return `<article class="card ${done === e[1] ? "complete" : ""}">
@@ -718,10 +765,15 @@ function renderWorkout(){
         </div>
       </div>
       <div class="set-grid">
-        ${sets.map((s, si) => `
+        ${sets.map((s, si) => {
+          const currentKg = parseFloat(s.kg) || 0;
+          const isPR = maxHistorical > 0 && currentKg > maxHistorical;
+
+          return `
           <div class="set-box">
             <div class="set-top">
               <span class="set-num">SET ${si + 1}</span>
+              <span class="pr-badge ${isPR ? "visible" : ""}" id="pr-badge-${ei}-${si}">★ PR</span>
               <button class="check ${s.done ? "on" : ""}" data-e="${ei}" data-s="${si}">${s.done ? "✓" : ""}</button>
             </div>
             <div class="input-wrapper">
@@ -733,37 +785,49 @@ function renderWorkout(){
               <span class="field-unit">rep</span>
             </div>
           </div>
-        `).join("")}
+          `;
+        }).join("")}
       </div>
     </article>`;
   }).join("");
 
   document.querySelectorAll(".check").forEach(b => b.onclick = () => {
     const e = +b.dataset.e, s = +b.dataset.s;
-    w[e][s].done = !w[e][s].done;
-    if (w[e][s].done && navigator.vibrate) navigator.vibrate(40);
+    const exName = day.exercises[e][0];
+    const isNowDone = !w[e][s].done;
+    w[e][s].done = isNowDone;
+    
+    if (isNowDone) {
+      const maxHist = getMaxWeightForEx(exName);
+      const currentKg = parseFloat(w[e][s].kg) || 0;
+      
+      if (maxHist > 0 && currentKg > maxHist) {
+        triggerHaptic("pr");
+        toast(`Bravo! Record personal la <strong>${exName}</strong>: ${currentKg} kg!`);
+      } else {
+        triggerHaptic("light");
+      }
+    } else {
+      triggerHaptic("light");
+    }
+
     save();
     renderWorkout();
     updateProgress();
   });
 
-  // Logica de completare automată pentru campurile kg și reps
   document.querySelectorAll(".field").forEach(inp => inp.oninput = () => {
     const e = +inp.dataset.e, s = +inp.dataset.s;
     const type = inp.classList.contains("kg") ? "kg" : "reps";
     const val = inp.value;
 
-    // Actualizăm starea în modelul de date
     w[e][s][type] = val;
 
-    // Cheie unică pentru exercițiul și tipul curent (kg sau reps)
     const customKey = `${currentDay}_${e}_${type}`;
     customModifiedSets[customKey] ||= {};
 
     if (s === 0) {
-      // Dacă modificăm Primul Set (Set 1)
       for (let i = 1; i < w[e].length; i++) {
-        // Actualizăm celelalte seturi DOAR dacă nu au fost modificate manual de către utilizator
         if (!customModifiedSets[customKey][i]) {
           w[e][i][type] = val;
           const targetInput = document.querySelector(`.field.${type}[data-e="${e}"][data-s="${i}"]`);
@@ -771,16 +835,28 @@ function renderWorkout(){
         }
       }
     } else {
-      // Dacă modificăm Setul 2, 3 sau 4
       if (val === "") {
-        // Resetăm starea manuală dacă câmpul este golit și preluăm valoarea din Set 1
         customModifiedSets[customKey][s] = false;
         const set1Val = w[e][0][type];
         w[e][s][type] = set1Val;
         inp.value = set1Val;
       } else {
-        // Marcăm că acest set are o valoare personalizată introdusă manual
         customModifiedSets[customKey][s] = true;
+      }
+    }
+
+    // Actualizare live starea insignei PR
+    const exName = day.exercises[e][0];
+    const maxHist = getMaxWeightForEx(exName);
+    for (let i = 0; i < w[e].length; i++) {
+      const currentKg = parseFloat(w[e][i].kg) || 0;
+      const badge = document.getElementById(`pr-badge-${e}-${i}`);
+      if (badge) {
+        if (maxHist > 0 && currentKg > maxHist) {
+          badge.classList.add("visible");
+        } else {
+          badge.classList.remove("visible");
+        }
       }
     }
 
@@ -805,6 +881,7 @@ function addExercise(){
 }
 
 function deleteExercise(index){
+  triggerHaptic("warn");
   if (confirm("Sigur vrei să ștergi acest exercițiu din rutina zilei?")){
     DAYS[currentDay].exercises.splice(index, 1);
     db.workouts[DAYS[currentDay].id].splice(index, 1);
@@ -852,8 +929,14 @@ function getLast(dayId, ei){
 function finishWorkout(){
   const day = DAYS[currentDay], w = getWorkout(currentDay);
   const flat = w.flat();
-  if (!flat.some(s => s.done)){ toast("Bifează cel puțin un set."); return; }
+  if (!flat.some(s => s.done)){ 
+    triggerHaptic("warn");
+    toast("Bifează cel puțin un set."); 
+    return; 
+  }
   
+  triggerHaptic("finish");
+
   day.exercises.forEach((e, ei) => {
     db.records.push({ time: Date.now(), dayId: day.id, exerciseIndex: ei, exercise: e[0], sets: w[ei].map(x => ({...x})) });
   });
@@ -871,11 +954,12 @@ function finishWorkout(){
   
   save();
   resetTimer();
-  toast("Antrenamentul a fost salvat!");
+  toast("🎉 Antrenamentul a fost salvat!");
   switchScreen("historyScreen");
 }
 
 function resetDay(){
+  triggerHaptic("warn");
   db.workouts[DAYS[currentDay].id] = DAYS[currentDay].exercises.map(e => Array.from({length: e[1]}, () => ({done: false, kg: "", reps: ""})));
   save();
   resetTimer();
@@ -1016,36 +1100,41 @@ function renderProgress(){
   });
 }
 
-// Event Listeners pentru Navigație și Butoane
 document.querySelectorAll(".nav-btn").forEach(btn => {
-  btn.onclick = () => switchScreen(btn.dataset.screen);
+  btn.onclick = () => {
+    triggerHaptic("light");
+    switchScreen(btn.dataset.screen);
+  };
 });
 
 document.getElementById("heroStartBtn").onclick = () => {
+  triggerHaptic("light");
   startTimer();
   switchScreen("workoutScreen");
 };
 
 document.getElementById("calPrev").onclick = () => {
+  triggerHaptic("light");
   calendarDate.setMonth(calendarDate.getMonth() - 1);
   renderCalendar();
 };
 
 document.getElementById("calNext").onclick = () => {
+  triggerHaptic("light");
   calendarDate.setMonth(calendarDate.getMonth() + 1);
   renderCalendar();
 };
 
 document.getElementById("finishBtn").onclick = finishWorkout;
-document.getElementById("addExBtn").onclick = addExercise;
+document.getElementById("addExBtn").onclick = () => { triggerHaptic("light"); addExercise(); };
 document.getElementById("resetBtn").onclick = resetDay;
 
 document.getElementById("hideInstall").onclick = () => {
   document.getElementById("installCard").style.display = "none";
 };
 
-// Export Backup
 document.getElementById("exportBtn").onclick = () => {
+  triggerHaptic("light");
   const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(db));
   const dlAnchorElem = document.createElement('a');
   dlAnchorElem.setAttribute("href", dataStr);
@@ -1053,8 +1142,7 @@ document.getElementById("exportBtn").onclick = () => {
   dlAnchorElem.click();
 };
 
-// Import Backup
-document.getElementById("importBtn").onclick = () => document.getElementById("importInput").click();
+document.getElementById("importBtn").onclick = () => { triggerHaptic("light"); document.getElementById("importInput").click(); };
 document.getElementById("importInput").onchange = (e) => {
   const file = e.target.files[0];
   if (!file) return;
@@ -1073,7 +1161,6 @@ document.getElementById("importInput").onchange = (e) => {
   reader.readAsText(file);
 };
 
-// Inițializare
 switchScreen("homeScreen");
 </script>
 </body>
