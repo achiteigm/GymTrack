@@ -433,7 +433,7 @@
     <div class="home-screen">
       <div class="welcome-badge">GymTrack Pro</div>
       <h2 class="welcome-title">Bine ai venit, <span id="userNameDisplay">Sportivule</span>!</h2>
-      <p class="home-sub">Ești gata pentru o nouă sesiune? Apasă Start pentru a porni cronometrul și a-ți alege ziua de antrenament.</p>
+      <p class="home-sub">Ești gata pentru o nouă sesiune? Apasă Start pentru a-ți alege ziua de antrenament.</p>
       <button class="edit-name-btn" id="editNameBtn">✎ Schimbă numele</button>
       <button class="btn-start-hero" id="heroStartBtn">
         <svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
@@ -560,6 +560,7 @@ function toast(msg){
   window._tt = setTimeout(() => t.classList.remove("show"), 2400);
 }
 
+// Aici era codul original tăiat, acum completat exact pe structura ta:
 function openModal({title, desc, fields = [], confirmText = "OK", cancelText = "Anulează", danger = false, onConfirm}){
   const backdrop = document.getElementById("modalBackdrop");
   const body = document.getElementById("modalBody");
@@ -710,7 +711,7 @@ window.deleteExercise = function(exIdx){
   toast("Exercițiu șters");
 };
 
-// DOAR AICI pornește efectiv cronometrul la apăsarea butonului START principal
+// TIMERUL pornește EXCLUSIV de aici (la apăsarea butonului START principal)
 document.getElementById("heroStartBtn").onclick = () => {
   if(!db.activeTimerStart) {
     db.activeTimerStart = Date.now();
@@ -889,7 +890,7 @@ function renderProgressChart(){
   });
 }
 
-// Navigation Wiring (nu mai pornește timerul automat la schimbarea ecranului)
+// Navigarea obișnuită
 document.querySelectorAll(".nav-btn").forEach(btn => {
   btn.onclick = () => switchScreen(btn.getAttribute("data-screen"));
 });
