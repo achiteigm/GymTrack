@@ -9,119 +9,61 @@
   <meta name="apple-mobile-web-app-title" content="GymTrack">
   <link rel="manifest" href="manifest.webmanifest">
   <title>GymTrack Pro</title>
-
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     :root{
-      --bg:#0b0e14;
-      --surface:rgba(23, 29, 40, 0.75);
-      --surface2:#1e2635;
+      --bg:#0b0e14; 
+      --surface:rgba(23, 29, 40, 0.75); 
+      --surface2:#1e2635; 
       --border:rgba(255, 255, 255, 0.08);
-      --text:#f8fafc;
-      --muted:#94a3b8;
-      --accent:#38bdf8;
+      --text:#f8fafc; 
+      --muted:#94a3b8; 
+      --accent:#38bdf8; 
       --accent-glow:rgba(56, 189, 248, 0.25);
       --accent2:#7dd3fc;
-      --done:#22c55e;
+      --done:#22c55e; 
       --done-glow:rgba(34, 197, 94, 0.35);
       --gold:#f59e0b;
       --gold-glow:rgba(245, 158, 11, 0.3);
-      --danger:#ff5252;
+      --danger:#ff5252; 
       --radius-lg:22px;
       --radius-md:14px;
       --radius-sm:10px;
     }
-
-    *{
-      box-sizing:border-box;
-      -webkit-tap-highlight-color:transparent
-    }
-
-    html,body{
-      height:100%
-    }
-
+    
+    *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+    html,body{height:100%}
     body{
       margin:0;
       background:#0b0e14;
-      background-image:
+      background-image: 
         radial-gradient(at 0% 0%, rgba(56, 189, 248, 0.08) 0px, transparent 50%),
         radial-gradient(at 100% 100%, rgba(34, 197, 94, 0.05) 0px, transparent 50%);
-      background-attachment:fixed;
+      background-attachment: fixed;
       color:var(--text);
       font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",Roboto,sans-serif;
       overflow-x:hidden;
     }
-
-    button,input,select{
-      font:inherit
-    }
-
-    button{
-      cursor:pointer;
-      transition:
-        transform 0.15s cubic-bezier(0.4, 0, 0.2, 1),
-        background-color 0.2s,
-        border-color 0.2s;
-      border:0;
-    }
-
-    button:active{
-      transform:scale(0.92)
-    }
-
-    .app{
-      min-height:100%;
-      padding-bottom:calc(92px + env(safe-area-inset-bottom))
-    }
-
+    button,input,select{font:inherit}
+    button{cursor:pointer;transition:transform 0.15s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.2s, border-color 0.2s;border:0;}
+    button:active{transform:scale(0.92)}
+    
+    .app{min-height:100%;padding-bottom:calc(92px + env(safe-area-inset-bottom))}
+    
     header{
-      position:sticky;
-      top:0;
-      z-index:20;
+      position:sticky;top:0;z-index:20;
       padding:calc(16px + env(safe-area-inset-top)) 20px 16px;
       background:rgba(11, 14, 20, 0.85);
       backdrop-filter:blur(20px);
       -webkit-backdrop-filter:blur(20px);
       border-bottom:1px solid var(--border);
     }
+    .header-top{display:flex;justify-content:space-between;align-items:center;}
+    .eyebrow{margin:0 0 2px;text-transform:uppercase;letter-spacing:.18em;color:var(--accent);font-size:11px;font-weight:800}
+    h1{margin:0;font-size:22px;font-weight:800;letter-spacing:-.03em;color:#fff}
+    .sub{margin:2px 0 0;color:var(--muted);font-size:12px}
 
-    .header-top{
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      gap:10px;
-    }
-
-    .eyebrow{
-      margin:0 0 2px;
-      text-transform:uppercase;
-      letter-spacing:.18em;
-      color:var(--accent);
-      font-size:11px;
-      font-weight:800
-    }
-
-    h1{
-      margin:0;
-      font-size:22px;
-      font-weight:800;
-      letter-spacing:-.03em;
-      color:#fff
-    }
-
-    .sub{
-      margin:2px 0 0;
-      color:var(--muted);
-      font-size:12px
-    }
-
-    .timer-container{
-      display:flex;
-      align-items:center;
-      gap:6px;
-      flex-shrink:0;
-    }
-
+    .timer-container{display:flex;align-items:center;gap:6px;}
     .timer-badge{
       display:inline-flex;
       align-items:center;
@@ -136,25 +78,12 @@
       font-variant-numeric:tabular-nums;
       box-shadow:0 0 12px var(--accent-glow);
     }
-
     .timer-dot{
-      width:8px;
-      height:8px;
-      border-radius:50%;
-      background:var(--accent);
+      width:8px;height:8px;border-radius:50%;background:var(--accent);
       animation:pulse 1.5s infinite;
     }
-
-    .timer-badge.paused .timer-dot{
-      background:var(--gold);
-      animation:none;
-    }
-
-    .timer-badge.stopped .timer-dot{
-      background:var(--muted);
-      animation:none;
-    }
-
+    .timer-badge.paused .timer-dot{background:var(--gold);animation:none;}
+    .timer-badge.stopped .timer-dot{background:var(--muted);animation:none;}
     .timer-btn{
       background:var(--surface2);
       border:1px solid var(--border);
@@ -164,67 +93,25 @@
       padding:6px 10px;
       border-radius:99px;
     }
-
     .timer-btn.stop-btn{
       background:rgba(255, 82, 82, 0.15);
       border-color:rgba(255, 82, 82, 0.3);
       color:var(--danger);
     }
-
     @keyframes pulse{
       0%{opacity:1;transform:scale(1);}
       50%{opacity:0.4;transform:scale(0.8);}
       100%{opacity:1;transform:scale(1);}
     }
 
-    .progress{
-      display:flex;
-      align-items:center;
-      gap:12px;
-      margin-top:12px
-    }
-
-    .track{
-      height:8px;
-      flex:1;
-      border-radius:99px;
-      background:rgba(255,255,255,0.06);
-      overflow:hidden;
-      border:1px solid rgba(255,255,255,0.03)
-    }
-
-    .fill{
-      height:100%;
-      width:0;
-      background:linear-gradient(90deg, var(--accent), var(--done));
-      border-radius:99px;
-      transition:width .4s cubic-bezier(0.4, 0, 0.2, 1);
-      box-shadow:0 0 12px var(--accent-glow)
-    }
-
-    .progress span{
-      min-width:42px;
-      text-align:right;
-      color:var(--muted);
-      font-size:12px;
-      font-weight:700;
-      font-variant-numeric:tabular-nums
-    }
-
-    main{
-      padding:calc(12px + env(safe-area-inset-top)) 16px 20px;
-      max-width:760px;
-      margin:0 auto
-    }
-
-    .screen{
-      display:none
-    }
-
-    .screen.active{
-      display:block
-    }
-
+    .progress{display:flex;align-items:center;gap:12px;margin-top:12px}
+    .track{height:8px;flex:1;border-radius:99px;background:rgba(255,255,255,0.06);overflow:hidden;border:1px solid rgba(255,255,255,0.03)}
+    .fill{height:100%;width:0;background:linear-gradient(90deg, var(--accent), var(--done));border-radius:99px;transition:width .4s cubic-bezier(0.4, 0, 0.2, 1);box-shadow:0 0 12px var(--accent-glow)}
+    .progress span{min-width:42px;text-align:right;color:var(--muted);font-size:12px;font-weight:700;font-variant-numeric:tabular-nums}
+    
+    main{padding:calc(12px + env(safe-area-inset-top)) 16px 20px;max-width:760px;margin:0 auto}
+    .screen{display:none}.screen.active{display:block}
+    
     .home-screen{
       display:flex;
       flex-direction:column;
@@ -234,7 +121,6 @@
       text-align:center;
       padding:20px;
     }
-
     .welcome-badge{
       display:inline-block;
       padding:6px 16px;
@@ -249,7 +135,6 @@
       margin-bottom:12px;
       box-shadow:0 0 15px rgba(56, 189, 248, 0.15);
     }
-
     .welcome-title{
       font-size:32px;
       font-weight:900;
@@ -259,7 +144,6 @@
       -webkit-background-clip:text;
       -webkit-text-fill-color:transparent;
     }
-
     .home-sub{
       color:var(--muted);
       font-size:15px;
@@ -267,7 +151,6 @@
       margin:0 0 18px;
       line-height:1.4;
     }
-
     .streak-badge{
       display:none;
       align-items:center;
@@ -282,7 +165,6 @@
       margin-bottom:18px;
       box-shadow:0 0 15px rgba(245, 158, 11, 0.15);
     }
-
     .edit-name-btn{
       background:none;
       border:1px solid var(--border);
@@ -292,7 +174,6 @@
       border-radius:99px;
       margin-bottom:28px;
     }
-
     .btn-start-hero{
       position:relative;
       width:210px;
@@ -311,11 +192,8 @@
       gap:8px;
       box-shadow:0 0 50px var(--accent-glow), 0 12px 35px rgba(0,0,0,0.5);
       cursor:pointer;
-      transition:
-        transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275),
-        box-shadow 0.3s ease;
+      transition:transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.3s ease;
     }
-
     .btn-start-hero::before{
       content:'';
       position:absolute;
@@ -325,55 +203,21 @@
       opacity:0.4;
       animation:ripple 2s infinite ease-out;
     }
-
     @keyframes ripple{
       0%{transform:scale(0.95);opacity:0.8;}
       100%{transform:scale(1.2);opacity:0;}
     }
-
     .btn-start-hero:hover{
       transform:scale(1.05);
       box-shadow:0 0 70px var(--accent-glow), 0 16px 40px rgba(0,0,0,0.6);
     }
+    .btn-start-hero svg{width:36px;height:36px;fill:none;stroke:#fff;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
 
-    .btn-start-hero svg{
-      width:36px;
-      height:36px;
-      fill:none;
-      stroke:#fff;
-      stroke-width:2.5;
-      stroke-linecap:round;
-      stroke-linejoin:round
-    }
-
-    .hero{
-      padding:10px 4px 16px
-    }
-
-    .hero h2{
-      margin:0;
-      font-size:22px;
-      font-weight:800
-    }
-
-    .hero p{
-      margin:4px 0 0;
-      color:var(--muted);
-      font-size:13px
-    }
-
-    .day-tabs{
-      display:flex;
-      gap:10px;
-      overflow:auto;
-      padding:4px 0 16px;
-      scrollbar-width:none
-    }
-
-    .day-tabs::-webkit-scrollbar{
-      display:none
-    }
-
+    .hero{padding:10px 4px 16px}
+    .hero h2{margin:0;font-size:22px;font-weight:800}.hero p{margin:4px 0 0;color:var(--muted);font-size:13px}
+    
+    .day-tabs{display:flex;gap:10px;overflow:auto;padding:4px 0 16px;scrollbar-width:none}
+    .day-tabs::-webkit-scrollbar{display:none}
     .day-tab{
       border:1px solid var(--border);
       background:var(--surface);
@@ -383,38 +227,18 @@
       border-radius:var(--radius-md);
       min-width:120px;
       text-align:left;
-      flex-shrink:0;
+      flex-shrink: 0;
     }
-
-    .day-tab strong{
-      display:block;
-      color:var(--text);
-      font-size:14px;
-      font-weight:700
-    }
-
-    .day-tab small{
-      display:block;
-      margin-top:3px;
-      font-size:11px;
-      opacity:0.8
-    }
-
+    .day-tab strong{display:block;color:var(--text);font-size:14px;font-weight:700}
+    .day-tab small{display:block;margin-top:3px;font-size:11px;opacity:0.8}
     .day-tab.active{
       background:var(--surface2);
       border-color:var(--accent);
       box-shadow:0 4px 20px var(--accent-glow);
     }
-
-    .day-tab.active strong{
-      color:#fff
-    }
-
-    .day-tab.active small{
-      color:var(--accent);
-      font-weight:600
-    }
-
+    .day-tab.active strong{color:#fff}
+    .day-tab.active small{color:var(--accent);font-weight:600}
+    
     .card{
       background:var(--surface);
       backdrop-filter:blur(12px);
@@ -425,40 +249,29 @@
       box-shadow:0 10px 30px rgba(0,0,0,0.3);
       transition:border-color .3s, box-shadow .3s;
     }
-
     .card.complete{
       border-color:rgba(34, 197, 94, 0.4);
       box-shadow:0 8px 24px rgba(34, 197, 94, 0.1);
     }
-
-    .ex-head{
-      display:flex;
-      flex-direction:column;
-      gap:14px;
-      padding:16px;
-      position:relative
+    .card.advance-highlight{
+      border-color:var(--accent);
+      box-shadow:0 0 0 3px var(--accent-glow), 0 10px 30px rgba(0,0,0,0.3);
+      animation:advancePulse .6s ease;
     }
-
+    @keyframes advancePulse{0%{transform:scale(1)}50%{transform:scale(1.015)}100%{transform:scale(1)}}
+    .ex-head{display:flex;flex-direction:column;gap:14px;padding:16px;position:relative}
     .btn-delete-ex{
-      position:absolute;
-      top:12px;
-      right:12px;
+      position:absolute;top:12px;right:12px;
       background:rgba(255,255,255,0.05);
       border:1px solid var(--border);
       border-radius:50%;
-      width:28px;
-      height:28px;
+      width:28px;height:28px;
       color:var(--muted);
-      display:grid;
-      place-items:center;
+      display:grid;place-items:center;
       font-size:13px;
     }
-
-    .btn-delete-ex:hover{
-      color:var(--danger);
-      border-color:var(--danger)
-    }
-
+    .btn-delete-ex:hover{color:var(--danger);border-color:var(--danger)}
+    
     .visual{
       width:100%;
       height:220px;
@@ -468,7 +281,6 @@
       border:1px solid rgba(255,255,255,0.06);
       overflow:hidden;
     }
-
     .exercise-img{
       position:absolute;
       inset:0;
@@ -480,110 +292,119 @@
       opacity:0;
       transition:opacity .5s ease;
     }
-
-    .exercise-img.visible{
-      opacity:1
+    .exercise-img.visible{ opacity:1; }
+    
+    .ex-info{min-width:0;flex:1}
+    .ex-title{font-size:18px;font-weight:800;line-height:1.3;padding-right:30px;color:#fff}
+    .meta{color:var(--muted);font-size:13px;margin-top:4px;font-weight:500}
+    .last{
+      display:inline-block;
+      color:var(--accent2);
+      font-size:11px;
+      margin-top:8px;
+      font-weight:600;
+      background:rgba(56, 189, 248, 0.1);
+      padding:4px 8px;
+      border-radius:6px;
+      border:1px solid rgba(56, 189, 248, 0.2);
     }
-
-    .ex-info{
-      min-width:0;
-      flex:1
-    }
-
-    .ex-title{
-      font-size:18px;
-      font-weight:800;
-      line-height:1.3;
-      padding-right:30px;
-      color:#fff
-    }
-
-    .meta{
-      color:var(--muted);
-      font-size:13px;
-      margin-top:4px;
-      font-weight:500
-    }
-
-    .set-list{
-      display:flex;
-      flex-direction:column;
-      gap:8px;
-      padding:0 16px 16px
-    }
-
+    
+    .set-list{display:flex;flex-direction:column;gap:8px;padding:0 16px 16px}
     .set-row{
-      display:flex;
-      align-items:center;
-      gap:8px;
+      display:flex;align-items:center;gap:8px;
       background:rgba(12, 16, 24, 0.6);
       border:1px solid var(--border);
       border-radius:var(--radius-md);
       padding:8px 10px;
     }
-
-    .set-label{
-      font-size:10px;
-      color:var(--muted);
-      font-weight:800;
-      width:22px;
-      flex:none;
-    }
-
-    .field{
-      width:100%;
-      border:1px solid rgba(255,255,255,0.08);
-      background:rgba(0,0,0,0.3);
+    .set-label{font-size:10px;color:var(--muted);font-weight:800;width:22px;flex:none;}
+    .stepper{display:flex;align-items:center;gap:4px;flex:1;justify-content:center;min-width:0;}
+    .step-btn{
+      width:26px;height:26px;flex:none;
+      border-radius:8px;
+      border:1px solid var(--border);
+      background:var(--surface2);
       color:var(--text);
-      border-radius:var(--radius-sm);
-      padding:10px 10px;
-      font-size:14px;
-      font-weight:700;
-      outline:none;
-      text-align:center;
+      font-weight:800;
+      font-size:15px;
+      line-height:1;
+      display:flex;align-items:center;justify-content:center;
     }
-
-    .field:focus{
-      border-color:var(--accent);
-      background:rgba(0,0,0,0.5)
+    .stepper .val{
+      min-width:52px;text-align:center;font-size:13px;font-weight:800;
+      font-variant-numeric:tabular-nums;color:#fff;white-space:nowrap;
     }
-
-    .weight-field,
-    .reps-field{
-      flex:1;
-      min-width:0;
-    }
-
+    .stepper .unit{font-size:9px;color:var(--muted);text-transform:uppercase;margin-left:2px;font-weight:600;}
+    
     .check{
-      width:28px;
-      height:28px;
-      flex:none;
+      width:28px;height:28px;flex:none;
       border:1px solid rgba(255,255,255,0.15);
       border-radius:8px;
       background:var(--surface2);
       color:transparent;
-      display:grid;
-      place-items:center;
+      display:grid;place-items:center;
       font-size:12px;
       transition:all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }
-
     .check.on{
       background:var(--done);
       border-color:var(--done);
       color:#000;
       font-weight:900;
       transform:scale(1.1);
+      animation: pop 0.3s ease;
       box-shadow:0 0 12px var(--done-glow);
     }
+    @keyframes pop { 0% { transform: scale(1); } 50% { transform: scale(1.25); } 100% { transform: scale(1.1); } }
 
-    .actions{
-      display:flex;
-      gap:10px;
-      padding:8px 0 16px;
-      flex-wrap:wrap
+    /* Modal */
+    .modal-backdrop{
+      position:fixed;inset:0;z-index:100;
+      background:rgba(0,0,0,.6);
+      backdrop-filter:blur(4px);
+      display:flex;align-items:center;justify-content:center;
+      padding:20px;
+      opacity:0;pointer-events:none;
+      transition:opacity .2s ease;
     }
-
+    .modal-backdrop.show{opacity:1;pointer-events:auto;}
+    .modal{
+      background:var(--surface2);
+      border:1px solid var(--border);
+      border-radius:20px;
+      padding:22px;
+      width:100%;max-width:360px;
+      max-height:82vh;
+      overflow-y:auto;
+      box-shadow:0 20px 60px rgba(0,0,0,.5);
+      transform:scale(.94);
+      transition:transform .2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    .modal-backdrop.show .modal{transform:scale(1);}
+    .modal h3{margin:0 0 6px;font-size:18px;color:#fff;}
+    .modal p{margin:0 0 16px;color:var(--muted);font-size:13px;line-height:1.45;}
+    .modal .input-wrapper{margin-bottom:10px;position:static;}
+    .modal .field{padding:11px 12px;font-size:14px;}
+    .modal-actions{display:flex;gap:10px;margin-top:14px;position:sticky;bottom:-22px;background:var(--surface2);padding-top:6px;}
+    .modal-actions .btn{flex:1;justify-content:center;}
+    
+    .input-wrapper{position:relative;margin-bottom:6px}
+    .input-wrapper:last-child{margin-bottom:0}
+    .field{
+      width:100%;
+      border:1px solid rgba(255,255,255,0.08);
+      background:rgba(0,0,0,0.3);
+      color:var(--text);
+      border-radius:var(--radius-sm);
+      padding:7px 22px 7px 8px;
+      font-size:13px;
+      font-weight:700;
+      outline:none;
+    }
+    .field:focus{border-color:var(--accent);background:rgba(0,0,0,0.5)}
+    select.field{-webkit-appearance:none;appearance:none;}
+    
+    .actions{display:flex;gap:10px;padding:8px 0 16px;flex-wrap:wrap}
     .btn{
       border:1px solid var(--border);
       background:var(--surface2);
@@ -597,18 +418,64 @@
       justify-content:center;
       gap:8px;
     }
-
     .btn.primary{
       background:linear-gradient(135deg, var(--accent), #0284c7);
       border:none;
       color:#fff;
       box-shadow:0 4px 16px var(--accent-glow);
     }
-
-    .btn.ghost{
-      background:rgba(255,255,255,0.03)
+    .btn.ghost{background:rgba(255,255,255,0.03)}
+    .btn.small{padding:6px 12px;font-size:11px;}
+    .btn.danger-outline{color:var(--danger);border-color:var(--danger);}
+    
+    .section{margin:18px 0 10px;color:var(--muted);font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase}
+    .history-item,.stat-card,.chart-card,.calendar-card{
+      background:var(--surface);
+      backdrop-filter:blur(10px);
+      border:1px solid var(--border);
+      border-radius:var(--radius-lg);
+      padding:16px;
+      margin-bottom:12px;
     }
+    .calendar-card {
+      padding: 12px;
+      overflow: hidden;
+    }
+    .stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .stat-card strong{font-size:24px;font-weight:800;color:var(--accent)}.stat-card span{display:block;color:var(--muted);font-size:12px;margin-top:2px}
 
+    .cal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+    .cal-header strong{font-size:15px;color:var(--text);font-weight:700}
+    .cal-nav-btn{background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:6px 12px;font-size:12px}
+    .cal-grid{
+      display:grid;
+      grid-template-columns:repeat(7, 1fr);
+      gap:4px;
+      text-align:center;
+      width:100%;
+    }
+    .cal-day-name{font-size:10px;font-weight:800;color:var(--muted);padding-bottom:4px;text-transform:uppercase}
+    .cal-cell{
+      min-height: 34px;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      border-radius:8px;
+      background:rgba(0,0,0,0.25);
+      border:1px solid var(--border);
+      font-size:11px;
+      color:var(--muted);
+      position:relative;
+      box-sizing: border-box;
+    }
+    .cal-cell.empty{background:transparent;border:0;min-height:auto}
+    .cal-cell.today{border-color:var(--accent);color:var(--text);font-weight:700}
+    .cal-cell.trained{ color:#fff; font-weight:800; }
+    .cal-legend{display:flex;align-items:center;gap:6px;justify-content:flex-end;margin-top:10px;font-size:10px;color:var(--muted);}
+    .cal-legend-swatch{width:12px;height:12px;border-radius:3px;}
+
+    .empty{padding:32px 16px;text-align:center;color:var(--muted);background:var(--surface);border:1px dashed var(--border);border-radius:var(--radius-lg)}
     .install{
       background:linear-gradient(135deg, rgba(56, 189, 248, 0.1), rgba(30, 38, 53, 0.8));
       border:1px solid rgba(56, 189, 248, 0.2);
@@ -616,28 +483,17 @@
       border-radius:var(--radius-lg);
       margin-bottom:16px;
     }
-
+    .install strong{display:block;color:#fff;font-size:14px}.install p{margin:6px 0 0;color:var(--muted);font-size:12px;line-height:1.4}
+    
     nav{
-      position:fixed;
-      left:0;
-      right:0;
-      bottom:0;
-      z-index:30;
+      position:fixed;left:0;right:0;bottom:0;z-index:30;
       padding:10px 16px calc(10px + env(safe-area-inset-bottom));
       background:rgba(11, 14, 20, 0.88);
       backdrop-filter:blur(20px);
       -webkit-backdrop-filter:blur(20px);
       border-top:1px solid var(--border);
     }
-
-    .nav-inner{
-      max-width:760px;
-      margin:auto;
-      display:grid;
-      grid-template-columns:repeat(4,1fr);
-      gap:4px
-    }
-
+    .nav-inner{max-width:760px;margin:auto;display:grid;grid-template-columns:repeat(4,1fr);gap:4px}
     .nav-btn{
       border:0;
       background:transparent;
@@ -651,33 +507,14 @@
       align-items:center;
       gap:4px;
     }
-
-    .nav-btn svg{
-      width:20px;
-      height:20px;
-      fill:none;
-      stroke:currentColor;
-      stroke-width:2;
-      stroke-linecap:round;
-      stroke-linejoin:round
-    }
-
-    .nav-btn.active{
-      background:rgba(255,255,255,0.06);
-      color:var(--accent)
-    }
-
-    .nav-btn.active svg{
-      stroke:var(--accent)
-    }
-
+    .nav-btn svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+    .nav-btn.active{background:rgba(255,255,255,0.06);color:var(--accent)}
+    .nav-btn.active svg{stroke:var(--accent)}
+    
     .toast{
-      position:fixed;
-      left:50%;
-      bottom:96px;
+      position:fixed;left:50%;bottom:96px;
       transform:translate(-50%,20px);
-      opacity:0;
-      pointer-events:none;
+      opacity:0;pointer-events:none;
       background:#161c26;
       border:1px solid var(--border);
       color:var(--text);
@@ -691,782 +528,951 @@
       text-align:center;
       max-width:88%;
     }
-
-    .toast.show{
-      opacity:1;
-      transform:translate(-50%,0)
-    }
-
-    @media(min-width:520px){
-      .ex-head{
-        flex-direction:row;
-        align-items:center
-      }
-
-      .visual{
-        width:160px;
-        height:160px;
-        flex:none
-      }
+    .toast.show{opacity:1;transform:translate(-50%,0)}
+    
+    @media(min-width: 520px){
+      .ex-head{flex-direction:row;align-items:center}
+      .visual{width:160px;height:160px;flex:none}
     }
   </style>
 </head>
-
 <body>
-
 <div class="app">
-
-  <header id="appHeader">
-    <div class="header-top">
-      <div>
-        <p class="eyebrow" id="eyebrow">GymTrack Pro</p>
-        <h1 id="title">Acasa</h1>
-        <p class="sub" id="subtitle">Sesiune curenta</p>
+<header id="appHeader">
+  <div class="header-top">
+    <div>
+      <p class="eyebrow" id="eyebrow">GymTrack Pro</p>
+      <h1 id="title">Acasă</h1>
+      <p class="sub" id="subtitle">Sesiune curentă</p>
+    </div>
+    <div class="timer-container" id="headerTimerContainer">
+      <div class="timer-badge" id="workoutTimer">
+        <span class="timer-dot"></span>
+        <span id="timerText">00:00</span>
       </div>
+      <button class="timer-btn" id="timerToggleBtn" title="Pauză / Reluare">Pauză</button>
+      <button class="timer-btn stop-btn" id="timerStopBtn" title="Oprește Antrenamentul">Oprește</button>
+    </div>
+  </div>
+  <div class="progress" id="headerProgressContainer"><div class="track"><div class="fill" id="fill"></div></div><span id="progressText">0%</span></div>
+</header>
 
-      <div class="timer-container" id="headerTimerContainer">
-        <div class="timer-badge stopped" id="workoutTimer">
-          <span class="timer-dot"></span>
-          <span id="timerText">00:00</span>
-        </div>
+<main>
+  <!-- Home -->
+  <section id="homeScreen" class="screen active">
+    <div class="home-screen">
+      <div class="welcome-badge">GymTrack Pro</div>
+      <h2 class="welcome-title">Bine ai venit, <span id="userNameDisplay">Sportivule</span>!</h2>
+      <p class="home-sub">Ești gata pentru o nouă sesiune? Apasă Start pentru a-ți alege ziua de antrenament.</p>
+      <div class="streak-badge" id="streakBadge">🔥 0 săptămâni la rând</div>
+      <button class="edit-name-btn" id="editNameBtn">✎ Schimbă numele</button>
+      <button class="btn-start-hero" id="heroStartBtn">
+        <svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+        <span>START</span>
+      </button>
+    </div>
+  </section>
 
-        <button class="timer-btn" id="timerToggleBtn" title="Pauza / Reluare">Pauza</button>
-        <button class="timer-btn stop-btn" id="timerStopBtn" title="Opreste Antrenamentul">Opreste</button>
+  <!-- Antrenament -->
+  <section id="workoutScreen" class="screen">
+    <div class="install" id="installCard">
+      <strong>Instalează GymTrack pe iPhone</strong>
+      <p>În Safari: Apasă Partajare → Adaugă la ecranul principal. Aplicația funcționează 100% offline.</p>
+      <button class="btn ghost" id="hideInstall" style="margin-top:10px;padding:6px 12px;font-size:11px;">Ascunde</button>
+    </div>
+    <div class="day-tabs" id="dayTabs"></div>
+    <div id="workoutList"></div>
+    <div class="actions">
+      <button class="btn primary" id="finishBtn">✓ Finalizează antrenamentul</button>
+      <button class="btn ghost" id="addExBtn">+ Exercițiu nou</button>
+      <button class="btn ghost" id="resetBtn">↺ Resetează</button>
+    </div>
+  </section>
+
+  <!-- Istoric -->
+  <section id="historyScreen" class="screen">
+    <div class="hero"><h2>Istoric Sesiuni</h2><p>Evidența activității tale și sincronizarea datelor.</p></div>
+    <div class="stats-grid" id="stats"></div>
+
+    <div class="calendar-card">
+      <div class="cal-header">
+        <button class="cal-nav-btn" id="calPrev">◄</button>
+        <strong id="calMonthTitle">Luna An</strong>
+        <button class="cal-nav-btn" id="calNext">►</button>
+      </div>
+      <div class="cal-grid" id="calGrid"></div>
+      <div class="cal-legend">
+        <span>puțin volum</span>
+        <span class="cal-legend-swatch" style="background:rgba(34,197,94,.18);border:1px solid rgba(34,197,94,.3)"></span>
+        <span class="cal-legend-swatch" style="background:rgba(34,197,94,.45);border:1px solid rgba(34,197,94,.5)"></span>
+        <span class="cal-legend-swatch" style="background:rgba(34,197,94,.85);border:1px solid rgba(34,197,94,.9)"></span>
+        <span>mult volum</span>
       </div>
     </div>
 
-    <div class="progress" id="headerProgressContainer">
-      <div class="track">
-        <div class="fill" id="fill"></div>
-      </div>
-      <span id="progressText">0%</span>
+    <div class="actions" style="padding: 10px 0;">
+      <button class="btn ghost" id="exportBtn">Export Backup (JSON)</button>
+      <button class="btn ghost" id="importBtn">Import Backup</button>
+      <button class="btn ghost" id="forceUpdateBtn" style="border-color:var(--accent);color:var(--accent);">⚡ Actualizează aplicația (Force PWA Update)</button>
+      <input type="file" id="importInput" accept=".json" style="display:none">
     </div>
-  </header>
+    <div class="section">Sesiuni Recente</div>
+    <div id="historyList"></div>
+  </section>
 
-  <main>
-    <!-- HOME -->
-    <section id="homeScreen" class="screen active">
-      <div class="home-screen">
-        <div class="welcome-badge">GymTrack Pro</div>
-        <h2 class="welcome-title">Bine ai venit, <span id="userNameDisplay">Sportivule</span>!</h2>
-        <p class="home-sub">Esti gata pentru o noua sesiune? Apasa Start pentru a-ti alege ziua de antrenament.</p>
-        <div class="streak-badge" id="streakBadge"></div>
-        <button class="edit-name-btn" id="editNameBtn">✎ Schimba numele</button>
-        <button class="btn-start-hero" id="heroStartBtn">
-          <svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-          <span>START</span>
-        </button>
-      </div>
-    </section>
+  <!-- Progres -->
+  <section id="progressScreen" class="screen">
+    <div class="hero"><h2>Evoluție Greutăți</h2><p>Scorul de forță arată volumul relativ pe grupă musculară — 100 e grupa ta cea mai antrenată.</p></div>
+    <div id="exerciseProgress"></div>
+  </section>
+</main>
 
-    <!-- WORKOUT -->
-    <section id="workoutScreen" class="screen">
-      <div class="install" id="installCard">
-        <strong>Instaleaza GymTrack pe iPhone</strong>
-        <p>In Safari: Apasa Partajare → Adauga la ecranul principal. Aplicatia functioneaza si offline.</p>
-        <button class="btn ghost" id="hideInstall" style="margin-top:10px;padding:6px 12px;font-size:11px;">Ascunde</button>
-      </div>
-      <div class="day-tabs" id="dayTabs"></div>
-      <div id="workoutList"></div>
-      <div class="actions">
-        <button class="btn primary" id="finishBtn">✓ Finalizeaza antrenamentul</button>
-        <button class="btn ghost" id="addExBtn">+ Exercitiu nou</button>
-        <button class="btn ghost" id="resetBtn">↺ Reseteaza</button>
-      </div>
-    </section>
+<nav><div class="nav-inner">
+  <button class="nav-btn active" data-screen="homeScreen">
+    <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+    Acasă
+  </button>
+  <button class="nav-btn" data-screen="workoutScreen">
+    <svg viewBox="0 0 24 24"><path d="M6.5 6.5h11M6.5 12h11M6.5 17.5h11M3 6.5h.01M3 12h.01M3 17.5h.01"/></svg>
+    Antrenament
+  </button>
+  <button class="nav-btn" data-screen="historyScreen">
+    <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+    Istoric
+  </button>
+  <button class="nav-btn" data-screen="progressScreen">
+    <svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+    Progres
+  </button>
+</div></nav>
+<div class="toast" id="toast"></div>
 
-    <!-- HISTORY -->
-    <section id="historyScreen" class="screen">
-      <div class="hero">
-        <h2>Istoric sesiuni</h2>
-        <p>Evidenta activitatii tale.</p>
-      </div>
-      <div id="historyList"></div>
-    </section>
-
-    <!-- PROGRESS -->
-    <section id="progressScreen" class="screen">
-      <div class="hero">
-        <h2>Evolutie</h2>
-        <p>Volum de antrenament pe grupe musculare.</p>
-      </div>
-      <div id="exerciseProgress"></div>
-    </section>
-  </main>
-
-  <nav>
-    <div class="nav-inner">
-      <button class="nav-btn active" data-screen="homeScreen">
-        <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-        Acasa
-      </button>
-      <button class="nav-btn" data-screen="workoutScreen">
-        <svg viewBox="0 0 24 24"><path d="M6.5 6.5h11M6.5 12h11M6.5 17.5h11"/><path d="M3 6.5h.01M3 12h.01M3 17.5h.01"/></svg>
-        Antrenament
-      </button>
-      <button class="nav-btn" data-screen="historyScreen">
-        <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-        Istoric
-      </button>
-      <button class="nav-btn" data-screen="progressScreen">
-        <svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-        Progres
-      </button>
-    </div>
-  </nav>
-
-  <div class="toast" id="toast"></div>
+<div class="modal-backdrop" id="modalBackdrop">
+  <div class="modal" id="modalBody"></div>
+</div>
 </div>
 
 <script>
-/* =========================================================
-   EXERCISES & DB SETUP
-   ========================================================= */
-
 const EX_FOLDERS = {
-  "Barbell Bench Press": "Barbell_Bench_Press",
-  "Incline Dumbbell Press": "Incline_Dumbbell_Press",
-  "Cable Chest Fly": "Cable_Chest_Fly",
-  "Triceps Pushdown": "Triceps_Pushdown_-_Rope_Attachment",
-  "Overhead Cable Triceps Extension": "Cable_Overhead_Triceps_Extension",
-  "Lat Pulldown": "Lat_Pulldown",
-  "Seated Cable Row": "Seated_Cable_Row",
-  "Face Pull": "Face_Pull",
-  "Dumbbell Biceps Curl": "Dumbbell_Biceps_Curl",
-  "Hammer Curl": "Hammer_Curl",
-  "Barbell Squat": "Barbell_Squat",
-  "Leg Press": "Leg_Press",
-  "Romanian Deadlift": "Romanian_Deadlift",
-  "Standing Calf Raise": "Standing_Calf_Raise",
-  "Dumbbell Lateral Raise": "Dumbbell_Lateral_Raise",
-  "Overhead Dumbbell Press": "Overhead_Dumbbell_Press"
+  legPress: "Leg_Press",
+  gobletSquat: "Goblet_Squat",
+  hyperextension: "Hyperextensions",
+  legExtension: "Leg_Extensions",
+  abductor: "Thigh_Abductor",
+  calfRaise: "Standing_Calf_Raises",
+  machineCrunch: "Ab_Crunch_Machine",
+  latPulldown: "Wide-Grip_Lat_Pulldown",
+  closeGripLatPulldown: "Close-Grip_Front_Lat_Pulldown",
+  chestSupportedRow: "Bent_Over_Two-Dumbbell_Row",
+  seatedCableRow: "Seated_Cable_Rows",
+  chestPress: "Machine_Bench_Press",
+  shoulderPress: "Seated_Dumbbell_Press",
+  lateralRaise: "Side_Lateral_Raise",
+  reverseFly: "Reverse_Flyes",
+  reverseMachineFlyes: "Reverse_Machine_Flyes",
+  deadBug: "Dead_Bug",
+  pecDeck: "Butterfly",
+  tricepsPushdown: "Triceps_Pushdown_-_Rope_Attachment",
+  bicepsCurl: "Dumbbell_Bicep_Curl",
+  pallofPress: "Pallof_Press",
+  leverageInclineChestPress: "Leverage_Incline_Chest_Press"
 };
+
+const FOLDER_CATEGORY = {
+  Leg_Press: "legs", Goblet_Squat: "legs", Hyperextensions: "back", Leg_Extensions: "legs",
+  Thigh_Abductor: "legs", Standing_Calf_Raises: "legs", Ab_Crunch_Machine: "core",
+  "Wide-Grip_Lat_Pulldown": "back", "Close-Grip_Front_Lat_Pulldown": "back",
+  "Bent_Over_Two-Dumbbell_Row": "back", Seated_Cable_Rows: "back",
+  Machine_Bench_Press: "chest", Seated_Dumbbell_Press: "shoulders", Side_Lateral_Raise: "shoulders",
+  Reverse_Flyes: "shoulders", Reverse_Machine_Flyes: "shoulders", Dead_Bug: "core",
+  Butterfly: "chest", "Triceps_Pushdown_-_Rope_Attachment": "arms", Dumbbell_Bicep_Curl: "arms",
+  Pallof_Press: "core", Leverage_Incline_Chest_Press: "chest"
+};
+const CATEGORY_LABELS = { legs: "Picioare", back: "Spate", chest: "Piept", shoulders: "Umeri", arms: "Brațe", core: "Core" };
+const CATEGORY_OPTIONS = Object.keys(CATEGORY_LABELS).map(k => ({ value: k, label: CATEGORY_LABELS[k] }));
+
+function getExerciseCategory(e){
+  return e[4] || FOLDER_CATEGORY[e[3]] || "core";
+}
 
 const DEFAULT_DAYS = [
   {
-    id: "push",
-    title: "Ziua 1 - Push",
-    sub: "Piept, Umeri, Triceps",
-    exercises: [
-      { name: "Barbell Bench Press", target: "3 x 8-10", sets: [ {w: 60, r: 10, done: false}, {w: 60, r: 10, done: false}, {w: 60, r: 8, done: false} ] },
-      { name: "Incline Dumbbell Press", target: "3 x 10-12", sets: [ {w: 22, r: 10, done: false}, {w: 22, r: 10, done: false}, {w: 22, r: 10, done: false} ] },
-      { name: "Cable Chest Fly", target: "3 x 12-15", sets: [ {w: 15, r: 12, done: false}, {w: 15, r: 12, done: false}, {w: 15, r: 12, done: false} ] },
-      { name: "Overhead Dumbbell Press", target: "3 x 10-12", sets: [ {w: 18, r: 10, done: false}, {w: 18, r: 10, done: false}, {w: 18, r: 10, done: false} ] },
-      { name: "Dumbbell Lateral Raise", target: "4 x 12-15", sets: [ {w: 10, r: 12, done: false}, {w: 10, r: 12, done: false}, {w: 10, r: 12, done: false}, {w: 10, r: 12, done: false} ] },
-      { name: "Triceps Pushdown", target: "3 x 12-15", sets: [ {w: 25, r: 12, done: false}, {w: 25, r: 12, done: false}, {w: 25, r: 12, done: false} ] },
-      { name: "Overhead Cable Triceps Extension", target: "3 x 12-15", sets: [ {w: 20, r: 12, done: false}, {w: 20, r: 12, done: false}, {w: 20, r: 12, done: false} ] }
+    id: "d1", title: "Picioare + abdomen", label: "Ziua 1", exercises: [
+      ["Presă pentru picioare", 4, "10-12", EX_FOLDERS.legPress],
+      ["Goblet Squat", 3, "10", EX_FOLDERS.gobletSquat],
+      ["Extensii lombare la bancă 45°", 3, "12-15", EX_FOLDERS.hyperextension],
+      ["Extensii cvadriceps la aparat", 3, "12-15", EX_FOLDERS.legExtension],
+      ["Abductor la aparat", 3, "15-20", EX_FOLDERS.abductor],
+      ["Ridicări pe vârfuri la aparat", 3, "15-20", EX_FOLDERS.calfRaise],
+      ["Crunch la aparat", 3, "12-15", EX_FOLDERS.machineCrunch]
     ]
   },
   {
-    id: "pull",
-    title: "Ziua 2 - Pull",
-    sub: "Spate, Biceps, Umeri post.",
-    exercises: [
-      { name: "Lat Pulldown", target: "3 x 8-10", sets: [ {w: 55, r: 10, done: false}, {w: 55, r: 10, done: false}, {w: 55, r: 8, done: false} ] },
-      { name: "Seated Cable Row", target: "3 x 10-12", sets: [ {w: 50, r: 10, done: false}, {w: 50, r: 10, done: false}, {w: 50, r: 10, done: false} ] },
-      { name: "Face Pull", target: "4 x 12-15", sets: [ {w: 20, r: 15, done: false}, {w: 20, r: 15, done: false}, {w: 20, r: 15, done: false}, {w: 20, r: 15, done: false} ] },
-      { name: "Dumbbell Biceps Curl", target: "3 x 10-12", sets: [ {w: 12, r: 10, done: false}, {w: 12, r: 10, done: false}, {w: 12, r: 10, done: false} ] },
-      { name: "Hammer Curl", target: "3 x 10-12", sets: [ {w: 12, r: 10, done: false}, {w: 12, r: 10, done: false}, {w: 12, r: 10, done: false} ] }
+    id: "d2", title: "Piept + Spate + Umeri + Core", label: "Ziua 2", exercises: [
+      ["Lat Pulldown", 3, "10-12", EX_FOLDERS.latPulldown],
+      ["Ramat sprijinit pe piept", 3, "10-12", EX_FOLDERS.chestSupportedRow],
+      ["Presă piept la aparat", 3, "10-12", EX_FOLDERS.chestPress],
+      ["Presă umeri la aparat", 3, "10-12", EX_FOLDERS.shoulderPress],
+      ["Ridicări laterale cu gantere", 3, "15", EX_FOLDERS.lateralRaise],
+      ["Fluturări inverse la aparat", 3, "12-15", EX_FOLDERS.reverseMachineFlyes],
+      ["Dead Bug", 3, "10-12 / parte", EX_FOLDERS.deadBug]
     ]
   },
   {
-    id: "legs",
-    title: "Ziua 3 - Legs",
-    sub: "Picioare & Gambe",
-    exercises: [
-      { name: "Barbell Squat", target: "3 x 8-10", sets: [ {w: 80, r: 8, done: false}, {w: 80, r: 8, done: false}, {w: 80, r: 8, done: false} ] },
-      { name: "Leg Press", target: "3 x 10-12", sets: [ {w: 140, r: 10, done: false}, {w: 140, r: 10, done: false}, {w: 140, r: 10, done: false} ] },
-      { name: "Romanian Deadlift", target: "3 x 10-12", sets: [ {w: 70, r: 10, done: false}, {w: 70, r: 10, done: false}, {w: 70, r: 10, done: false} ] },
-      { name: "Standing Calf Raise", target: "4 x 12-15", sets: [ {w: 50, r: 12, done: false}, {w: 50, r: 12, done: false}, {w: 50, r: 12, done: false}, {w: 50, r: 12, done: false} ] }
+    id: "d3", title: "Full Body + Brațe", label: "Ziua 3", exercises: [
+      ["Presă pentru picioare", 3, "12", EX_FOLDERS.legPress],
+      ["Lat Pulldown priză îngustă", 3, "10-12", EX_FOLDERS.closeGripLatPulldown],
+      ["Ramat la cablu", 3, "10-12", EX_FOLDERS.seatedCableRow],
+      ["Presă piept înclinată", 3, "10-12", EX_FOLDERS.leverageInclineChestPress],
+      ["Pec Deck", 3, "12-15", EX_FOLDERS.pecDeck],
+      ["Extensii triceps la scripete", 3, "12-15", EX_FOLDERS.tricepsPushdown],
+      ["Flexii biceps la cablu", 3, "12-15", EX_FOLDERS.bicepsCurl],
+      ["Pallof Press la cablu", 3, "10-12 / parte", EX_FOLDERS.pallofPress]
     ]
   }
 ];
 
-const DB_NAME = "GymTrackDB";
-const DB_VERSION = 1;
-const STORE_NAME = "appData";
+const store = {
+  key: "gymtrack:v4",
+  load(){ try{ return JSON.parse(localStorage.getItem(this.key) || "{}"); } catch{ return {}; } },
+  save(data){ localStorage.setItem(this.key, JSON.stringify(data)); }
+};
 
-let dbInstance = null;
-
-function openDB() {
-  return new Promise((resolve, reject) => {
-    if (dbInstance) return resolve(dbInstance);
-
-    const request = indexedDB.open(DB_NAME, DB_VERSION);
-
-    request.onupgradeneeded = (event) => {
-      const db = event.target.result;
-      if (!db.objectStoreNames.contains(STORE_NAME)) {
-        db.createObjectStore(STORE_NAME);
-      }
-    };
-
-    request.onsuccess = (event) => {
-      dbInstance = event.target.result;
-      resolve(dbInstance);
-    };
-
-    request.onerror = (event) => {
-      console.error("IndexedDB Error:", event.target.error);
-      reject(event.target.error);
-    };
-  });
-}
-
-async function saveState(key, value) {
-  try {
-    const db = await openDB();
-    return new Promise((resolve, reject) => {
-      const tx = db.transaction(STORE_NAME, "readwrite");
-      const store = tx.objectStore(STORE_NAME);
-      const req = store.put(value, key);
-      req.onsuccess = () => resolve(true);
-      req.onerror = () => reject(req.error);
-    });
-  } catch (err) {
-    console.error("Eroare la salvare IndexedDB:", err);
-  }
-}
-
-async function getState(key) {
-  try {
-    const db = await openDB();
-    return new Promise((resolve, reject) => {
-      const tx = db.transaction(STORE_NAME, "readonly");
-      const store = tx.objectStore(STORE_NAME);
-      const req = store.get(key);
-      req.onsuccess = () => resolve(req.result);
-      req.onerror = () => reject(req.error);
-    });
-  } catch (err) {
-    console.error("Eroare la citire IndexedDB:", err);
-    return null;
-  }
-}
-
-/* =========================================================
-   APP STATE & DOM ELEMENTS
-   ========================================================= */
-
-let activeDayId = "push";
-let daysData = JSON.parse(JSON.stringify(DEFAULT_DAYS));
-let historyData = [];
-let userName = "Sportivule";
-
-// Workout Timer Variables
-let workoutStartTime = null;
+let db = store.load();
+db.days ||= DEFAULT_DAYS;
+db.userName ||= "";
+let DAYS = db.days;
+let currentDay = 0;
+let currentScreen = "homeScreen";
 let timerInterval = null;
-let elapsedTimePaused = 0;
-let isTimerPaused = false;
+let calendarDate = new Date();
 
-// DOM Elements
-const dayTabsEl = document.getElementById("dayTabs");
-const workoutListEl = document.getElementById("workoutList");
-const historyListEl = document.getElementById("historyList");
-const exerciseProgressEl = document.getElementById("exerciseProgress");
-const fillEl = document.getElementById("fill");
-const progressTextEl = document.getElementById("progressText");
-const titleEl = document.getElementById("title");
-const subtitleEl = document.getElementById("subtitle");
-const toastEl = document.getElementById("toast");
-const userNameDisplayEl = document.getElementById("userNameDisplay");
-const streakBadgeEl = document.getElementById("streakBadge");
-
-const headerTimerContainer = document.getElementById("headerTimerContainer");
-const headerProgressContainer = document.getElementById("headerProgressContainer");
-const workoutTimerEl = document.getElementById("workoutTimer");
-const timerTextEl = document.getElementById("timerText");
-const timerToggleBtn = document.getElementById("timerToggleBtn");
-const timerStopBtn = document.getElementById("timerStopBtn");
-
-/* =========================================================
-   TIMER LOGIC (Baterie-Friendly / Date.now)
-   ========================================================= */
-
-function updateTimerDisplay() {
-  if (!workoutStartTime || isTimerPaused) return;
-
-  const totalSeconds = Math.floor((Date.now() - workoutStartTime) / 1000);
-  const minutes = Math.floor(totalSeconds / 60).toString().padStart(2, '0');
-  const seconds = (totalSeconds % 60).toString().padStart(2, '0');
-
-  timerTextEl.textContent = `${minutes}:${seconds}`;
+function triggerHaptic(type = "light"){
+  if (!navigator.vibrate) return;
+  switch (type) {
+    case "light": navigator.vibrate(30); break;
+    case "finish": navigator.vibrate([100, 50, 100, 50, 200]); break;
+    case "warn": navigator.vibrate([20, 100, 50]); break;
+  }
 }
 
-function startTimer() {
-  workoutStartTime = Date.now() - elapsedTimePaused;
-  isTimerPaused = false;
-  workoutTimerEl.className = "timer-badge";
-  timerToggleBtn.textContent = "Pauza";
+function updateTimerDisplay(){
+  let elapsed = db.activeTimerElapsed || 0;
+  if (db.activeTimerStart && !db.timerPaused) {
+    elapsed += Math.max(0, Math.floor((Date.now() - db.activeTimerStart) / 1000));
+  }
+  const mins = Math.floor(elapsed / 60);
+  const secs = elapsed % 60;
+  document.getElementById("timerText").textContent = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
   
-  clearInterval(timerInterval);
+  const badge = document.getElementById("workoutTimer");
+  const toggleBtn = document.getElementById("timerToggleBtn");
+  
+  badge.classList.remove("paused", "stopped");
+  if (!db.activeTimerStart && elapsed === 0) {
+    badge.classList.add("stopped");
+    toggleBtn.textContent = "Pauză";
+  } else if (db.timerPaused) {
+    badge.classList.add("paused");
+    toggleBtn.textContent = "Reluare";
+  } else {
+    toggleBtn.textContent = "Pauză";
+  }
+}
+
+function runTimerInterval(){
+  if (timerInterval) return;
+  updateTimerDisplay();
   timerInterval = setInterval(updateTimerDisplay, 1000);
+}
+
+function stopTimerInterval(){
+  if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+}
+
+function startWorkoutTimer(){
+  if (!db.activeTimerStart && !db.timerPaused) {
+    db.activeTimerStart = Date.now();
+    db.activeTimerElapsed = 0;
+    db.timerPaused = false;
+    save();
+  }
+  runTimerInterval();
+}
+
+function toggleTimerPause(){
+  if (!db.activeTimerStart && (db.activeTimerElapsed || 0) === 0) {
+    toast("Pornește mai întâi un antrenament!");
+    return;
+  }
+  if (!db.timerPaused) {
+    let currentElapsed = db.activeTimerElapsed || 0;
+    db.activeTimerElapsed = currentElapsed + Math.max(0, Math.floor((Date.now() - db.activeTimerStart) / 1000));
+    db.activeTimerStart = null;
+    db.timerPaused = true;
+    toast("Cronometru pus pe pauză");
+  } else {
+    db.activeTimerStart = Date.now();
+    db.timerPaused = false;
+    toast("Cronometru reluat");
+  }
+  save();
   updateTimerDisplay();
 }
 
-function pauseTimer() {
-  if (!isTimerPaused && workoutStartTime) {
-    elapsedTimePaused = Date.now() - workoutStartTime;
-    isTimerPaused = true;
-    clearInterval(timerInterval);
-    workoutTimerEl.className = "timer-badge paused";
-    timerToggleBtn.textContent = "Reluare";
+function confirmStopTimer(){
+  if (!db.activeTimerStart && (db.activeTimerElapsed || 0) === 0) {
+    toast("Nu există niciun antrenament pornit.");
+    return;
   }
+  openModal({
+    title: "Oprește Antrenamentul",
+    desc: "Sigur dorești să oprești cronometrul? Progresul nesalvat nu va fi înregistrat în istoric.",
+    confirmText: "Da, oprește",
+    danger: true,
+    onConfirm: () => {
+      resetWorkoutTimer();
+      toast("Antrenament oprit.");
+    }
+  });
 }
 
-function stopTimer() {
-  clearInterval(timerInterval);
-  workoutStartTime = null;
-  elapsedTimePaused = 0;
-  isTimerPaused = false;
-  timerTextEl.textContent = "00:00";
-  workoutTimerEl.className = "timer-badge stopped";
-  timerToggleBtn.textContent = "Start";
+function resetWorkoutTimer(){
+  stopTimerInterval();
+  db.activeTimerStart = null;
+  db.activeTimerElapsed = 0;
+  db.timerPaused = false;
+  save();
+  updateTimerDisplay();
 }
 
-// Actualizare automata la deblocarea telefonului
 document.addEventListener("visibilitychange", () => {
   if (document.visibilityState === "visible") {
     updateTimerDisplay();
-  } else {
-    saveState("gym_days_backup", daysData);
+    if (db.activeTimerStart && !db.timerPaused) runTimerInterval();
   }
 });
-
-timerToggleBtn.addEventListener("click", () => {
-  if (!workoutStartTime) {
-    startTimer();
-  } else if (isTimerPaused) {
-    startTimer();
-  } else {
-    pauseTimer();
-  }
+window.addEventListener("pageshow", () => {
+  updateTimerDisplay();
+  if (db.activeTimerStart && !db.timerPaused) runTimerInterval();
 });
 
-timerStopBtn.addEventListener("click", () => {
-  if (confirm("Sigur vrei sa opresti si sa resetezi cronometrul?")) {
-    stopTimer();
-    showToast("Cronometru oprit.");
-  }
-});
+function save(){ store.save(db); }
 
-/* =========================================================
-   NAVIGATION & SCREENS
-   ========================================================= */
+function getWorkout(day){
+  db.workouts ||= {};
+  return db.workouts[DAYS[day].id] ||= DAYS[day].exercises.map(e => Array.from({length: e[1]}, () => ({done: false, kg: "", reps: ""})));
+}
+function getRecords(){ db.records ||= []; return db.records; }
 
-document.querySelectorAll(".nav-btn").forEach(btn => {
-  btn.addEventListener("click", () => {
-    const screenId = btn.getAttribute("data-screen");
-    switchScreen(screenId);
-  });
-});
-
-function switchScreen(screenId) {
-  document.querySelectorAll(".nav-btn").forEach(b => {
-    b.classList.toggle("active", b.getAttribute("data-screen") === screenId);
-  });
-
-  document.querySelectorAll(".screen").forEach(s => {
-    s.classList.toggle("active", s.id === screenId);
-  });
-
-  if (screenId === "homeScreen") {
-    headerTimerContainer.style.display = "none";
-    headerProgressContainer.style.display = "none";
-    titleEl.textContent = "Acasa";
-    subtitleEl.textContent = "Tablou de bord";
-    updateHomeData();
-  } else if (screenId === "workoutScreen") {
-    headerTimerContainer.style.display = "flex";
-    headerProgressContainer.style.display = "flex";
-    titleEl.textContent = "Antrenament";
-    subtitleEl.textContent = getActiveDay().title;
-    renderWorkout();
-  } else if (screenId === "historyScreen") {
-    headerTimerContainer.style.display = "none";
-    headerProgressContainer.style.display = "none";
-    titleEl.textContent = "Istoric";
-    subtitleEl.textContent = "Sesiuni salvate";
-    renderHistory();
-  } else if (screenId === "progressScreen") {
-    headerTimerContainer.style.display = "none";
-    headerProgressContainer.style.display = "none";
-    titleEl.textContent = "Progres";
-    subtitleEl.textContent = "Evolutie si volum";
-    renderProgress();
-  }
+function toast(msg){
+  const t = document.getElementById("toast");
+  t.innerHTML = msg;
+  t.classList.add("show");
+  clearTimeout(window._tt);
+  window._tt = setTimeout(() => t.classList.remove("show"), 2400);
 }
 
-document.getElementById("heroStartBtn").addEventListener("click", () => {
-  switchScreen("workoutScreen");
-  if (!workoutStartTime) {
-    startTimer();
-  }
-});
-
-/* =========================================================
-   HOME LOGIC
-   ========================================================= */
-
-function updateHomeData() {
-  userNameDisplayEl.textContent = userName;
-
-  if (historyData.length > 0) {
-    let streak = 0;
-    const today = new Date().toDateString();
-    streakBadgeEl.style.display = "inline-flex";
-    streakBadgeEl.innerHTML = `🔥 ${historyData.length} Antrenamente completate`;
-  } else {
-    streakBadgeEl.style.display = "none";
-  }
-}
-
-document.getElementById("editNameBtn").addEventListener("click", () => {
-  const newName = prompt("Introduce numele tau:", userName);
-  if (newName && newName.trim() !== "") {
-    userName = newName.trim();
-    userNameDisplayEl.textContent = userName;
-    saveState("gym_username", userName);
-    showToast("Nume salvat!");
-  }
-});
-
-/* =========================================================
-   WORKOUT LOGIC & RENDERING
-   ========================================================= */
-
-function getActiveDay() {
-  return daysData.find(d => d.id === activeDayId) || daysData[0];
-}
-
-function renderTabs() {
-  dayTabsEl.innerHTML = "";
-  daysData.forEach(day => {
-    const tab = document.createElement("button");
-    tab.className = `day-tab ${day.id === activeDayId ? "active" : ""}`;
-    tab.innerHTML = `<strong>${day.title}</strong><small>${day.sub}</small>`;
-    tab.addEventListener("click", () => {
-      activeDayId = day.id;
-      subtitleEl.textContent = day.title;
-      renderTabs();
-      renderWorkout();
+function openModal({title, desc, fields = [], confirmText = "OK", cancelText = "Anulează", danger = false, onConfirm}){
+  const backdrop = document.getElementById("modalBackdrop");
+  const body = document.getElementById("modalBody");
+  body.innerHTML = `
+    ${title ? `<h3>${title}</h3>` : ""}
+    ${desc ? `<p>${desc}</p>` : ""}
+    ${fields.map(f => {
+      if (f.type === "select") {
+        return `<div class="input-wrapper"><select class="field" id="mf-${f.id}">
+          ${f.options.map(o => `<option value="${o.value}" ${o.value === f.value ? "selected" : ""}>${o.label}</option>`).join("")}
+        </select></div>`;
+      }
+      return `<div class="input-wrapper">
+        <input class="field" id="mf-${f.id}" type="${f.type || 'text'}" placeholder="${f.placeholder || ''}" value="${f.value || ''}">
+      </div>`;
+    }).join("")}
+    <div class="modal-actions">
+      <button class="btn ghost" id="modalCancel">${cancelText}</button>
+      <button class="btn ${danger ? 'danger-outline' : 'primary'}" id="modalConfirm">${confirmText}</button>
+    </div>
+  `;
+  backdrop.classList.add("show");
+  
+  const close = () => { backdrop.classList.remove("show"); };
+  document.getElementById("modalCancel").onclick = close;
+  backdrop.onclick = (e) => { if(e.target === backdrop) close(); };
+  document.getElementById("modalConfirm").onclick = () => {
+    const values = {};
+    fields.forEach(f => {
+      values[f.id] = document.getElementById(`mf-${f.id}`).value;
     });
-    dayTabsEl.appendChild(tab);
-  });
+    close();
+    if(onConfirm) onConfirm(values);
+  };
 }
 
-function renderWorkout() {
-  renderTabs();
-  const currentDay = getActiveDay();
-  workoutListEl.innerHTML = "";
+/* UI Header & Screen Logic */
+function updateHeaderInfo(){
+  const eyebrowEl = document.getElementById("eyebrow");
+  const titleEl = document.getElementById("title");
+  const progressContainer = document.getElementById("headerProgressContainer");
+  const timerContainer = document.getElementById("headerTimerContainer");
 
-  currentDay.exercises.forEach((ex, exIndex) => {
-    const card = document.createElement("div");
-    const allDone = ex.sets.length > 0 && ex.sets.every(s => s.done);
-    card.className = `card ${allDone ? "complete" : ""}`;
+  if(currentScreen === "workoutScreen"){
+    const day = DAYS[currentDay];
+    eyebrowEl.textContent = day.label;
+    titleEl.textContent = day.title;
+    progressContainer.style.display = "flex";
+    timerContainer.style.display = "flex";
+  } else if(currentScreen === "homeScreen"){
+    eyebrowEl.textContent = "GymTrack Pro";
+    titleEl.textContent = "Acasă";
+    progressContainer.style.display = "none";
+    timerContainer.style.display = "none";
+  } else if(currentScreen === "historyScreen"){
+    eyebrowEl.textContent = "GymTrack Pro";
+    titleEl.textContent = "Istoric";
+    progressContainer.style.display = "none";
+    timerContainer.style.display = "flex";
+  } else if(currentScreen === "progressScreen"){
+    eyebrowEl.textContent = "GymTrack Pro";
+    titleEl.textContent = "Progres";
+    progressContainer.style.display = "none";
+    timerContainer.style.display = "flex";
+  }
+}
 
-    const folderName = EX_FOLDERS[ex.name] || ex.name.replace(/\s+/g, '_');
-    const imagePath = `assets/exercises/${folderName}/images/0.jpg`;
+function renderHomeScreen(){
+  document.getElementById("userNameDisplay").textContent = db.userName ? db.userName : "Sportivule";
+  const streakBadge = document.getElementById("streakBadge");
+  const records = getRecords();
+  if(records.length > 0){
+    streakBadge.style.display = "inline-flex";
+    streakBadge.textContent = `🔥 ${Math.max(1, records.length)} sesiuni salvate`;
+  } else {
+    streakBadge.style.display = "none";
+  }
+}
 
-    card.innerHTML = `
-      <div class="ex-head">
-        <button class="btn-delete-ex" title="Sterge exercitiu">✕</button>
-        <div class="visual">
-          <img class="exercise-img" src="${imagePath}" alt="${ex.name}" loading="lazy" onload="this.classList.add('visible')" onerror="this.style.display='none'">
-        </div>
-        <div class="ex-info">
-          <div class="ex-title">${ex.name}</div>
-          <div class="meta">Tinta: ${ex.target}</div>
-        </div>
-      </div>
-      <div class="set-list">
-        ${ex.sets.map((set, setIndex) => `
-          <div class="set-row">
-            <span class="set-label">#${setIndex + 1}</span>
-            <input type="number" class="field weight-field" value="${set.w}" placeholder="Kg" data-ex="${exIndex}" data-set="${setIndex}" data-type="w">
-            <input type="number" class="field reps-field" value="${set.r}" placeholder="Reps" data-ex="${exIndex}" data-set="${setIndex}" data-type="r">
-            <button class="check ${set.done ? "on" : ""}" data-ex="${exIndex}" data-set="${setIndex}">✓</button>
+function renderDayTabs(){
+  const container = document.getElementById("dayTabs");
+  container.innerHTML = DAYS.map((d, i) => `
+    <button class="day-tab ${i === currentDay ? 'active' : ''}" onclick="switchDay(${i})">
+      <strong>${d.label}</strong>
+      <small>${d.title}</small>
+    </button>
+  `).join("");
+}
+
+function switchDay(i){
+  currentDay = i;
+  renderDayTabs();
+  renderWorkout();
+}
+
+function renderWorkout(){
+  renderDayTabs();
+  updateHeaderInfo();
+  
+  const day = DAYS[currentDay];
+  const workoutData = getWorkout(currentDay);
+  const list = document.getElementById("workoutList");
+  
+  let totalSets = 0, doneSets = 0;
+  
+  list.innerHTML = day.exercises.map((ex, exIdx) => {
+    const sets = workoutData[exIdx];
+    const category = getExerciseCategory(ex);
+    const folder = ex[3];
+    const imgSrc = folder ? `exercises/${folder}/0.jpg` : null;
+    
+    totalSets += sets.length;
+    sets.forEach(s => { if(s.done) doneSets++; });
+    const isExComplete = sets.every(s => s.done);
+    
+    return `
+      <div class="card ${isExComplete ? 'complete' : ''}" id="ex-card-${exIdx}">
+        <div class="ex-head">
+          ${imgSrc ? `
+            <div class="visual">
+              <img class="exercise-img" src="${imgSrc}" alt="${ex[0]}" loading="lazy" onload="this.classList.add('visible')" onerror="this.parentElement.style.display='none'">
+            </div>
+          ` : ''}
+          <div class="ex-info">
+            <div class="ex-title">${ex[0]}</div>
+            <div class="meta">${ex[1]} serii × ${ex[2]} reps</div>
+            <div class="last">${getPreviousSummary(ex[0])}</div>
           </div>
-        `).join('')}
-        <button class="btn ghost btn-add-set" data-ex="${exIndex}" style="width:100%;margin-top:6px;padding:8px;font-size:12px;">+ Adauga set</button>
+          <button class="btn-delete-ex" onclick="deleteExercise(${exIdx})" title="Șterge exercițiul">✕</button>
+        </div>
+        <div class="set-list">
+          ${sets.map((set, setIdx) => `
+            <div class="set-row">
+              <span class="set-label">#${setIdx + 1}</span>
+              <div class="stepper">
+                <button class="step-btn" onclick="adjustValue(${exIdx}, ${setIdx}, 'kg', -2.5)">-</button>
+                <div class="val" onclick="editSetPrompt(${exIdx}, ${setIdx}, 'kg')">${set.kg !== "" ? set.kg : '0'}<span class="unit">kg</span></div>
+                <button class="step-btn" onclick="adjustValue(${exIdx}, ${setIdx}, 'kg', 2.5)">+</button>
+              </div>
+              <div class="stepper">
+                <button class="step-btn" onclick="adjustValue(${exIdx}, ${setIdx}, 'reps', -1)">-</button>
+                <div class="val" onclick="editSetPrompt(${exIdx}, ${setIdx}, 'reps')">${set.reps !== "" ? set.reps : '0'}<span class="unit">reps</span></div>
+                <button class="step-btn" onclick="adjustValue(${exIdx}, ${setIdx}, 'reps', 1)">+</button>
+              </div>
+              <button class="check ${set.done ? 'on' : ''}" onclick="toggleSet(${exIdx}, ${setIdx})">✓</button>
+            </div>
+          `).join('')}
+        </div>
       </div>
     `;
-
-    // Event handlers pentru exercitiu
-    card.querySelector(".btn-delete-ex").addEventListener("click", () => {
-      if (confirm(`Stergi ${ex.name}?`)) {
-        currentDay.exercises.splice(exIndex, 1);
-        saveState("gym_days", daysData);
-        renderWorkout();
-      }
-    });
-
-    card.querySelector(".btn-add-set").addEventListener("click", () => {
-      const lastSet = ex.sets[ex.sets.length - 1] || { w: 10, r: 10, done: false };
-      ex.sets.push({ w: lastSet.w, r: lastSet.r, done: false });
-      saveState("gym_days", daysData);
-      renderWorkout();
-    });
-
-    workoutListEl.appendChild(card);
-  });
-
-  // Attach event listeners pentru inputs si checks
-  workoutListEl.querySelectorAll(".field").forEach(input => {
-    input.addEventListener("change", (e) => {
-      const exIdx = e.target.getAttribute("data-ex");
-      const setIdx = e.target.getAttribute("data-set");
-      const type = e.target.getAttribute("data-type");
-      const val = parseFloat(e.target.value) || 0;
-
-      if (type === "w") currentDay.exercises[exIdx].sets[setIdx].w = val;
-      if (type === "r") currentDay.exercises[exIdx].sets[setIdx].r = val;
-
-      saveState("gym_days", daysData);
-    });
-  });
-
-  workoutListEl.querySelectorAll(".check").forEach(btn => {
-    btn.addEventListener("click", (e) => {
-      const exIdx = btn.getAttribute("data-ex");
-      const setIdx = btn.getAttribute("data-set");
-      const currentState = currentDay.exercises[exIdx].sets[setIdx].done;
-      
-      currentDay.exercises[exIdx].sets[setIdx].done = !currentState;
-      saveState("gym_days", daysData);
-      renderWorkout();
-      
-      if (!currentState && navigator.vibrate) {
-        navigator.vibrate(50);
-      }
-    });
-  });
-
-  updateProgress();
+  }).join("");
+  
+  const pct = totalSets > 0 ? Math.round((doneSets / totalSets) * 100) : 0;
+  document.getElementById("fill").style.width = `${pct}%`;
+  document.getElementById("progressText").textContent = `${pct}%`;
 }
 
-function updateProgress() {
-  const currentDay = getActiveDay();
-  let totalSets = 0;
-  let completedSets = 0;
-
-  currentDay.exercises.forEach(ex => {
-    ex.sets.forEach(s => {
-      totalSets++;
-      if (s.done) completedSets++;
-    });
-  });
-
-  const percentage = totalSets > 0 ? Math.round((completedSets / totalSets) * 100) : 0;
-  fillEl.style.width = `${percentage}%`;
-  progressTextEl.textContent = `${percentage}%`;
+function getPreviousSummary(exName){
+  const records = getRecords();
+  for(let i = records.length - 1; i >= 0; i--){
+    const r = records[i];
+    if(r.exercises && r.exercises[exName]){
+      const s = r.exercises[exName];
+      return `Ultima dată: ${s.maxKg || 0} kg (${s.setsCount || 0} serii)`;
+    }
+  }
+  return "Fără istoric recent";
 }
 
-/* =========================================================
-   ACTIONS (FINISH, ADD EXERCISE, RESET)
-   ========================================================= */
-
-document.getElementById("addExBtn").addEventListener("click", () => {
-  const name = prompt("Numele exercițiului nou:");
-  if (!name || name.trim() === "") return;
-
-  const target = prompt("Țintă seturi / repetări (ex: 3 x 10-12):", "3 x 10-12") || "3 x 10-12";
-  const currentDay = getActiveDay();
-
-  currentDay.exercises.push({
-    name: name.trim(),
-    target: target.trim(),
-    sets: [
-      { w: 10, r: 10, done: false },
-      { w: 10, r: 10, done: false },
-      { w: 10, r: 10, done: false }
-    ]
-  });
-
-  saveState("gym_days", daysData);
+function adjustValue(exIdx, setIdx, field, delta){
+  const sets = getWorkout(currentDay)[exIdx];
+  let cur = parseFloat(sets[setIdx][field]);
+  if(isNaN(cur)) cur = 0;
+  cur = Math.max(0, cur + delta);
+  sets[setIdx][field] = cur === 0 ? "" : cur;
+  save();
   renderWorkout();
-  showToast("Exercițiu adăugat cu succes!");
-});
+}
 
-document.getElementById("resetBtn").addEventListener("click", () => {
-  if (confirm("Sigur dorești să resetezi bifele pentru ziua curentă?")) {
-    const currentDay = getActiveDay();
-    currentDay.exercises.forEach(ex => {
-      ex.sets.forEach(s => s.done = false);
-    });
-    saveState("gym_days", daysData);
-    renderWorkout();
-    showToast("Antrenamentul a fost resetat.");
-  }
-});
-
-document.getElementById("finishBtn").addEventListener("click", async () => {
-  const currentDay = getActiveDay();
-  let totalCompleted = 0;
-
-  currentDay.exercises.forEach(ex => {
-    ex.sets.forEach(s => { if (s.done) totalCompleted++; });
+function editSetPrompt(exIdx, setIdx, field){
+  const sets = getWorkout(currentDay)[exIdx];
+  openModal({
+    title: field === 'kg' ? "Modifică Greutatea (kg)" : "Modifică Repetările",
+    fields: [{ id: "val", type: "number", value: sets[setIdx][field], placeholder: "Introdu valoarea" }],
+    onConfirm: (res) => {
+      const v = res.val.trim();
+      sets[setIdx][field] = v === "" ? "" : parseFloat(v);
+      save();
+      renderWorkout();
+    }
   });
+}
 
-  if (totalCompleted === 0) {
-    showToast("Bifează cel puțin un set înainte de finalizare!");
-    return;
-  }
+function toggleSet(exIdx, setIdx){
+  const sets = getWorkout(currentDay)[exIdx];
+  sets[setIdx].done = !sets[setIdx].done;
+  if(sets[setIdx].done) triggerHaptic("light");
+  save();
+  renderWorkout();
+}
 
-  const durationText = timerTextEl.textContent;
+function deleteExercise(exIdx){
+  openModal({
+    title: "Șterge exercițiul",
+    desc: "Sigur dorești să elimini acest exercițiu din programul zilei?",
+    confirmText: "Șterge",
+    danger: true,
+    onConfirm: () => {
+      DAYS[currentDay].exercises.splice(exIdx, 1);
+      if(db.workouts && db.workouts[DAYS[currentDay].id]){
+        db.workouts[DAYS[currentDay].id].splice(exIdx, 1);
+      }
+      save();
+      renderWorkout();
+      toast("Exercițiu șters");
+    }
+  });
+}
 
-  const sessionData = {
-    id: Date.now(),
-    date: new Date().toLocaleDateString("ro-RO", { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }),
-    dayTitle: currentDay.title,
-    duration: durationText,
-    exercises: JSON.parse(JSON.stringify(currentDay.exercises))
-  };
-
-  historyData.unshift(sessionData);
-  await saveState("gym_history", historyData);
-
-  // Reset bife
-  currentDay.exercises.forEach(ex => ex.sets.forEach(s => s.done = false));
-  await saveState("gym_days", daysData);
-
-  stopTimer();
-  showToast("🎉 Antrenament salvat în istoric!");
-  switchScreen("historyScreen");
-});
-
-/* =========================================================
-   HISTORY & PROGRESS RENDERING
-   ========================================================= */
-
-function renderHistory() {
-  historyListEl.innerHTML = "";
-
-  if (historyData.length === 0) {
-    historyListEl.innerHTML = `<p style="color:var(--muted);text-align:center;padding:40px 0;">Nu ai nicio sesiune salvată încă.</p>`;
-    return;
-  }
-
-  historyData.forEach((session, index) => {
-    const card = document.createElement("div");
-    card.className = "card";
-    card.style.padding = "16px";
-
-    card.innerHTML = `
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
-        <div>
-          <strong style="font-size:16px;color:#fff;">${session.dayTitle}</strong>
-          <div style="font-size:12px;color:var(--muted);margin-top:2px;">${session.date} • ⏱ ${session.duration || 'N/A'}</div>
+/* History, Stats & Charts */
+function renderHistory(){
+  const records = getRecords();
+  const statsEl = document.getElementById("stats");
+  const historyList = document.getElementById("historyList");
+  
+  let totalWorkouts = records.length;
+  let totalVolumeKg = records.reduce((acc, r) => acc + (r.totalVolume || 0), 0);
+  
+  statsEl.innerHTML = `
+    <div class="stat-card">
+      <strong>${totalWorkouts}</strong>
+      <span>Antrenamente total</span>
+    </div>
+    <div class="stat-card">
+      <strong>${totalVolumeKg > 1000 ? (totalVolumeKg/1000).toFixed(1) + 't' : totalVolumeKg + 'kg'}</strong>
+      <span>Volum total ridicat</span>
+    </div>
+  `;
+  
+  if(records.length === 0){
+    historyList.innerHTML = `<div class="empty">Niciun antrenament finalizat încă. Apasă Start și finalizează o sesiune!</div>`;
+  } else {
+    historyList.innerHTML = records.slice().reverse().map((r, idx) => `
+      <div class="history-item">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start">
+          <div>
+            <strong>${r.dayTitle}</strong>
+            <div style="font-size:12px;color:var(--muted);margin-top:2px">${r.date} • Durată: ${r.duration || 'N/A'}</div>
+          </div>
+          <button class="btn ghost small danger-outline" onclick="deleteRecord(${records.length - 1 - idx})">Șterge</button>
         </div>
-        <button class="btn ghost btn-del-hist" data-index="${index}" style="padding:6px 10px;font-size:11px;color:var(--danger);">Șterge</button>
       </div>
-      <div style="display:flex;flex-direction:column;gap:6px;">
-        ${session.exercises.map(ex => {
-          const completedSets = ex.sets.filter(s => s.done);
-          if (completedSets.length === 0) return '';
+    `).join("");
+  }
+  
+  renderCalendar();
+}
+
+function deleteRecord(index){
+  openModal({
+    title: "Șterge sesiunea",
+    desc: "Sigur dorești să ștergi această sesiune din istoric?",
+    confirmText: "Șterge",
+    danger: true,
+    onConfirm: () => {
+      getRecords().splice(index, 1);
+      save();
+      renderHistory();
+      toast("Sesiune ștearsă");
+    }
+  });
+}
+
+function renderCalendar(){
+  const titleEl = document.getElementById("calMonthTitle");
+  const gridEl = document.getElementById("calGrid");
+  
+  const year = calendarDate.getFullYear();
+  const month = calendarDate.getMonth();
+  
+  const monthNames = ["Ianuarie", "Februarie", "Martie", "Aprilie", "Mai", "Iunie", "Iulie", "August", "Septembrie", "Octombrie", "Noiembrie", "Decembrie"];
+  titleEl.textContent = `${monthNames[month]} ${year}`;
+  
+  const firstDayIndex = new Date(year, month, 1).getDay();
+  const adjustedFirstDay = (firstDayIndex === 0) ? 6 : firstDayIndex - 1;
+  const totalDays = new Date(year, month + 1, 0).getDate();
+  
+  const records = getRecords();
+  const trainedDates = {};
+  records.forEach(r => {
+    if(r.timestamp) {
+      const d = new Date(r.timestamp);
+      if(d.getFullYear() === year && d.getMonth() === month){
+        trainedDates[d.getDate()] = (trainedDates[d.getDate()] || 0) + (r.totalVolume || 1000);
+      }
+    }
+  });
+  
+  let html = `
+    <div class="cal-day-name">L</div><div class="cal-day-name">M</div><div class="cal-day-name">M</div>
+    <div class="cal-day-name">J</div><div class="cal-day-name">V</div><div class="cal-day-name">S</div><div class="cal-day-name">D</div>
+  `;
+  
+  for(let i = 0; i < adjustedFirstDay; i++){
+    html += `<div class="cal-cell empty"></div>`;
+  }
+  
+  const today = new Date();
+  for(let day = 1; day <= totalDays; day++){
+    const isToday = (day === today.getDate() && month === today.getMonth() && year === today.getFullYear());
+    const vol = trainedDates[day];
+    let bgStyle = "";
+    let trainedClass = "";
+    if(vol !== undefined){
+      trainedClass = "trained";
+      if(vol > 15000) bgStyle = "background:rgba(34,197,94,.85);border-color:rgba(34,197,94,.9);";
+      else if(vol > 5000) bgStyle = "background:rgba(34,197,94,.45);border-color:rgba(34,197,94,.5);";
+      else bgStyle = "background:rgba(34,197,94,.18);border-color:rgba(34,197,94,.3);";
+    }
+    
+    html += `<div class="cal-cell ${isToday ? 'today' : ''} ${trainedClass}" style="${bgStyle}">${day}</div>`;
+  }
+  
+  gridEl.innerHTML = html;
+}
+
+function renderProgress(){
+  const container = document.getElementById("exerciseProgress");
+  const records = getRecords();
+  
+  if(records.length === 0){
+    container.innerHTML = `<div class="empty">Nu există date suficiente pentru grafice. Completează primul antrenament!</div>`;
+    return;
+  }
+  
+  const categoryScores = { legs: 0, back: 0, chest: 0, shoulders: 0, arms: 0, core: 0 };
+  records.forEach(r => {
+    if(r.categoryVolumes){
+      for(let k in r.categoryVolumes){
+        categoryScores[k] = (categoryScores[k] || 0) + r.categoryVolumes[k];
+      }
+    }
+  });
+  
+  const maxScore = Math.max(...Object.values(categoryScores), 1);
+  
+  container.innerHTML = `
+    <div class="chart-card">
+      <h3 style="margin:0 0 14px;font-size:16px;color:#fff;">Distribuție Forță pe Grupe Musculare</h3>
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        ${Object.keys(CATEGORY_LABELS).map(key => {
+          const score = categoryScores[key] || 0;
+          const percentage = Math.round((score / maxScore) * 100);
           return `
-            <div style="font-size:13px;color:var(--text);background:rgba(0,0,0,0.2);padding:8px 10px;border-radius:8px;">
-              <strong>${ex.name}</strong>: ${completedSets.map(s => `${s.w}kg × ${s.r}`).join(', ')}
+            <div>
+              <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px;">
+                <strong style="color:var(--text);">${CATEGORY_LABELS[key]}</strong>
+                <span style="color:var(--muted);">${score > 1000 ? (score/1000).toFixed(1) + 'k kg' : score + ' kg'}</span>
+              </div>
+              <div class="track"><div class="fill" style="width:${percentage}%"></div></div>
             </div>
           `;
-        }).join('')}
+        }).join("")}
       </div>
-    `;
-
-    card.querySelector(".btn-del-hist").addEventListener("click", async () => {
-      if (confirm("Ștergi această sesiune din istoric?")) {
-        historyData.splice(index, 1);
-        await saveState("gym_history", historyData);
-        renderHistory();
-        showToast("Sesiune ștearsă.");
-      }
-    });
-
-    historyListEl.appendChild(card);
-  });
+    </div>
+  `;
 }
 
-function renderProgress() {
-  exerciseProgressEl.innerHTML = "";
-
-  if (historyData.length === 0) {
-    exerciseProgressEl.innerHTML = `<p style="color:var(--muted);text-align:center;padding:40px 0;">Efectuează antrenamente pentru a vedea evoluția volumului.</p>`;
-    return;
+/* Navigation Screen Switching */
+function showScreen(screenId){
+  currentScreen = screenId;
+  document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+  document.getElementById(screenId).classList.add("active");
+  
+  document.querySelectorAll(".nav-btn").forEach(b => {
+    if(b.dataset.screen === screenId) b.classList.add("active");
+    else b.classList.remove("active");
+  });
+  
+  updateHeaderInfo();
+  
+  if(screenId === "workoutScreen"){
+    renderWorkout();
+  } else if(screenId === "historyScreen"){
+    renderHistory();
+  } else if(screenId === "progressScreen"){
+    renderProgress();
+  } else {
+    renderHomeScreen();
   }
+}
 
-  // Calcul volum total per exercitiu
-  const volumeMap = {};
-
-  historyData.forEach(session => {
-    session.exercises.forEach(ex => {
-      let exVol = 0;
-      ex.sets.forEach(s => {
-        if (s.done) exVol += (s.w * s.r);
-      });
-      if (exVol > 0) {
-        volumeMap[ex.name] = (volumeMap[ex.name] || 0) + exVol;
+/* Event Listeners & Initialization */
+document.addEventListener("DOMContentLoaded", () => {
+  renderHomeScreen();
+  updateHeaderInfo();
+  updateTimerDisplay();
+  if (db.activeTimerStart && !db.timerPaused) runTimerInterval();
+  
+  document.getElementById("heroStartBtn").onclick = () => {
+    startWorkoutTimer();
+    showScreen("workoutScreen");
+  };
+  
+  document.getElementById("timerToggleBtn").onclick = () => {
+    toggleTimerPause();
+  };
+  
+  document.getElementById("timerStopBtn").onclick = () => {
+    confirmStopTimer();
+  };
+  
+  document.querySelectorAll(".nav-btn").forEach(btn => {
+    btn.onclick = () => {
+      showScreen(btn.dataset.screen);
+    };
+  });
+  
+  document.getElementById("editNameBtn").onclick = () => {
+    openModal({
+      title: "Nume Sportiv",
+      fields: [{ id: "name", value: db.userName, placeholder: "Introdu numele tău" }],
+      onConfirm: (res) => {
+        db.userName = res.name.trim();
+        save();
+        renderHomeScreen();
+        toast("Nume actualizat!");
       }
     });
-  });
-
-  Object.keys(volumeMap).forEach(exName => {
-    const card = document.createElement("div");
-    card.className = "card";
-    card.style.padding = "16px";
-    card.innerHTML = `
-      <div style="display:flex;justify-content:space-between;align-items:center;">
-        <strong style="color:#fff;font-size:15px;">${exName}</strong>
-        <span style="color:var(--accent);font-weight:800;font-size:14px;">${volumeMap[exName]} kg total</span>
-      </div>
-    `;
-    exerciseProgressEl.appendChild(card);
-  });
-}
-
-/* =========================================================
-   UTILITIES
-   ========================================================= */
-
-function showToast(msg) {
-  toastEl.textContent = msg;
-  toastEl.classList.add("show");
-  setTimeout(() => {
-    toastEl.classList.remove("show");
-  }, 2500);
-}
-
-document.getElementById("hideInstall").addEventListener("click", () => {
-  document.getElementById("installCard").style.display = "none";
+  };
+  
+  document.getElementById("hideInstall").onclick = () => {
+    document.getElementById("installCard").style.display = "none";
+  };
+  
+  document.getElementById("finishBtn").onclick = () => {
+    openModal({
+      title: "Finalizează Antrenamentul",
+      desc: "Felicitări pentru efort! Dorești să salvezi sesiunea curentă în istoric?",
+      confirmText: "Salvează",
+      onConfirm: () => {
+        const day = DAYS[currentDay];
+        const workoutData = getWorkout(currentDay);
+        
+        let totalVol = 0;
+        let catVols = { legs: 0, back: 0, chest: 0, shoulders: 0, arms: 0, core: 0 };
+        let exSummary = {};
+        
+        day.exercises.forEach((ex, exIdx) => {
+          const sets = workoutData[exIdx];
+          const cat = getExerciseCategory(ex);
+          let maxKgForEx = 0;
+          let setsDoneCount = 0;
+          
+          sets.forEach(s => {
+            if(s.done){
+              setsDoneCount++;
+              const kg = parseFloat(s.kg) || 0;
+              const reps = parseFloat(s.reps) || 0;
+              const vol = kg * reps;
+              totalVol += vol;
+              catVols[cat] = (catVols[cat] || 0) + vol;
+              if(kg > maxKgForEx) maxKgForEx = kg;
+            }
+          });
+          
+          exSummary[ex[0]] = { maxKg: maxKgForEx, setsCount: setsDoneCount };
+        });
+        
+        const now = new Date();
+        const records = getRecords();
+        
+        let elapsed = db.activeTimerElapsed || 0;
+        if (db.activeTimerStart && !db.timerPaused) {
+          elapsed += Math.max(0, Math.floor((Date.now() - db.activeTimerStart) / 1000));
+        }
+        const mins = Math.floor(elapsed / 60);
+        const secs = elapsed % 60;
+        const durationStr = `${mins}m ${secs}s`;
+        
+        records.push({
+          dayId: day.id,
+          dayTitle: day.title,
+          date: now.toLocaleDateString("ro-RO", { day: 'numeric', month: 'short', year: 'numeric' }),
+          timestamp: now.getTime(),
+          duration: durationStr,
+          totalVolume: totalVol,
+          categoryVolumes: catVols,
+          exercises: exSummary
+        });
+        
+        save();
+        resetWorkoutTimer();
+        triggerHaptic("finish");
+        toast("Antrenament salvat cu succes! 🎉");
+        showScreen("historyScreen");
+      }
+    });
+  };
+  
+  document.getElementById("addExBtn").onclick = () => {
+    openModal({
+      title: "Adaugă Exercițiu Nou",
+      fields: [
+        { id: "name", placeholder: "Nume exercițiu" },
+        { id: "sets", type: "number", value: "3", placeholder: "Număr serii" },
+        { id: "reps", value: "10-12", placeholder: "Repetări (ex: 10-12)" },
+        { id: "category", type: "select", options: CATEGORY_OPTIONS, value: "legs" }
+      ],
+      confirmText: "Adaugă",
+      onConfirm: (res) => {
+        if(!res.name.trim()) return;
+        const newEx = [res.name.trim(), parseInt(res.sets) || 3, res.reps.trim() || "10", null, res.category];
+        DAYS[currentDay].exercises.push(newEx);
+        
+        const workoutData = getWorkout(currentDay);
+        workoutData.push(Array.from({length: parseInt(res.sets) || 3}, () => ({done: false, kg: "", reps: ""})));
+        
+        save();
+        renderWorkout();
+        toast("Exercițiu adăugat!");
+      }
+    });
+  };
+  
+  document.getElementById("resetBtn").onclick = () => {
+    openModal({
+      title: "Resetează Sesiunea",
+      desc: "Sigur vrei să ștergi toate bifările și valorile introduse pentru acest antrenament?",
+      confirmText: "Resetează",
+      danger: true,
+      onConfirm: () => {
+        if(db.workouts) delete db.workouts[DAYS[currentDay].id];
+        save();
+        renderWorkout();
+        toast("Sesiune resetată");
+      }
+    });
+  };
+  
+  document.getElementById("exportBtn").onclick = () => {
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(db, null, 2));
+    const dlAnchor = document.createElement('a');
+    dlAnchor.setAttribute("href", dataStr);
+    dlAnchor.setAttribute("download", `gymtrack_backup_${new Date().toISOString().slice(0,10)}.json`);
+    document.body.appendChild(dlAnchor);
+    dlAnchor.click();
+    dlAnchor.remove();
+    toast("Backup descărcat!");
+  };
+  
+  document.getElementById("importBtn").onclick = () => {
+    document.getElementById("importInput").click();
+  };
+  
+  document.getElementById("importInput").onchange = (e) => {
+    const file = e.target.files[0];
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      try {
+        const imported = JSON.parse(event.target.result);
+        if(imported.days){
+          db = imported;
+          save();
+          DAYS = db.days;
+          renderHomeScreen();
+          toast("Date importate cu succes!");
+        } else {
+          toast("Fișier invalid!");
+        }
+      } catch {
+        toast("Eroare la citirea fișierului JSON.");
+      }
+    };
+    reader.readAsText(file);
+  };
+  
+  document.getElementById("forceUpdateBtn").onclick = () => {
+    if ('serviceWorker' in navigator) {
+      navigator.getRegistrations().then(registrations => {
+        for(let registration of registrations) {
+          registration.update();
+        }
+      });
+    }
+    toast("⚡ Verificat actualizări noi!");
+    setTimeout(() => window.location.reload(), 1000);
+  };
+  
+  document.getElementById("calPrev").onclick = () => {
+    calendarDate.setMonth(calendarDate.getMonth() - 1);
+    renderCalendar();
+  };
+  
+  document.getElementById("calNext").onclick = () => {
+    calendarDate.setMonth(calendarDate.getMonth() + 1);
+    renderCalendar();
+  };
 });
-
-/* =========================================================
-   APP INITIALIZATION
-   ========================================================= */
-
-async function initApp() {
-  const savedDays = await getState("gym_days");
-  if (savedDays) daysData = savedDays;
-
-  const savedHistory = await getState("gym_history");
-  if (savedHistory) historyData = savedHistory;
-
-  const savedName = await getState("gym_username");
-  if (savedName) userName = savedName;
-
-  switchScreen("homeScreen");
-}
-
-initApp();
-
-// Service Worker Registration
-if ("serviceWorker" in navigator) {
-  window.addEventListener("load", () => {
-    navigator.serviceWorker.register("./sw.js")
-      .then(reg => console.log("SW înregistrat:", reg.scope))
-      .catch(err => console.log("SW eroare:", err));
-  });
-}
 </script>
-
 </body>
 </html>
