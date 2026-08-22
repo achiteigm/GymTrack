@@ -45,7 +45,7 @@
       overflow-x:hidden;
     }
     button,input{font:inherit}
-    button{cursor:pointer;transition:transform 0.15s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.2s, border-color 0.2s}
+    button{cursor:pointer;transition:transform 0.15s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.2s, border-color 0.2s;border:0;}
     button:active{transform:scale(0.92)}
     
     .app{min-height:100%;padding-bottom:calc(92px + env(safe-area-inset-bottom))}
@@ -131,8 +131,17 @@
       color:var(--muted);
       font-size:15px;
       max-width:320px;
-      margin:0 0 45px;
+      margin:0 0 32px;
       line-height:1.4;
+    }
+    .edit-name-btn{
+      background:none;
+      border:1px solid var(--border);
+      color:var(--muted);
+      font-size:12px;
+      padding:6px 14px;
+      border-radius:99px;
+      margin-bottom:28px;
     }
     .btn-start-hero{
       position:relative;
@@ -207,11 +216,18 @@
       margin:0 0 16px;
       overflow:hidden;
       box-shadow:0 10px 30px rgba(0,0,0,0.3);
+      transition:border-color .3s, box-shadow .3s;
     }
     .card.complete{
       border-color:rgba(34, 197, 94, 0.4);
       box-shadow:0 8px 24px rgba(34, 197, 94, 0.1);
     }
+    .card.advance-highlight{
+      border-color:var(--accent);
+      box-shadow:0 0 0 3px var(--accent-glow), 0 10px 30px rgba(0,0,0,0.3);
+      animation:advancePulse .6s ease;
+    }
+    @keyframes advancePulse{0%{transform:scale(1)}50%{transform:scale(1.015)}100%{transform:scale(1)}}
     .ex-head{display:flex;flex-direction:column;gap:14px;padding:16px;position:relative}
     .btn-delete-ex{
       position:absolute;top:12px;right:12px;
@@ -230,24 +246,22 @@
       height:220px;
       border-radius:var(--radius-md);
       background:#05070a;
-      display:flex;
-      align-items:center;
-      justify-content:center;
+      position:relative;
       border:1px solid rgba(255,255,255,0.06);
       overflow:hidden;
-      padding:6px;
     }
     .exercise-img{
-      max-width:100%;
-      max-height:100%;
-      width:auto;
-      height:auto;
+      position:absolute;
+      inset:0;
+      width:100%;
+      height:100%;
       object-fit:contain;
       object-position:center;
       background-color:#05070a;
-      display:block;
-      margin:auto;
+      opacity:0;
+      transition:opacity .5s ease;
     }
+    .exercise-img.visible{ opacity:1; }
     
     .ex-info{min-width:0;flex:1}
     .ex-title{font-size:18px;font-weight:800;line-height:1.3;padding-right:30px;color:#fff}
@@ -264,19 +278,35 @@
       border:1px solid rgba(56, 189, 248, 0.2);
     }
     
-    .set-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;padding:0 16px 16px}
-    .set-box{
+    .set-list{display:flex;flex-direction:column;gap:8px;padding:0 16px 16px}
+    .set-row{
+      display:flex;align-items:center;gap:8px;
       background:rgba(12, 16, 24, 0.6);
       border:1px solid var(--border);
       border-radius:var(--radius-md);
-      padding:10px 8px;
-      position:relative;
+      padding:8px 10px;
     }
-    .set-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
-    .set-num{font-size:10px;color:var(--muted);font-weight:800;letter-spacing:0.05em}
+    .set-label{font-size:10px;color:var(--muted);font-weight:800;width:22px;flex:none;}
+    .stepper{display:flex;align-items:center;gap:4px;flex:1;justify-content:center;min-width:0;}
+    .step-btn{
+      width:26px;height:26px;flex:none;
+      border-radius:8px;
+      border:1px solid var(--border);
+      background:var(--surface2);
+      color:var(--text);
+      font-weight:800;
+      font-size:15px;
+      line-height:1;
+      display:flex;align-items:center;justify-content:center;
+    }
+    .stepper .val{
+      min-width:52px;text-align:center;font-size:13px;font-weight:800;
+      font-variant-numeric:tabular-nums;color:#fff;white-space:nowrap;
+    }
+    .stepper .unit{font-size:9px;color:var(--muted);text-transform:uppercase;margin-left:2px;font-weight:600;}
     
     .check{
-      width:26px;height:26px;
+      width:28px;height:28px;flex:none;
       border:1px solid rgba(255,255,255,0.15);
       border-radius:8px;
       background:var(--surface2);
@@ -297,7 +327,7 @@
     @keyframes pop { 0% { transform: scale(1); } 50% { transform: scale(1.25); } 100% { transform: scale(1.1); } }
 
     .pr-badge {
-      display: none;
+      display: inline-flex;
       align-items: center;
       gap: 2px;
       background: rgba(245, 158, 11, 0.15);
@@ -305,14 +335,43 @@
       color: var(--gold);
       font-size: 9px;
       font-weight: 900;
-      padding: 1px 5px;
-      border-radius: 4px;
+      padding: 3px 6px;
+      border-radius: 6px;
       letter-spacing: 0.05em;
+      flex:none;
       box-shadow: 0 0 8px var(--gold-glow);
       animation: fadeIn 0.3s ease;
     }
-    .pr-badge.visible { display: inline-flex; }
     @keyframes fadeIn { from { opacity: 0; transform: scale(0.8); } to { opacity: 1; transform: scale(1); } }
+
+    /* Modal */
+    .modal-backdrop{
+      position:fixed;inset:0;z-index:100;
+      background:rgba(0,0,0,.6);
+      backdrop-filter:blur(4px);
+      display:flex;align-items:center;justify-content:center;
+      padding:20px;
+      opacity:0;pointer-events:none;
+      transition:opacity .2s ease;
+    }
+    .modal-backdrop.show{opacity:1;pointer-events:auto;}
+    .modal{
+      background:var(--surface2);
+      border:1px solid var(--border);
+      border-radius:20px;
+      padding:22px;
+      width:100%;max-width:360px;
+      box-shadow:0 20px 60px rgba(0,0,0,.5);
+      transform:scale(.94);
+      transition:transform .2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    .modal-backdrop.show .modal{transform:scale(1);}
+    .modal h3{margin:0 0 6px;font-size:18px;color:#fff;}
+    .modal p{margin:0 0 16px;color:var(--muted);font-size:13px;line-height:1.45;}
+    .modal .input-wrapper{margin-bottom:10px;position:static;}
+    .modal .field{padding:11px 12px;font-size:14px;}
+    .modal-actions{display:flex;gap:10px;margin-top:14px;}
+    .modal-actions .btn{flex:1;justify-content:center;}
     
     .input-wrapper{position:relative;margin-bottom:6px}
     .input-wrapper:last-child{margin-bottom:0}
@@ -328,16 +387,6 @@
       outline:none;
     }
     .field:focus{border-color:var(--accent);background:rgba(0,0,0,0.5)}
-    .field-unit{
-      position:absolute;
-      right:6px;top:50%;
-      transform:translateY(-50%);
-      font-size:9px;
-      font-weight:700;
-      color:var(--muted);
-      pointer-events:none;
-      text-transform:uppercase;
-    }
     
     .actions{display:flex;gap:10px;padding:8px 0 16px;flex-wrap:wrap}
     .btn{
@@ -404,13 +453,18 @@
     }
     .cal-cell.empty{background:transparent;border:0;min-height:auto}
     .cal-cell.today{border-color:var(--accent);color:var(--text);font-weight:700}
-    .cal-cell.trained{
-      background:rgba(34,197,94,0.15);
-      border-color:rgba(34,197,94,0.4);
-      color:#fff;
-      font-weight:800;
+    .cal-cell.trained{ color:#fff; font-weight:800; }
+    .cal-legend{display:flex;align-items:center;gap:6px;justify-content:flex-end;margin-top:10px;font-size:10px;color:var(--muted);}
+    .cal-legend-swatch{width:12px;height:12px;border-radius:3px;}
+
+    .chip-row{display:flex;gap:8px;overflow:auto;padding-bottom:14px;scrollbar-width:none}
+    .chip-row::-webkit-scrollbar{display:none}
+    .chip{
+      border:1px solid var(--border);background:var(--surface);color:var(--muted);
+      padding:8px 14px;border-radius:99px;font-size:12px;font-weight:700;
+      white-space:nowrap;flex:none;
     }
-    .cal-dot{width:4px;height:4px;border-radius:50%;background:var(--done);position:absolute;bottom:3px;box-shadow:0 0 6px var(--done)}
+    .chip.active{background:rgba(56,189,248,.15);border-color:var(--accent);color:var(--accent);}
 
     .empty{padding:32px 16px;text-align:center;color:var(--muted);background:var(--surface);border:1px dashed var(--border);border-radius:var(--radius-lg)}
     .install{
@@ -463,15 +517,13 @@
       z-index:40;
       box-shadow:0 10px 25px rgba(0,0,0,0.5);
       text-align:center;
+      max-width:88%;
     }
     .toast.show{opacity:1;transform:translate(-50%,0)}
     
     @media(min-width: 520px){
       .ex-head{flex-direction:row;align-items:center}
       .visual{width:160px;height:160px;flex:none}
-    }
-    @media(max-width:480px){
-      .set-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
     }
   </style>
 </head>
@@ -497,9 +549,9 @@
   <section id="homeScreen" class="screen active">
     <div class="home-screen">
       <div class="welcome-badge">GymTrack Pro</div>
-      <h2 class="welcome-title">Bine ai venit, Emilia!</h2>
+      <h2 class="welcome-title">Bine ai venit, <span id="userNameDisplay">Sportivule</span>!</h2>
       <p class="home-sub">Ești gata pentru o nouă sesiune? Apasă Start pentru a-ți alege ziua de antrenament.</p>
-      
+      <button class="edit-name-btn" id="editNameBtn">✎ Schimbă numele</button>
       <button class="btn-start-hero" id="heroStartBtn">
         <svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
         <span>START</span>
@@ -535,6 +587,13 @@
         <button class="cal-nav-btn" id="calNext">►</button>
       </div>
       <div class="cal-grid" id="calGrid"></div>
+      <div class="cal-legend">
+        <span>puțin volum</span>
+        <span class="cal-legend-swatch" style="background:rgba(34,197,94,.18);border:1px solid rgba(34,197,94,.3)"></span>
+        <span class="cal-legend-swatch" style="background:rgba(34,197,94,.45);border:1px solid rgba(34,197,94,.5)"></span>
+        <span class="cal-legend-swatch" style="background:rgba(34,197,94,.85);border:1px solid rgba(34,197,94,.9)"></span>
+        <span>mult volum</span>
+      </div>
     </div>
 
     <div class="actions" style="padding: 10px 0;">
@@ -549,7 +608,7 @@
 
   <!-- Progres -->
   <section id="progressScreen" class="screen">
-    <div class="hero"><h2>Evoluție Greutăți</h2><p>Graficul progresului pe fiecare exercițiu.</p></div>
+    <div class="hero"><h2>Evoluție Greutăți</h2><p>Alege până la 3 exerciții pentru a le compara pe același grafic.</p></div>
     <div id="exerciseProgress"></div>
   </section>
 </main>
@@ -573,6 +632,10 @@
   </button>
 </div></nav>
 <div class="toast" id="toast"></div>
+
+<div class="modal-backdrop" id="modalBackdrop">
+  <div class="modal" id="modalBody"></div>
+</div>
 </div>
 
 <script>
@@ -646,12 +709,14 @@ const store = {
 
 let db = store.load();
 db.days ||= DEFAULT_DAYS;
+db.userName ||= "";
 let DAYS = db.days;
 let currentDay = 0;
 let currentScreen = "homeScreen";
 let animationInterval = null;
 let chartInstances = {};
 let calendarDate = new Date();
+let selectedProgressExercises = [];
 
 const customModifiedSets = {};
 
@@ -709,8 +774,39 @@ function toast(msg){
   t.innerHTML = msg;
   t.classList.add("show");
   clearTimeout(window._tt);
-  window._tt = setTimeout(() => t.classList.remove("show"), 2200);
+  window._tt = setTimeout(() => t.classList.remove("show"), 2400);
 }
+
+/* ---------- Custom modal (replaces prompt/confirm/alert) ---------- */
+function openModal({title, desc, fields = [], confirmText = "OK", cancelText = "Anulează", danger = false, onConfirm}){
+  const backdrop = document.getElementById("modalBackdrop");
+  const body = document.getElementById("modalBody");
+  body.innerHTML = `
+    ${title ? `<h3>${title}</h3>` : ""}
+    ${desc ? `<p>${desc}</p>` : ""}
+    ${fields.map(f => `
+      <div class="input-wrapper">
+        <input class="field" id="mf-${f.id}" type="${f.type || "text"}" inputmode="${f.inputmode || "text"}" placeholder="${f.placeholder || ""}" value="${f.value || ""}">
+      </div>
+    `).join("")}
+    <div class="modal-actions">
+      <button class="btn ghost" id="modalCancel">${cancelText}</button>
+      <button class="btn ${danger ? "" : "primary"}" id="modalConfirm" style="${danger ? "background:var(--danger);color:#fff;" : ""}">${confirmText}</button>
+    </div>
+  `;
+  backdrop.classList.add("show");
+  const firstInput = body.querySelector(".field");
+  if (firstInput) setTimeout(() => firstInput.focus(), 200);
+  document.getElementById("modalCancel").onclick = closeModal;
+  document.getElementById("modalConfirm").onclick = () => {
+    const values = {};
+    fields.forEach(f => values[f.id] = document.getElementById("mf-" + f.id).value.trim());
+    closeModal();
+    onConfirm && onConfirm(values);
+  };
+}
+function closeModal(){ document.getElementById("modalBackdrop").classList.remove("show"); }
+document.getElementById("modalBackdrop").onclick = (e) => { if (e.target.id === "modalBackdrop") closeModal(); };
 
 function switchScreen(screenId){
   currentScreen = screenId;
@@ -764,6 +860,42 @@ function updateProgress(){
   if (doneSets > 0) startTimer();
 }
 
+function adjustSet(e, s, type, dir){
+  const w = getWorkout(currentDay);
+  const step = type === "kg" ? 2.5 : 1;
+  let val = (parseFloat(w[e][s][type]) || 0) + dir * step;
+  val = Math.max(0, val);
+  if (type === "kg") val = Math.round(val * 10) / 10;
+  w[e][s][type] = String(val);
+
+  const customKey = `${currentDay}_${e}_${type}`;
+  customModifiedSets[customKey] ||= {};
+
+  if (s === 0) {
+    for (let i = 1; i < w[e].length; i++) {
+      if (!customModifiedSets[customKey][i]) w[e][i][type] = String(val);
+    }
+  } else {
+    customModifiedSets[customKey][s] = true;
+  }
+  save();
+}
+
+function findNextIncompleteExercise(fromIdx){
+  const w = getWorkout(currentDay);
+  for (let i = fromIdx + 1; i < w.length; i++) if (!w[i].every(s => s.done)) return i;
+  for (let i = 0; i < fromIdx; i++) if (!w[i].every(s => s.done)) return i;
+  return -1;
+}
+
+function scrollToExercise(idx){
+  const card = document.querySelectorAll(".card")[idx];
+  if (!card) return;
+  card.scrollIntoView({ behavior: "smooth", block: "center" });
+  card.classList.add("advance-highlight");
+  setTimeout(() => card.classList.remove("advance-highlight"), 1200);
+}
+
 function renderWorkout(){
   const day = DAYS[currentDay];
   const w = getWorkout(currentDay);
@@ -791,18 +923,13 @@ function renderWorkout(){
     const done = sets.filter(s => s.done).length;
     const last = getLast(day.id, ei);
     const maxHistorical = getMaxWeightForEx(e[0]);
-    const initialSrc = `./exercises/${folder}/0.jpg`;
 
     return `<article class="card ${done === e[1] ? "complete" : ""}">
       <div class="ex-head">
         <button class="btn-delete-ex" onclick="deleteExercise(${ei})" title="Șterge exercițiul">✕</button>
         <div class="visual">
-          <img class="exercise-img" 
-               src="${initialSrc}" 
-               data-folder="${folder}" 
-               data-frame="0" 
-               onerror="this.onerror=null; this.src='https://via.placeholder.com/300/0f131b/38bdf8?text=GymTrack';" 
-               alt="${e[0]}">
+          <img class="exercise-img visible" src="./exercises/${folder}/0.jpg" data-folder="${folder}" onerror="this.onerror=null; this.src='https://via.placeholder.com/300/0f131b/38bdf8?text=GymTrack';" alt="${e[0]}">
+          <img class="exercise-img" src="./exercises/${folder}/1.jpg" data-folder="${folder}" onerror="this.onerror=null; this.src='https://via.placeholder.com/300/0f131b/38bdf8?text=GymTrack';" alt="${e[0]}">
         </div>
         <div class="ex-info">
           <div class="ex-title">${e[0]}</div>
@@ -810,32 +937,37 @@ function renderWorkout(){
           ${last ? `<div class="last">Ultimul: ${last}</div>` : ""}
         </div>
       </div>
-      <div class="set-grid">
+      <div class="set-list">
         ${sets.map((s, si) => {
           const currentKg = parseFloat(s.kg) || 0;
           const isPR = maxHistorical > 0 && currentKg > maxHistorical;
-
           return `
-          <div class="set-box">
-            <div class="set-top">
-              <span class="set-num">SET ${si + 1}</span>
-              <span class="pr-badge ${isPR ? "visible" : ""}" id="pr-badge-${ei}-${si}">★ PR</span>
-              <button class="check ${s.done ? "on" : ""}" data-e="${ei}" data-s="${si}">${s.done ? "✓" : ""}</button>
+          <div class="set-row">
+            <span class="set-label">S${si + 1}</span>
+            <div class="stepper" data-e="${ei}" data-s="${si}" data-type="kg">
+              <button class="step-btn" data-dir="-1">–</button>
+              <span class="val">${s.kg || 0}<span class="unit">kg</span></span>
+              <button class="step-btn" data-dir="1">+</button>
             </div>
-            <div class="input-wrapper">
-              <input class="field kg" inputmode="decimal" placeholder="0" value="${s.kg}" data-e="${ei}" data-s="${si}">
-              <span class="field-unit">kg</span>
+            <div class="stepper" data-e="${ei}" data-s="${si}" data-type="reps">
+              <button class="step-btn" data-dir="-1">–</button>
+              <span class="val">${s.reps || 0}<span class="unit">rep</span></span>
+              <button class="step-btn" data-dir="1">+</button>
             </div>
-            <div class="input-wrapper">
-              <input class="field reps" inputmode="numeric" placeholder="0" value="${s.reps}" data-e="${ei}" data-s="${si}">
-              <span class="field-unit">rep</span>
-            </div>
-          </div>
-          `;
+            ${isPR ? `<span class="pr-badge">★ PR</span>` : ""}
+            <button class="check ${s.done ? "on" : ""}" data-e="${ei}" data-s="${si}">${s.done ? "✓" : ""}</button>
+          </div>`;
         }).join("")}
       </div>
     </article>`;
   }).join("");
+
+  document.querySelectorAll(".step-btn").forEach(btn => btn.onclick = () => {
+    const wrap = btn.closest(".stepper");
+    adjustSet(+wrap.dataset.e, +wrap.dataset.s, wrap.dataset.type, +btn.dataset.dir);
+    renderWorkout();
+    updateProgress();
+  });
 
   document.querySelectorAll(".check").forEach(b => b.onclick = () => {
     const e = +b.dataset.e, s = +b.dataset.s;
@@ -843,6 +975,7 @@ function renderWorkout(){
     const isNowDone = !w[e][s].done;
     w[e][s].done = isNowDone;
     
+    let justCompletedExercise = false;
     if (isNowDone) {
       const maxHist = getMaxWeightForEx(exName);
       const currentKg = parseFloat(w[e][s].kg) || 0;
@@ -853,6 +986,7 @@ function renderWorkout(){
       } else {
         triggerHaptic("light");
       }
+      justCompletedExercise = w[e].every(set => set.done);
     } else {
       triggerHaptic("light");
     }
@@ -860,52 +994,15 @@ function renderWorkout(){
     save();
     renderWorkout();
     updateProgress();
-  });
 
-  document.querySelectorAll(".field").forEach(inp => inp.oninput = () => {
-    const e = +inp.dataset.e, s = +inp.dataset.s;
-    const type = inp.classList.contains("kg") ? "kg" : "reps";
-    const val = inp.value;
-
-    w[e][s][type] = val;
-
-    const customKey = `${currentDay}_${e}_${type}`;
-    customModifiedSets[customKey] ||= {};
-
-    if (s === 0) {
-      for (let i = 1; i < w[e].length; i++) {
-        if (!customModifiedSets[customKey][i]) {
-          w[e][i][type] = val;
-          const targetInput = document.querySelector(`.field.${type}[data-e="${e}"][data-s="${i}"]`);
-          if (targetInput) targetInput.value = val;
-        }
-      }
-    } else {
-      if (val === "") {
-        customModifiedSets[customKey][s] = false;
-        const set1Val = w[e][0][type];
-        w[e][s][type] = set1Val;
-        inp.value = set1Val;
+    if (justCompletedExercise) {
+      const nextIdx = findNextIncompleteExercise(e);
+      if (nextIdx !== -1) {
+        setTimeout(() => scrollToExercise(nextIdx), 350);
       } else {
-        customModifiedSets[customKey][s] = true;
+        setTimeout(() => toast("Toate exercițiile zilei sunt completate! 💪"), 350);
       }
     }
-
-    const exName = day.exercises[e][0];
-    const maxHist = getMaxWeightForEx(exName);
-    for (let i = 0; i < w[e].length; i++) {
-      const currentKg = parseFloat(w[e][i].kg) || 0;
-      const badge = document.getElementById(`pr-badge-${e}-${i}`);
-      if (badge) {
-        if (maxHist > 0 && currentKg > maxHist) {
-          badge.classList.add("visible");
-        } else {
-          badge.classList.remove("visible");
-        }
-      }
-    }
-
-    save();
   });
 
   startAnimation();
@@ -913,39 +1010,52 @@ function renderWorkout(){
 }
 
 function addExercise(){
-  const name = prompt("Numele noului exercițiu:");
-  if (!name) return;
-  const setsCount = parseInt(prompt("Număr de serii:", "3")) || 3;
-  const repsCount = prompt("Repetări vizate:", "10-12") || "10-12";
-  
-  DAYS[currentDay].exercises.push([name, setsCount, repsCount, "Leg_Press"]);
-  db.workouts[DAYS[currentDay].id].push(Array.from({length: setsCount}, () => ({done: false, kg: "", reps: ""})));
-  save();
-  renderWorkout();
-  toast("Exercițiu adăugat!");
+  openModal({
+    title: "Exercițiu nou",
+    fields: [
+      { id: "name", placeholder: "Numele exercițiului" },
+      { id: "sets", type: "number", inputmode: "numeric", placeholder: "Număr de serii", value: "3" },
+      { id: "reps", placeholder: "Repetări (ex: 10-12)", value: "10-12" }
+    ],
+    confirmText: "Adaugă",
+    onConfirm: (v) => {
+      if (!v.name) return;
+      const setsCount = parseInt(v.sets) || 3;
+      DAYS[currentDay].exercises.push([v.name, setsCount, v.reps || "10-12", "Leg_Press"]);
+      db.workouts[DAYS[currentDay].id].push(Array.from({ length: setsCount }, () => ({ done: false, kg: "", reps: "" })));
+      save();
+      renderWorkout();
+      toast("Exercițiu adăugat!");
+    }
+  });
 }
 
 function deleteExercise(index){
   triggerHaptic("warn");
-  if (confirm("Sigur vrei să ștergi acest exercițiu din rutina zilei?")){
-    DAYS[currentDay].exercises.splice(index, 1);
-    db.workouts[DAYS[currentDay].id].splice(index, 1);
-    save();
-    renderWorkout();
-    toast("Exercițiu șters.");
-  }
+  openModal({
+    title: "Ștergi exercițiul?",
+    desc: "Sigur vrei să ștergi acest exercițiu din rutina zilei?",
+    confirmText: "Șterge",
+    danger: true,
+    onConfirm: () => {
+      DAYS[currentDay].exercises.splice(index, 1);
+      db.workouts[DAYS[currentDay].id].splice(index, 1);
+      save();
+      renderWorkout();
+      toast("Exercițiu șters.");
+    }
+  });
 }
 
 function startAnimation() {
   if (animationInterval) clearInterval(animationInterval);
   animationInterval = setInterval(() => {
-    const images = document.querySelectorAll('.exercise-img');
-    images.forEach(img => {
-      const folder = img.getAttribute('data-folder');
-      let currentFrame = parseInt(img.getAttribute('data-frame') || '0', 10);
-      currentFrame = (currentFrame === 0) ? 1 : 0;
-      img.setAttribute('data-frame', currentFrame);
-      img.src = `./exercises/${folder}/${currentFrame}.jpg`;
+    document.querySelectorAll(".visual").forEach(v => {
+      const imgs = v.querySelectorAll(".exercise-img");
+      if (imgs.length < 2) return;
+      const activeIdx = imgs[0].classList.contains("visible") ? 0 : 1;
+      imgs[activeIdx].classList.remove("visible");
+      imgs[1 - activeIdx].classList.add("visible");
     });
   }, 1200);
 }
@@ -979,7 +1089,7 @@ function finishWorkout(){
     sets: doneSets
   });
 
-  db.workouts[day.id] = day.exercises.map(e => Array.from({length: e[1]}, () => ({done: false, kg: "", reps: ""})));
+  db.workouts[day.id] = day.exercises.map(e => Array.from({ length: e[1] }, () => ({ done: false, kg: "", reps: "" })));
   save();
   resetTimer();
   triggerHaptic("finish");
@@ -988,14 +1098,20 @@ function finishWorkout(){
 }
 
 function resetCurrentWorkout(){
-  if (confirm("Resetezi toate bifările și valorile pentru ziua curentă?")){
-    const day = DAYS[currentDay];
-    db.workouts[day.id] = day.exercises.map(e => Array.from({length: e[1]}, () => ({done: false, kg: "", reps: ""})));
-    save();
-    resetTimer();
-    renderWorkout();
-    toast("Sesiunea a fost resetată.");
-  }
+  openModal({
+    title: "Resetezi ziua?",
+    desc: "Toate bifările și valorile pentru ziua curentă vor fi șterse.",
+    confirmText: "Resetează",
+    danger: true,
+    onConfirm: () => {
+      const day = DAYS[currentDay];
+      db.workouts[day.id] = day.exercises.map(e => Array.from({ length: e[1] }, () => ({ done: false, kg: "", reps: "" })));
+      save();
+      resetTimer();
+      renderWorkout();
+      toast("Sesiunea a fost resetată.");
+    }
+  });
 }
 
 function renderHistory(){
@@ -1053,14 +1169,19 @@ function renderCalendar(){
   if (startingDay === -1) startingDay = 6;
   
   const totalDays = lastDay.getDate();
-  const trainedDays = new Set();
-  
+
+  /* volume-based heatmap instead of a flat "trained" dot */
+  const volumePerDay = {};
   getRecords().forEach(r => {
     const rd = new Date(r.date);
     if (rd.getFullYear() === year && rd.getMonth() === month) {
-      trainedDays.add(rd.getDate());
+      const day = rd.getDate();
+      let vol = 0;
+      r.sets.forEach(s => { vol += (parseFloat(s.kg) || 0) * (parseFloat(s.reps) || 0); });
+      volumePerDay[day] = (volumePerDay[day] || 0) + vol;
     }
   });
+  const maxVol = Math.max(1, ...Object.values(volumePerDay));
 
   const today = new Date();
   const isCurrentMonth = today.getFullYear() === year && today.getMonth() === month;
@@ -1070,18 +1191,24 @@ function renderCalendar(){
     <div class="cal-day-name">J</div><div class="cal-day-name">V</div><div class="cal-day-name">S</div><div class="cal-day-name">D</div>
   `;
 
-  for (let i = 0; i < startingDay; i++) {
-    html += `<div class="cal-cell empty"></div>`;
-  }
+  for (let i = 0; i < startingDay; i++) html += `<div class="cal-cell empty"></div>`;
 
   for (let day = 1; day <= totalDays; day++) {
     const isToday = isCurrentMonth && today.getDate() === day;
-    const isTrained = trainedDays.has(day);
+    const isTrained = !!volumePerDay[day];
     let classes = "cal-cell";
     if (isToday) classes += " today";
     if (isTrained) classes += " trained";
 
-    html += `<div class="${classes}">${day}${isTrained ? '<div class="cal-dot"></div>' : ''}</div>`;
+    let style = "";
+    if (isTrained) {
+      const intensity = Math.min(1, volumePerDay[day] / maxVol);
+      const alphaBg = 0.15 + intensity * 0.7;
+      const alphaBorder = Math.min(1, alphaBg + 0.1);
+      style = `style="background:rgba(34,197,94,${alphaBg.toFixed(2)});border-color:rgba(34,197,94,${alphaBorder.toFixed(2)});"`;
+    }
+
+    html += `<div class="${classes}" ${style}>${day}</div>`;
   }
 
   document.getElementById("calGrid").innerHTML = html;
@@ -1092,15 +1219,15 @@ document.getElementById("calNext").onclick = () => { calendarDate.setMonth(calen
 
 function renderProgress(){
   const recs = getRecords();
-  const exMap = {};
+  const exMap = {}; // exName -> [{ts, kg}]
 
   recs.forEach(r => {
-    const dateStr = new Date(r.date).toLocaleDateString("ro-RO", { day: 'numeric', month: 'short' });
+    const ts = new Date(r.date).getTime();
     r.sets.forEach(s => {
       const kg = parseFloat(s.kg) || 0;
       if (kg > 0) {
         exMap[s.exercise] ||= [];
-        exMap[s.exercise].push({ date: dateStr, kg: kg });
+        exMap[s.exercise].push({ ts, kg });
       }
     });
   });
@@ -1113,44 +1240,67 @@ function renderProgress(){
     return;
   }
 
-  container.innerHTML = keys.map((exName, idx) => `
-    <div class="chart-card">
-      <strong style="display:block;margin-bottom:12px;font-size:15px;color:#fff;">${exName}</strong>
-      <canvas id="chart-${idx}" height="180"></canvas>
+  selectedProgressExercises = selectedProgressExercises.filter(k => keys.includes(k));
+  if (!selectedProgressExercises.length) selectedProgressExercises = [keys[0]];
+
+  container.innerHTML = `
+    <div class="chip-row" id="progressChips">
+      ${keys.map(k => `<button class="chip ${selectedProgressExercises.includes(k) ? "active" : ""}" data-ex="${k}">${k}</button>`).join("")}
     </div>
-  `).join("");
+    <div class="chart-card"><canvas id="overlayChart" height="220"></canvas></div>
+  `;
 
-  keys.forEach((exName, idx) => {
-    const ctx = document.getElementById(`chart-${idx}`).getContext("2d");
-    const dataPoints = exMap[exName];
-    
-    if (chartInstances[idx]) chartInstances[idx].destroy();
-
-    chartInstances[idx] = new Chart(ctx, {
-      type: 'line',
-      data: {
-        labels: dataPoints.map(p => p.date),
-        datasets: [{
-          label: 'Greutate (kg)',
-          data: dataPoints.map(p => p.kg),
-          borderColor: '#38bdf8',
-          backgroundColor: 'rgba(56, 189, 248, 0.1)',
-          borderWidth: 2,
-          fill: true,
-          tension: 0.3,
-          pointBackgroundColor: '#22c55e'
-        }]
-      },
-      options: {
-        responsive: true,
-        plugins: { legend: { display: false } },
-        scales: {
-          x: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#94a3b8' } },
-          y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#94a3b8' } }
-        }
-      }
-    });
+  document.querySelectorAll("#progressChips .chip").forEach(c => c.onclick = () => {
+    const ex = c.dataset.ex;
+    if (selectedProgressExercises.includes(ex)) {
+      if (selectedProgressExercises.length > 1) selectedProgressExercises = selectedProgressExercises.filter(x => x !== ex);
+    } else {
+      if (selectedProgressExercises.length >= 3) selectedProgressExercises.shift();
+      selectedProgressExercises.push(ex);
+    }
+    renderProgress();
   });
+
+  const tsSet = new Set();
+  selectedProgressExercises.forEach(ex => exMap[ex].forEach(p => tsSet.add(p.ts)));
+  const sortedTs = [...tsSet].sort((a, b) => a - b);
+  const labels = sortedTs.map(ts => new Date(ts).toLocaleDateString("ro-RO", { day: "numeric", month: "short" }));
+
+  const palette = ["#38bdf8", "#22c55e", "#f59e0b"];
+  const datasets = selectedProgressExercises.map((ex, i) => {
+    const byTs = {};
+    exMap[ex].forEach(p => { if (!(p.ts in byTs) || p.kg > byTs[p.ts]) byTs[p.ts] = p.kg; });
+    return {
+      label: ex,
+      data: sortedTs.map(ts => (ts in byTs) ? byTs[ts] : null),
+      borderColor: palette[i % palette.length],
+      backgroundColor: palette[i % palette.length] + "22",
+      borderWidth: 2,
+      fill: true,
+      tension: 0.3,
+      spanGaps: true,
+      pointBackgroundColor: palette[i % palette.length]
+    };
+  });
+
+  if (chartInstances.overlay) chartInstances.overlay.destroy();
+  const ctx = document.getElementById("overlayChart").getContext("2d");
+  chartInstances.overlay = new Chart(ctx, {
+    type: "line",
+    data: { labels, datasets },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: selectedProgressExercises.length > 1, labels: { color: "#94a3b8" } } },
+      scales: {
+        x: { grid: { color: "rgba(255,255,255,0.05)" }, ticks: { color: "#94a3b8" } },
+        y: { grid: { color: "rgba(255,255,255,0.05)" }, ticks: { color: "#94a3b8" } }
+      }
+    }
+  });
+}
+
+function updateWelcome(){
+  document.getElementById("userNameDisplay").textContent = db.userName || "Sportivule";
 }
 
 // BACKUP & FORCE UPDATE LOGIC
@@ -1181,12 +1331,13 @@ document.getElementById("importInput").onchange = (e) => {
         DAYS = db.days || DEFAULT_DAYS;
         save();
         toast("Datele au fost importate cu succes!");
+        updateWelcome();
         renderHistory();
       } else {
-        alert("Fișierul JSON nu are un format valid pentru GymTrack.");
+        toast("Fișierul JSON nu are un format valid pentru GymTrack.");
       }
     } catch(err) {
-      alert("Eroare la citirea fișierului!");
+      toast("Eroare la citirea fișierului!");
     }
   };
   reader.readAsText(file);
@@ -1216,11 +1367,24 @@ document.getElementById("resetBtn").onclick = resetCurrentWorkout;
 document.getElementById("hideInstall").onclick = () => {
   document.getElementById("installCard").style.display = "none";
 };
+document.getElementById("editNameBtn").onclick = () => {
+  openModal({
+    title: "Numele tău",
+    fields: [{ id: "name", placeholder: "Numele tău", value: db.userName || "" }],
+    confirmText: "Salvează",
+    onConfirm: (v) => {
+      db.userName = v.name || "";
+      save();
+      updateWelcome();
+    }
+  });
+};
 
 if (window.navigator.standalone === true || window.matchMedia('(display-mode: standalone)').matches) {
   document.getElementById("installCard").style.display = "none";
 }
 
+updateWelcome();
 switchScreen("homeScreen");
 </script>
 </body>
