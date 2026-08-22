@@ -56,9 +56,36 @@
       -webkit-backdrop-filter:blur(20px);
       border-bottom:1px solid var(--border);
     }
+    .header-top{display:flex;justify-content:space-between;align-items:flex-start}
     .eyebrow{margin:0 0 2px;text-transform:uppercase;letter-spacing:.18em;color:var(--accent);font-size:11px;font-weight:800}
     h1{margin:0;font-size:26px;font-weight:800;letter-spacing:-.03em;color:#fff}
     .sub{margin:2px 0 0;color:var(--muted);font-size:13px}
+
+    /* Timer Badge */
+    .timer-badge{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      background:rgba(56, 189, 248, 0.12);
+      border:1px solid rgba(56, 189, 248, 0.3);
+      padding:6px 12px;
+      border-radius:99px;
+      color:var(--accent);
+      font-size:13px;
+      font-weight:800;
+      font-variant-numeric:tabular-nums;
+      box-shadow:0 0 12px var(--accent-glow);
+    }
+    .timer-dot{
+      width:8px;height:8px;border-radius:50%;background:var(--accent);
+      animation:pulse 1.5s infinite;
+    }
+    @keyframes pulse{
+      0%{opacity:1;transform:scale(1);}
+      50%{opacity:0.4;transform:scale(0.8);}
+      100%{opacity:1;transform:scale(1);}
+    }
+
     .progress{display:flex;align-items:center;gap:12px;margin-top:14px}
     .track{height:8px;flex:1;border-radius:99px;background:rgba(255,255,255,0.06);overflow:hidden;border:1px solid rgba(255,255,255,0.03)}
     .fill{height:100%;width:0;background:linear-gradient(90deg, var(--accent), var(--done));border-radius:99px;transition:width .4s cubic-bezier(0.4, 0, 0.2, 1);box-shadow:0 0 12px var(--accent-glow)}
@@ -66,6 +93,76 @@
     
     main{padding:12px 16px 20px;max-width:760px;margin:0 auto}
     .screen{display:none}.screen.active{display:block}
+    
+    /* Pagina de Start (Home) */
+    .home-screen{
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      min-height:calc(80vh - 100px);
+      text-align:center;
+      padding:20px;
+    }
+    .home-logo{
+      font-size:14px;
+      font-weight:800;
+      letter-spacing:0.25em;
+      text-transform:uppercase;
+      color:var(--accent);
+      margin-bottom:8px;
+    }
+    .home-title{
+      font-size:32px;
+      font-weight:900;
+      margin:0 0 8px;
+      letter-spacing:-0.03em;
+    }
+    .home-sub{
+      color:var(--muted);
+      font-size:15px;
+      max-width:320px;
+      margin:0 0 40px;
+    }
+    .btn-start-hero{
+      position:relative;
+      width:210px;
+      height:210px;
+      border-radius:50%;
+      background:linear-gradient(135deg, var(--accent), #0284c7);
+      border:none;
+      color:#fff;
+      font-size:17px;
+      font-weight:900;
+      letter-spacing:0.05em;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      gap:8px;
+      box-shadow:0 0 50px var(--accent-glow), 0 12px 35px rgba(0,0,0,0.5);
+      cursor:pointer;
+      transition:transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.3s ease;
+    }
+    .btn-start-hero::before{
+      content:'';
+      position:absolute;
+      inset:-10px;
+      border-radius:50%;
+      border:2px solid var(--accent);
+      opacity:0.4;
+      animation:ripple 2s infinite ease-out;
+    }
+    @keyframes ripple{
+      0%{transform:scale(0.95);opacity:0.8;}
+      100%{transform:scale(1.2);opacity:0;}
+    }
+    .btn-start-hero:hover{
+      transform:scale(1.05);
+      box-shadow:0 0 70px var(--accent-glow), 0 16px 40px rgba(0,0,0,0.6);
+    }
+    .btn-start-hero svg{width:36px;height:36px;fill:none;stroke:#fff;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
+
     .hero{padding:10px 4px 16px}
     .hero h2{margin:0;font-size:22px;font-weight:800}.hero p{margin:4px 0 0;color:var(--muted);font-size:13px}
     
@@ -279,7 +376,7 @@
       -webkit-backdrop-filter:blur(20px);
       border-top:1px solid var(--border);
     }
-    .nav-inner{max-width:760px;margin:auto;display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+    .nav-inner{max-width:760px;margin:auto;display:grid;grid-template-columns:repeat(4,1fr);gap:4px}
     .nav-btn{
       border:0;
       background:transparent;
@@ -325,15 +422,38 @@
 </head>
 <body>
 <div class="app">
-<header>
-  <p class="eyebrow" id="eyebrow">GymTrack</p>
-  <h1 id="title">Picioare + abdomen</h1>
-  <p class="sub" id="subtitle">Antrenament 1</p>
+<header id="appHeader" style="display:none;">
+  <div class="header-top">
+    <div>
+      <p class="eyebrow" id="eyebrow">GymTrack</p>
+      <h1 id="title">Picioare + abdomen</h1>
+      <p class="sub" id="subtitle">Antrenament 1</p>
+    </div>
+    <div class="timer-badge" id="workoutTimer">
+      <span class="timer-dot"></span>
+      <span id="timerText">00:00</span>
+    </div>
+  </div>
   <div class="progress"><div class="track"><div class="fill" id="fill"></div></div><span id="progressText">0%</span></div>
 </header>
 
 <main>
-  <section id="workoutScreen" class="screen active">
+  <!-- Pagina de Start (Home) -->
+  <section id="homeScreen" class="screen active">
+    <div class="home-screen">
+      <div class="home-logo">GymTrack Pro</div>
+      <h2 class="home-title" id="homeDayLabel">Ziua 1</h2>
+      <p class="home-sub" id="homeDayTitle">Picioare + abdomen</p>
+      
+      <button class="btn-start-hero" id="heroStartBtn">
+        <svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+        <span>START</span>
+      </button>
+    </div>
+  </section>
+
+  <!-- Pagina de Antrenament -->
+  <section id="workoutScreen" class="screen">
     <div class="install" id="installCard">
       <strong>Instalează GymTrack pe iPhone</strong>
       <p>În Safari: Apasă Partajare → Adaugă la ecranul principal. Aplicația funcționează 100% offline.</p>
@@ -348,6 +468,7 @@
     </div>
   </section>
 
+  <!-- Pagina de Istoric -->
   <section id="historyScreen" class="screen">
     <div class="hero"><h2>Istoric Sesiuni</h2><p>Evidența activității tale și sincronizarea datelor.</p></div>
     <div class="stats-grid" id="stats"></div>
@@ -370,6 +491,7 @@
     <div id="historyList"></div>
   </section>
 
+  <!-- Pagina de Progres -->
   <section id="progressScreen" class="screen">
     <div class="hero"><h2>Evoluție Greutăți</h2><p>Graficul progresului pe fiecare exercițiu.</p></div>
     <div id="exerciseProgress"></div>
@@ -377,7 +499,11 @@
 </main>
 
 <nav><div class="nav-inner">
-  <button class="nav-btn active" data-screen="workoutScreen">
+  <button class="nav-btn active" data-screen="homeScreen">
+    <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+    Acasă
+  </button>
+  <button class="nav-btn" data-screen="workoutScreen">
     <svg viewBox="0 0 24 24"><path d="M6.5 6.5h11M6.5 12h11M6.5 17.5h11M3 6.5h.01M3 12h.01M3 17.5h.01"/></svg>
     Antrenament
   </button>
@@ -466,10 +592,42 @@ let db = store.load();
 db.days ||= DEFAULT_DAYS;
 let DAYS = db.days;
 let currentDay = 0;
-let currentScreen = "workoutScreen";
+let currentScreen = "homeScreen";
 let animationInterval = null;
 let chartInstances = {};
 let calendarDate = new Date();
+
+// Stare Cronometru
+let timerInterval = null;
+let timerSeconds = 0;
+
+function startTimer(){
+  if (timerInterval) return;
+  timerInterval = setInterval(() => {
+    timerSeconds++;
+    updateTimerDisplay();
+  }, 1000);
+}
+
+function stopTimer(){
+  if (timerInterval) {
+    clearInterval(timerInterval);
+    timerInterval = null;
+  }
+}
+
+function resetTimer(){
+  stopTimer();
+  timerSeconds = 0;
+  updateTimerDisplay();
+}
+
+function updateTimerDisplay(){
+  const mins = Math.floor(timerSeconds / 60);
+  const secs = timerSeconds % 60;
+  const formatted = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+  document.getElementById("timerText").textContent = formatted;
+}
 
 function getWorkout(day){
   db.workouts ||= {};
@@ -482,6 +640,30 @@ function toast(msg){
   t.classList.add("show");
   clearTimeout(window._tt);
   window._tt = setTimeout(() => t.classList.remove("show"), 1800);
+}
+
+function updateHomeScreen(){
+  const day = DAYS[currentDay];
+  document.getElementById("homeDayLabel").textContent = day.label;
+  document.getElementById("homeDayTitle").textContent = day.title;
+}
+
+function switchScreen(screenId){
+  currentScreen = screenId;
+  document.querySelectorAll(".nav-btn").forEach(x => {
+    x.classList.toggle("active", x.dataset.screen === currentScreen);
+  });
+  document.querySelectorAll(".screen").forEach(x => {
+    x.classList.toggle("active", x.id === currentScreen);
+  });
+  
+  // Header-ul apare doar în ecranul de antrenament
+  document.getElementById("appHeader").style.display = (currentScreen === "workoutScreen") ? "block" : "none";
+
+  if (currentScreen === "homeScreen") updateHomeScreen();
+  if (currentScreen === "workoutScreen") renderWorkout();
+  if (currentScreen === "historyScreen") renderHistory();
+  if (currentScreen === "progressScreen") renderProgress();
 }
 
 function renderWorkout(){
@@ -503,6 +685,7 @@ function renderWorkout(){
     currentDay = +b.dataset.day;
     renderWorkout();
     updateProgress();
+    updateHomeScreen();
   });
 
   document.getElementById("workoutList").innerHTML = day.exercises.map((e, ei) => {
@@ -637,19 +820,26 @@ function finishWorkout(){
   });
   
   db.sessions ||= [];
-  db.sessions.push({ time: Date.now(), dayId: day.id, title: day.title, sets: flat.filter(s => s.done).length });
+  db.sessions.push({ 
+    time: Date.now(), 
+    dayId: day.id, 
+    title: day.title, 
+    sets: flat.filter(s => s.done).length,
+    duration: timerSeconds 
+  });
+  
   db.workouts[day.id] = day.exercises.map(e => Array.from({length: e[1]}, () => ({done: false, kg: "", reps: ""})));
   
   save();
-  renderWorkout();
-  renderHistory();
-  renderProgress();
+  resetTimer();
   toast("Antrenamentul a fost salvat!");
+  switchScreen("historyScreen");
 }
 
 function resetDay(){
   db.workouts[DAYS[currentDay].id] = DAYS[currentDay].exercises.map(e => Array.from({length: e[1]}, () => ({done: false, kg: "", reps: ""})));
   save();
+  resetTimer();
   renderWorkout();
   toast("Ziua a fost resetată.");
 }
@@ -665,15 +855,18 @@ function renderHistory(){
 
   renderCalendar();
   
-  document.getElementById("historyList").innerHTML = sessions.length ? sessions.slice(0, 20).map(s => `
+  document.getElementById("historyList").innerHTML = sessions.length ? sessions.slice(0, 20).map(s => {
+    const durMins = s.duration ? Math.floor(s.duration / 60) : null;
+    const durText = durMins !== null ? ` · ${durMins} min` : '';
+    return `
     <div class="history-item">
       <div>
         <strong style="font-size:14px;color:#fff">${s.title}</strong>
-        <span style="font-size:12px;color:var(--muted);margin-top:2px">${new Date(s.time).toLocaleDateString("ro-RO", {day: "2-digit", month: "2-digit", year: "numeric"})}</span>
+        <span style="font-size:12px;color:var(--muted);margin-top:2px">${new Date(s.time).toLocaleDateString("ro-RO", {day: "2-digit", month: "2-digit", year: "numeric"})}${durText}</span>
       </div>
       <strong style="color:var(--accent);font-size:13px">${s.sets} seturi</strong>
     </div>
-  `).join("") : `<div class="empty">Nu există sesiuni salvate încă.</div>`;
+  `}).join("") : `<div class="empty">Nu există sesiuni salvate încă.</div>`;
 }
 
 function renderCalendar(){
@@ -819,9 +1012,7 @@ document.getElementById("importInput").onchange = (e) => {
       db = JSON.parse(evt.target.result);
       DAYS = db.days || DEFAULT_DAYS;
       save();
-      renderWorkout();
-      renderHistory();
-      renderProgress();
+      switchScreen("homeScreen");
       toast("Date restaurate cu succes!");
     } catch {
       toast("Fișier invalid!");
@@ -830,13 +1021,14 @@ document.getElementById("importInput").onchange = (e) => {
   reader.readAsText(file);
 };
 
+// Eveniment Buton Hero Start
+document.getElementById("heroStartBtn").onclick = () => {
+  startTimer();
+  switchScreen("workoutScreen");
+};
+
 document.querySelectorAll(".nav-btn").forEach(b => b.onclick = () => {
-  currentScreen = b.dataset.screen;
-  document.querySelectorAll(".nav-btn").forEach(x => x.classList.remove("active"));
-  b.classList.add("active");
-  document.querySelectorAll(".screen").forEach(x => x.classList.toggle("active", x.id === currentScreen));
-  if (currentScreen === "historyScreen") renderHistory();
-  if (currentScreen === "progressScreen") renderProgress();
+  switchScreen(b.dataset.screen);
 });
 
 document.getElementById("finishBtn").onclick = finishWorkout;
@@ -853,9 +1045,8 @@ if (localStorage.getItem("gymtrack:hideInstall") === "1") {
 
 if ("serviceWorker" in navigator) navigator.serviceWorker.register("./sw.js").catch(() => {});
 
-renderWorkout();
-renderHistory();
-renderProgress();
+// Initializare
+updateHomeScreen();
 </script>
 </body>
 </html>
