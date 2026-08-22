@@ -58,19 +58,18 @@
       -webkit-backdrop-filter:blur(20px);
       border-bottom:1px solid var(--border);
     }
-    .header-top{display:flex;justify-content:space-between;align-items:center;}
+    .header-top{display:flex;justify-content:space-between;align-items:flex-start}
     .eyebrow{margin:0 0 2px;text-transform:uppercase;letter-spacing:.18em;color:var(--accent);font-size:11px;font-weight:800}
-    h1{margin:0;font-size:22px;font-weight:800;letter-spacing:-.03em;color:#fff}
-    .sub{margin:2px 0 0;color:var(--muted);font-size:12px}
+    h1{margin:0;font-size:26px;font-weight:800;letter-spacing:-.03em;color:#fff}
+    .sub{margin:2px 0 0;color:var(--muted);font-size:13px}
 
-    .timer-container{display:flex;align-items:center;gap:6px;}
     .timer-badge{
       display:inline-flex;
       align-items:center;
       gap:6px;
       background:rgba(56, 189, 248, 0.12);
       border:1px solid rgba(56, 189, 248, 0.3);
-      padding:6px 10px;
+      padding:6px 12px;
       border-radius:99px;
       color:var(--accent);
       font-size:13px;
@@ -82,29 +81,13 @@
       width:8px;height:8px;border-radius:50%;background:var(--accent);
       animation:pulse 1.5s infinite;
     }
-    .timer-badge.paused .timer-dot{background:var(--gold);animation:none;}
-    .timer-badge.stopped .timer-dot{background:var(--muted);animation:none;}
-    .timer-btn{
-      background:var(--surface2);
-      border:1px solid var(--border);
-      color:var(--text);
-      font-size:11px;
-      font-weight:700;
-      padding:6px 10px;
-      border-radius:99px;
-    }
-    .timer-btn.stop-btn{
-      background:rgba(255, 82, 82, 0.15);
-      border-color:rgba(255, 82, 82, 0.3);
-      color:var(--danger);
-    }
     @keyframes pulse{
       0%{opacity:1;transform:scale(1);}
       50%{opacity:0.4;transform:scale(0.8);}
       100%{opacity:1;transform:scale(1);}
     }
 
-    .progress{display:flex;align-items:center;gap:12px;margin-top:12px}
+    .progress{display:flex;align-items:center;gap:12px;margin-top:14px}
     .track{height:8px;flex:1;border-radius:99px;background:rgba(255,255,255,0.06);overflow:hidden;border:1px solid rgba(255,255,255,0.03)}
     .fill{height:100%;width:0;background:linear-gradient(90deg, var(--accent), var(--done));border-radius:99px;transition:width .4s cubic-bezier(0.4, 0, 0.2, 1);box-shadow:0 0 12px var(--accent-glow)}
     .progress span{min-width:42px;text-align:right;color:var(--muted);font-size:12px;font-weight:700;font-variant-numeric:tabular-nums}
@@ -117,7 +100,7 @@
       flex-direction:column;
       align-items:center;
       justify-content:center;
-      min-height:calc(75vh - 100px);
+      min-height:calc(80vh - 100px);
       text-align:center;
       padding:20px;
     }
@@ -357,6 +340,24 @@
     }
     @keyframes pop { 0% { transform: scale(1); } 50% { transform: scale(1.25); } 100% { transform: scale(1.1); } }
 
+    .pr-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 2px;
+      background: rgba(245, 158, 11, 0.15);
+      border: 1px solid rgba(245, 158, 11, 0.4);
+      color: var(--gold);
+      font-size: 9px;
+      font-weight: 900;
+      padding: 3px 6px;
+      border-radius: 6px;
+      letter-spacing: 0.05em;
+      flex:none;
+      box-shadow: 0 0 8px var(--gold-glow);
+      animation: fadeIn 0.3s ease;
+    }
+    @keyframes fadeIn { from { opacity: 0; transform: scale(0.8); } to { opacity: 1; transform: scale(1); } }
+
     /* Modal */
     .modal-backdrop{
       position:fixed;inset:0;z-index:100;
@@ -475,6 +476,18 @@
     .cal-legend{display:flex;align-items:center;gap:6px;justify-content:flex-end;margin-top:10px;font-size:10px;color:var(--muted);}
     .cal-legend-swatch{width:12px;height:12px;border-radius:3px;}
 
+    .chip-row{display:flex;gap:8px;overflow:auto;padding-bottom:14px;scrollbar-width:none}
+    .chip-row::-webkit-scrollbar{display:none}
+    .chip{
+      border:1px solid var(--border);background:var(--surface);color:var(--muted);
+      padding:8px 14px;border-radius:99px;font-size:12px;font-weight:700;
+      white-space:nowrap;flex:none;
+    }
+    .chip.active{background:rgba(56,189,248,.15);border-color:var(--accent);color:var(--accent);}
+
+    .history-actions{display:flex;gap:8px;margin-top:10px;}
+    .history-actions .btn{flex:1;}
+
     .empty{padding:32px 16px;text-align:center;color:var(--muted);background:var(--surface);border:1px dashed var(--border);border-radius:var(--radius-lg)}
     .install{
       background:linear-gradient(135deg, rgba(56, 189, 248, 0.1), rgba(30, 38, 53, 0.8));
@@ -538,23 +551,19 @@
 </head>
 <body>
 <div class="app">
-<header id="appHeader">
+<header id="appHeader" style="display:none;">
   <div class="header-top">
     <div>
-      <p class="eyebrow" id="eyebrow">GymTrack Pro</p>
-      <h1 id="title">Acasă</h1>
-      <p class="sub" id="subtitle">Sesiune curentă</p>
+      <p class="eyebrow" id="eyebrow">GymTrack</p>
+      <h1 id="title">Picioare + abdomen</h1>
+      <p class="sub" id="subtitle">Antrenament</p>
     </div>
-    <div class="timer-container" id="headerTimerContainer">
-      <div class="timer-badge" id="workoutTimer">
-        <span class="timer-dot"></span>
-        <span id="timerText">00:00</span>
-      </div>
-      <button class="timer-btn" id="timerToggleBtn" title="Pauză / Reluare">Pauză</button>
-      <button class="timer-btn stop-btn" id="timerStopBtn" title="Oprește Antrenamentul">Oprește</button>
+    <div class="timer-badge" id="workoutTimer">
+      <span class="timer-dot"></span>
+      <span id="timerText">00:00</span>
     </div>
   </div>
-  <div class="progress" id="headerProgressContainer"><div class="track"><div class="fill" id="fill"></div></div><span id="progressText">0%</span></div>
+  <div class="progress"><div class="track"><div class="fill" id="fill"></div></div><span id="progressText">0%</span></div>
 </header>
 
 <main>
@@ -678,6 +687,7 @@ const EX_FOLDERS = {
   leverageInclineChestPress: "Leverage_Incline_Chest_Press"
 };
 
+/* folder -> muscle-group category, used for the strength radar */
 const FOLDER_CATEGORY = {
   Leg_Press: "legs", Goblet_Squat: "legs", Hyperextensions: "back", Leg_Extensions: "legs",
   Thigh_Abductor: "legs", Standing_Calf_Raises: "legs", Ab_Crunch_Machine: "core",
@@ -692,6 +702,7 @@ const CATEGORY_LABELS = { legs: "Picioare", back: "Spate", chest: "Piept", shoul
 const CATEGORY_OPTIONS = Object.keys(CATEGORY_LABELS).map(k => ({ value: k, label: CATEGORY_LABELS[k] }));
 
 function getExerciseCategory(e){
+  // e = [name, sets, reps, folder, category?]
   return e[4] || FOLDER_CATEGORY[e[3]] || "core";
 }
 
@@ -733,7 +744,7 @@ const DEFAULT_DAYS = [
 ];
 
 const store = {
-  key: "gymtrack:v4",
+  key: "gymtrack:v3",
   load(){ try{ return JSON.parse(localStorage.getItem(this.key) || "{}"); } catch{ return {}; } },
   save(data){ localStorage.setItem(this.key, JSON.stringify(data)); }
 };
@@ -744,40 +755,34 @@ db.userName ||= "";
 let DAYS = db.days;
 let currentDay = 0;
 let currentScreen = "homeScreen";
-let timerInterval = null;
+let animationInterval = null;
+let chartInstances = {};
 let calendarDate = new Date();
+let selectedProgressExercises = [];
+
+const customModifiedSets = {};
 
 function triggerHaptic(type = "light"){
   if (!navigator.vibrate) return;
   switch (type) {
     case "light": navigator.vibrate(30); break;
+    case "pr": navigator.vibrate([40, 60, 80]); break;
     case "finish": navigator.vibrate([100, 50, 100, 50, 200]); break;
     case "warn": navigator.vibrate([20, 100, 50]); break;
   }
 }
 
+let timerInterval = null;
+
+/* Timestamp-based timer: survives backgrounding/closing the app because the
+   displayed value is always (now - start), recomputed from a persisted
+   timestamp — not a counter that only advances while JS is actively running. */
 function updateTimerDisplay(){
-  let elapsed = db.activeTimerElapsed || 0;
-  if (db.activeTimerStart && !db.timerPaused) {
-    elapsed += Math.max(0, Math.floor((Date.now() - db.activeTimerStart) / 1000));
-  }
+  let elapsed = 0;
+  if (db.activeTimerStart) elapsed = Math.max(0, Math.floor((Date.now() - db.activeTimerStart) / 1000));
   const mins = Math.floor(elapsed / 60);
   const secs = elapsed % 60;
   document.getElementById("timerText").textContent = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
-  
-  const badge = document.getElementById("workoutTimer");
-  const toggleBtn = document.getElementById("timerToggleBtn");
-  
-  badge.classList.remove("paused", "stopped");
-  if (!db.activeTimerStart && elapsed === 0) {
-    badge.classList.add("stopped");
-    toggleBtn.textContent = "Pauză";
-  } else if (db.timerPaused) {
-    badge.classList.add("paused");
-    toggleBtn.textContent = "Reluare";
-  } else {
-    toggleBtn.textContent = "Pauză";
-  }
 }
 
 function runTimerInterval(){
@@ -791,70 +796,34 @@ function stopTimerInterval(){
 }
 
 function startWorkoutTimer(){
-  if (!db.activeTimerStart && !db.timerPaused) {
+  if (!db.activeTimerStart) {
     db.activeTimerStart = Date.now();
-    db.activeTimerElapsed = 0;
-    db.timerPaused = false;
     save();
   }
   runTimerInterval();
 }
 
-function toggleTimerPause(){
-  if (!db.activeTimerStart && (db.activeTimerElapsed || 0) === 0) {
-    toast("Pornește mai întâi un antrenament!");
-    return;
-  }
-  if (!db.timerPaused) {
-    let currentElapsed = db.activeTimerElapsed || 0;
-    db.activeTimerElapsed = currentElapsed + Math.max(0, Math.floor((Date.now() - db.activeTimerStart) / 1000));
-    db.activeTimerStart = null;
-    db.timerPaused = true;
-    toast("Cronometru pus pe pauză");
-  } else {
-    db.activeTimerStart = Date.now();
-    db.timerPaused = false;
-    toast("Cronometru reluat");
-  }
-  save();
-  updateTimerDisplay();
-}
-
-function confirmStopTimer(){
-  if (!db.activeTimerStart && (db.activeTimerElapsed || 0) === 0) {
-    toast("Nu există niciun antrenament pornit.");
-    return;
-  }
-  openModal({
-    title: "Oprește Antrenamentul",
-    desc: "Sigur dorești să oprești cronometrul? Progresul nesalvat nu va fi înregistrat în istoric.",
-    confirmText: "Da, oprește",
-    danger: true,
-    onConfirm: () => {
-      resetWorkoutTimer();
-      toast("Antrenament oprit.");
-    }
-  });
-}
-
 function resetWorkoutTimer(){
   stopTimerInterval();
   db.activeTimerStart = null;
-  db.activeTimerElapsed = 0;
-  db.timerPaused = false;
   save();
   updateTimerDisplay();
 }
 
+// Whenever the app comes back to the foreground (reopened, tab refocused,
+// resumed from background), immediately recompute the elapsed time and make
+// sure the interval is (re)running — the interval itself may have been
+// paused by the OS/browser while backgrounded, but the timestamp math means
+// no time is lost.
 document.addEventListener("visibilitychange", () => {
   if (document.visibilityState === "visible") {
     updateTimerDisplay();
-    if (db.activeTimerStart && !db.timerPaused) runTimerInterval();
+    if (db.activeTimerStart) runTimerInterval();
   }
 });
 window.addEventListener("pageshow", () => {
   updateTimerDisplay();
-  if (db.activeTimerStart && !db.timerPaused) runTimerInterval();
+  if (db.activeTimerStart) runTimerInterval();
 });
 
 function save(){ store.save(db); }
@@ -873,6 +842,7 @@ function toast(msg){
   window._tt = setTimeout(() => t.classList.remove("show"), 2400);
 }
 
+/* ---------- Custom modal (replaces prompt/confirm/alert) ---------- */
 function openModal({title, desc, fields = [], confirmText = "OK", cancelText = "Anulează", danger = false, onConfirm}){
   const backdrop = document.getElementById("modalBackdrop");
   const body = document.getElementById("modalBody");
@@ -886,593 +856,734 @@ function openModal({title, desc, fields = [], confirmText = "OK", cancelText = "
         </select></div>`;
       }
       return `<div class="input-wrapper">
-        <input class="field" id="mf-${f.id}" type="${f.type || 'text'}" placeholder="${f.placeholder || ''}" value="${f.value || ''}">
+        <input class="field" id="mf-${f.id}" type="${f.type || "text"}" inputmode="${f.inputmode || "text"}" placeholder="${f.placeholder || ""}" value="${f.value ?? ""}">
       </div>`;
     }).join("")}
     <div class="modal-actions">
       <button class="btn ghost" id="modalCancel">${cancelText}</button>
-      <button class="btn ${danger ? 'danger-outline' : 'primary'}" id="modalConfirm">${confirmText}</button>
+      <button class="btn ${danger ? "" : "primary"}" id="modalConfirm" style="${danger ? "background:var(--danger);color:#fff;" : ""}">${confirmText}</button>
     </div>
   `;
   backdrop.classList.add("show");
-  
-  const close = () => { backdrop.classList.remove("show"); };
-  document.getElementById("modalCancel").onclick = close;
-  backdrop.onclick = (e) => { if(e.target === backdrop) close(); };
+  const firstInput = body.querySelector(".field");
+  if (firstInput) setTimeout(() => firstInput.focus(), 200);
+  document.getElementById("modalCancel").onclick = closeModal;
   document.getElementById("modalConfirm").onclick = () => {
     const values = {};
-    fields.forEach(f => {
-      values[f.id] = document.getElementById(`mf-${f.id}`).value;
-    });
-    close();
-    if(onConfirm) onConfirm(values);
+    fields.forEach(f => values[f.id] = document.getElementById("mf-" + f.id).value.trim());
+    closeModal();
+    onConfirm && onConfirm(values);
   };
 }
+function closeModal(){ document.getElementById("modalBackdrop").classList.remove("show"); }
+document.getElementById("modalBackdrop").onclick = (e) => { if (e.target.id === "modalBackdrop") closeModal(); };
 
-/* UI Header & Screen Logic */
-function updateHeaderInfo(){
-  const eyebrowEl = document.getElementById("eyebrow");
-  const titleEl = document.getElementById("title");
-  const progressContainer = document.getElementById("headerProgressContainer");
-  const timerContainer = document.getElementById("headerTimerContainer");
+function switchScreen(screenId){
+  currentScreen = screenId;
+  document.querySelectorAll(".nav-btn").forEach(x => {
+    x.classList.toggle("active", x.dataset.screen === currentScreen);
+  });
+  document.querySelectorAll(".screen").forEach(x => {
+    x.classList.toggle("active", x.id === currentScreen);
+  });
+  
+  document.getElementById("appHeader").style.display = (currentScreen === "workoutScreen") ? "block" : "none";
 
-  if(currentScreen === "workoutScreen"){
-    const day = DAYS[currentDay];
-    eyebrowEl.textContent = day.label;
-    titleEl.textContent = day.title;
-    progressContainer.style.display = "flex";
-    timerContainer.style.display = "flex";
-  } else if(currentScreen === "homeScreen"){
-    eyebrowEl.textContent = "GymTrack Pro";
-    titleEl.textContent = "Acasă";
-    progressContainer.style.display = "none";
-    timerContainer.style.display = "none";
-  } else if(currentScreen === "historyScreen"){
-    eyebrowEl.textContent = "GymTrack Pro";
-    titleEl.textContent = "Istoric";
-    progressContainer.style.display = "none";
-    timerContainer.style.display = "flex";
-  } else if(currentScreen === "progressScreen"){
-    eyebrowEl.textContent = "GymTrack Pro";
-    titleEl.textContent = "Progres";
-    progressContainer.style.display = "none";
-    timerContainer.style.display = "flex";
-  }
+  if (currentScreen === "homeScreen") renderStreak();
+  if (currentScreen === "workoutScreen") { startWorkoutTimer(); renderWorkout(); }
+  if (currentScreen === "historyScreen") renderHistory();
+  if (currentScreen === "progressScreen") renderProgress();
 }
 
-function renderHomeScreen(){
-  document.getElementById("userNameDisplay").textContent = db.userName ? db.userName : "Sportivule";
-  const streakBadge = document.getElementById("streakBadge");
-  const records = getRecords();
-  if(records.length > 0){
-    streakBadge.style.display = "inline-flex";
-    streakBadge.textContent = `🔥 ${Math.max(1, records.length)} sesiuni salvate`;
+function getMaxWeightForEx(exName){
+  const records = getRecords().filter(r => r.exercise === exName);
+  let max = 0;
+  records.forEach(r => {
+    r.sets.forEach(s => {
+      const val = parseFloat(s.kg) || 0;
+      if (val > max) max = val;
+    });
+  });
+  return max;
+}
+
+function getLast(dayId, exIndex){
+  const dayRecs = getRecords().filter(r => r.dayId === dayId);
+  if (!dayRecs.length) return "";
+  const lastRec = dayRecs[dayRecs.length - 1];
+  const exName = DAYS.find(d => d.id === dayId)?.exercises[exIndex]?.[0];
+  const exSets = lastRec.sets.filter(s => s.exercise === exName && (s.kg || s.reps));
+  if (!exSets.length) return "";
+  return exSets.map(s => `${s.kg || 0}kg × ${s.reps || 0}`).join(", ");
+}
+
+function updateProgress(){
+  const w = getWorkout(currentDay);
+  let totalSets = 0, doneSets = 0;
+  w.forEach(sets => {
+    totalSets += sets.length;
+    doneSets += sets.filter(s => s.done).length;
+  });
+  const pct = totalSets ? Math.round((doneSets / totalSets) * 100) : 0;
+  document.getElementById("fill").style.width = pct + "%";
+  document.getElementById("progressText").textContent = pct + "%";
+}
+
+function adjustSet(e, s, type, dir){
+  const w = getWorkout(currentDay);
+  const step = type === "kg" ? 2.5 : 1;
+  let val = (parseFloat(w[e][s][type]) || 0) + dir * step;
+  val = Math.max(0, val);
+  if (type === "kg") val = Math.round(val * 10) / 10;
+  w[e][s][type] = String(val);
+
+  const customKey = `${currentDay}_${e}_${type}`;
+  customModifiedSets[customKey] ||= {};
+
+  if (s === 0) {
+    for (let i = 1; i < w[e].length; i++) {
+      if (!customModifiedSets[customKey][i]) w[e][i][type] = String(val);
+    }
   } else {
-    streakBadge.style.display = "none";
+    customModifiedSets[customKey][s] = true;
   }
+  save();
 }
 
-function renderDayTabs(){
-  const container = document.getElementById("dayTabs");
-  container.innerHTML = DAYS.map((d, i) => `
-    <button class="day-tab ${i === currentDay ? 'active' : ''}" onclick="switchDay(${i})">
-      <strong>${d.label}</strong>
-      <small>${d.title}</small>
-    </button>
-  `).join("");
+function findNextIncompleteExercise(fromIdx){
+  const w = getWorkout(currentDay);
+  for (let i = fromIdx + 1; i < w.length; i++) if (!w[i].every(s => s.done)) return i;
+  for (let i = 0; i < fromIdx; i++) if (!w[i].every(s => s.done)) return i;
+  return -1;
 }
 
-function switchDay(i){
-  currentDay = i;
-  renderDayTabs();
-  renderWorkout();
+function scrollToExercise(idx){
+  const card = document.querySelectorAll(".card")[idx];
+  if (!card) return;
+  card.scrollIntoView({ behavior: "smooth", block: "center" });
+  card.classList.add("advance-highlight");
+  setTimeout(() => card.classList.remove("advance-highlight"), 1200);
 }
 
 function renderWorkout(){
-  renderDayTabs();
-  updateHeaderInfo();
-  
   const day = DAYS[currentDay];
-  const workoutData = getWorkout(currentDay);
-  const list = document.getElementById("workoutList");
+  const w = getWorkout(currentDay);
   
-  let totalSets = 0, doneSets = 0;
+  document.getElementById("eyebrow").textContent = day.label;
+  document.getElementById("title").textContent = day.title;
+  document.getElementById("subtitle").textContent = day.exercises.length + " exerciții";
   
-  list.innerHTML = day.exercises.map((ex, exIdx) => {
-    const sets = workoutData[exIdx];
-    const category = getExerciseCategory(ex);
-    const folder = ex[3];
-    const imgSrc = folder ? `exercises/${folder}/0.jpg` : null;
-    
-    totalSets += sets.length;
-    sets.forEach(s => { if(s.done) doneSets++; });
-    const isExComplete = sets.every(s => s.done);
-    
-    return `
-      <div class="card ${isExComplete ? 'complete' : ''}" id="ex-card-${exIdx}">
-        <div class="ex-head">
-          ${imgSrc ? `
-            <div class="visual">
-              <img class="exercise-img" src="${imgSrc}" alt="${ex[0]}" loading="lazy" onload="this.classList.add('visible')" onerror="this.parentElement.style.display='none'">
-            </div>
-          ` : ''}
-          <div class="ex-info">
-            <div class="ex-title">${ex[0]}</div>
-            <div class="meta">${ex[1]} serii × ${ex[2]} reps</div>
-            <div class="last">${getPreviousSummary(ex[0])}</div>
-          </div>
-          <button class="btn-delete-ex" onclick="deleteExercise(${exIdx})" title="Șterge exercițiul">✕</button>
+  document.getElementById("dayTabs").innerHTML = DAYS.map((d, i) => 
+    `<button class="day-tab ${i === currentDay ? "active" : ""}" data-day="${i}">
+      <strong>${d.label}</strong>
+      <small>${d.title}</small>
+    </button>`
+  ).join("");
+  
+  document.querySelectorAll(".day-tab").forEach(b => b.onclick = () => {
+    currentDay = +b.dataset.day;
+    renderWorkout();
+    updateProgress();
+  });
+
+  document.getElementById("workoutList").innerHTML = day.exercises.map((e, ei) => {
+    const folder = e[3] || "Hyperextensions";
+    const sets = w[ei] || [];
+    const done = sets.filter(s => s.done).length;
+    const last = getLast(day.id, ei);
+    const maxHistorical = getMaxWeightForEx(e[0]);
+
+    return `<article class="card ${done === e[1] ? "complete" : ""}">
+      <div class="ex-head">
+        <button class="btn-delete-ex" onclick="deleteExercise(${ei})" title="Șterge exercițiul">✕</button>
+        <div class="visual">
+          <img class="exercise-img visible" src="./exercises/${folder}/0.jpg" data-folder="${folder}" onerror="this.onerror=null; this.src='https://via.placeholder.com/300/0f131b/38bdf8?text=GymTrack';" alt="${e[0]}">
+          <img class="exercise-img" src="./exercises/${folder}/1.jpg" data-folder="${folder}" onerror="this.onerror=null; this.src='https://via.placeholder.com/300/0f131b/38bdf8?text=GymTrack';" alt="${e[0]}">
         </div>
-        <div class="set-list">
-          ${sets.map((set, setIdx) => `
-            <div class="set-row">
-              <span class="set-label">#${setIdx + 1}</span>
-              <div class="stepper">
-                <button class="step-btn" onclick="adjustValue(${exIdx}, ${setIdx}, 'kg', -2.5)">-</button>
-                <div class="val" onclick="editSetPrompt(${exIdx}, ${setIdx}, 'kg')">${set.kg !== "" ? set.kg : '0'}<span class="unit">kg</span></div>
-                <button class="step-btn" onclick="adjustValue(${exIdx}, ${setIdx}, 'kg', 2.5)">+</button>
-              </div>
-              <div class="stepper">
-                <button class="step-btn" onclick="adjustValue(${exIdx}, ${setIdx}, 'reps', -1)">-</button>
-                <div class="val" onclick="editSetPrompt(${exIdx}, ${setIdx}, 'reps')">${set.reps !== "" ? set.reps : '0'}<span class="unit">reps</span></div>
-                <button class="step-btn" onclick="adjustValue(${exIdx}, ${setIdx}, 'reps', 1)">+</button>
-              </div>
-              <button class="check ${set.done ? 'on' : ''}" onclick="toggleSet(${exIdx}, ${setIdx})">✓</button>
-            </div>
-          `).join('')}
+        <div class="ex-info">
+          <div class="ex-title">${e[0]}</div>
+          <div class="meta">${e[1]} serii · ${e[2]} repetări</div>
+          ${last ? `<div class="last">Ultimul: ${last}</div>` : ""}
         </div>
       </div>
-    `;
+      <div class="set-list">
+        ${sets.map((s, si) => {
+          const currentKg = parseFloat(s.kg) || 0;
+          const isPR = maxHistorical > 0 && currentKg > maxHistorical;
+          return `
+          <div class="set-row">
+            <span class="set-label">S${si + 1}</span>
+            <div class="stepper" data-e="${ei}" data-s="${si}" data-type="kg">
+              <button class="step-btn" data-dir="-1">–</button>
+              <span class="val">${s.kg || 0}<span class="unit">kg</span></span>
+              <button class="step-btn" data-dir="1">+</button>
+            </div>
+            <div class="stepper" data-e="${ei}" data-s="${si}" data-type="reps">
+              <button class="step-btn" data-dir="-1">–</button>
+              <span class="val">${s.reps || 0}<span class="unit">rep</span></span>
+              <button class="step-btn" data-dir="1">+</button>
+            </div>
+            ${isPR ? `<span class="pr-badge">★ PR</span>` : ""}
+            <button class="check ${s.done ? "on" : ""}" data-e="${ei}" data-s="${si}">${s.done ? "✓" : ""}</button>
+          </div>`;
+        }).join("")}
+      </div>
+    </article>`;
   }).join("");
-  
-  const pct = totalSets > 0 ? Math.round((doneSets / totalSets) * 100) : 0;
-  document.getElementById("fill").style.width = `${pct}%`;
-  document.getElementById("progressText").textContent = `${pct}%`;
-}
 
-function getPreviousSummary(exName){
-  const records = getRecords();
-  for(let i = records.length - 1; i >= 0; i--){
-    const r = records[i];
-    if(r.exercises && r.exercises[exName]){
-      const s = r.exercises[exName];
-      return `Ultima dată: ${s.maxKg || 0} kg (${s.setsCount || 0} serii)`;
-    }
-  }
-  return "Fără istoric recent";
-}
-
-function adjustValue(exIdx, setIdx, field, delta){
-  const sets = getWorkout(currentDay)[exIdx];
-  let cur = parseFloat(sets[setIdx][field]);
-  if(isNaN(cur)) cur = 0;
-  cur = Math.max(0, cur + delta);
-  sets[setIdx][field] = cur === 0 ? "" : cur;
-  save();
-  renderWorkout();
-}
-
-function editSetPrompt(exIdx, setIdx, field){
-  const sets = getWorkout(currentDay)[exIdx];
-  openModal({
-    title: field === 'kg' ? "Modifică Greutatea (kg)" : "Modifică Repetările",
-    fields: [{ id: "val", type: "number", value: sets[setIdx][field], placeholder: "Introdu valoarea" }],
-    onConfirm: (res) => {
-      const v = res.val.trim();
-      sets[setIdx][field] = v === "" ? "" : parseFloat(v);
-      save();
-      renderWorkout();
-    }
+  document.querySelectorAll(".step-btn").forEach(btn => btn.onclick = () => {
+    const wrap = btn.closest(".stepper");
+    adjustSet(+wrap.dataset.e, +wrap.dataset.s, wrap.dataset.type, +btn.dataset.dir);
+    renderWorkout();
+    updateProgress();
   });
-}
 
-function toggleSet(exIdx, setIdx){
-  const sets = getWorkout(currentDay)[exIdx];
-  sets[setIdx].done = !sets[setIdx].done;
-  if(sets[setIdx].done) triggerHaptic("light");
-  save();
-  renderWorkout();
-}
-
-function deleteExercise(exIdx){
-  openModal({
-    title: "Șterge exercițiul",
-    desc: "Sigur dorești să elimini acest exercițiu din programul zilei?",
-    confirmText: "Șterge",
-    danger: true,
-    onConfirm: () => {
-      DAYS[currentDay].exercises.splice(exIdx, 1);
-      if(db.workouts && db.workouts[DAYS[currentDay].id]){
-        db.workouts[DAYS[currentDay].id].splice(exIdx, 1);
+  document.querySelectorAll(".check").forEach(b => b.onclick = () => {
+    const e = +b.dataset.e, s = +b.dataset.s;
+    const exName = day.exercises[e][0];
+    const isNowDone = !w[e][s].done;
+    w[e][s].done = isNowDone;
+    
+    let justCompletedExercise = false;
+    if (isNowDone) {
+      const maxHist = getMaxWeightForEx(exName);
+      const currentKg = parseFloat(w[e][s].kg) || 0;
+      
+      if (maxHist > 0 && currentKg > maxHist) {
+        triggerHaptic("pr");
+        toast(`Bravo! Record personal la <strong>${exName}</strong>: ${currentKg} kg!`);
+      } else {
+        triggerHaptic("light");
       }
+      justCompletedExercise = w[e].every(set => set.done);
+    } else {
+      triggerHaptic("light");
+    }
+
+    save();
+    renderWorkout();
+    updateProgress();
+
+    if (justCompletedExercise) {
+      const nextIdx = findNextIncompleteExercise(e);
+      if (nextIdx !== -1) {
+        setTimeout(() => scrollToExercise(nextIdx), 350);
+      } else {
+        setTimeout(() => toast("Toate exercițiile zilei sunt completate! 💪"), 350);
+      }
+    }
+  });
+
+  startAnimation();
+  updateProgress();
+}
+
+function addExercise(){
+  openModal({
+    title: "Exercițiu nou",
+    fields: [
+      { id: "name", placeholder: "Numele exercițiului" },
+      { id: "sets", type: "number", inputmode: "numeric", placeholder: "Număr de serii", value: "3" },
+      { id: "reps", placeholder: "Repetări (ex: 10-12)", value: "10-12" },
+      { id: "category", type: "select", options: CATEGORY_OPTIONS, value: "legs" }
+    ],
+    confirmText: "Adaugă",
+    onConfirm: (v) => {
+      if (!v.name) return;
+      const setsCount = parseInt(v.sets) || 3;
+      DAYS[currentDay].exercises.push([v.name, setsCount, v.reps || "10-12", "Leg_Press", v.category || "legs"]);
+      db.workouts[DAYS[currentDay].id].push(Array.from({ length: setsCount }, () => ({ done: false, kg: "", reps: "" })));
       save();
       renderWorkout();
-      toast("Exercițiu șters");
+      toast("Exercițiu adăugat!");
     }
   });
 }
 
-/* History, Stats & Charts */
-function renderHistory(){
-  const records = getRecords();
-  const statsEl = document.getElementById("stats");
-  const historyList = document.getElementById("historyList");
-  
-  let totalWorkouts = records.length;
-  let totalVolumeKg = records.reduce((acc, r) => acc + (r.totalVolume || 0), 0);
-  
-  statsEl.innerHTML = `
-    <div class="stat-card">
-      <strong>${totalWorkouts}</strong>
-      <span>Antrenamente total</span>
-    </div>
-    <div class="stat-card">
-      <strong>${totalVolumeKg > 1000 ? (totalVolumeKg/1000).toFixed(1) + 't' : totalVolumeKg + 'kg'}</strong>
-      <span>Volum total ridicat</span>
-    </div>
-  `;
-  
-  if(records.length === 0){
-    historyList.innerHTML = `<div class="empty">Niciun antrenament finalizat încă. Apasă Start și finalizează o sesiune!</div>`;
-  } else {
-    historyList.innerHTML = records.slice().reverse().map((r, idx) => `
-      <div class="history-item">
-        <div style="display:flex;justify-content:space-between;align-items:flex-start">
-          <div>
-            <strong>${r.dayTitle}</strong>
-            <div style="font-size:12px;color:var(--muted);margin-top:2px">${r.date} • Durată: ${r.duration || 'N/A'}</div>
-          </div>
-          <button class="btn ghost small danger-outline" onclick="deleteRecord(${records.length - 1 - idx})">Șterge</button>
-        </div>
-      </div>
-    `).join("");
-  }
-  
-  renderCalendar();
-}
-
-function deleteRecord(index){
+function deleteExercise(index){
+  triggerHaptic("warn");
   openModal({
-    title: "Șterge sesiunea",
-    desc: "Sigur dorești să ștergi această sesiune din istoric?",
+    title: "Ștergi exercițiul?",
+    desc: "Sigur vrei să ștergi acest exercițiu din rutina zilei?",
     confirmText: "Șterge",
     danger: true,
     onConfirm: () => {
-      getRecords().splice(index, 1);
+      DAYS[currentDay].exercises.splice(index, 1);
+      db.workouts[DAYS[currentDay].id].splice(index, 1);
+      save();
+      renderWorkout();
+      toast("Exercițiu șters.");
+    }
+  });
+}
+
+function startAnimation() {
+  if (animationInterval) clearInterval(animationInterval);
+  animationInterval = setInterval(() => {
+    document.querySelectorAll(".visual").forEach(v => {
+      const imgs = v.querySelectorAll(".exercise-img");
+      if (imgs.length < 2) return;
+      const activeIdx = imgs[0].classList.contains("visible") ? 0 : 1;
+      imgs[activeIdx].classList.remove("visible");
+      imgs[1 - activeIdx].classList.add("visible");
+    });
+  }, 1200);
+}
+
+function finishWorkout(){
+  const day = DAYS[currentDay];
+  const w = getWorkout(currentDay);
+  const doneSets = [];
+  
+  w.forEach((sets, ei) => {
+    sets.forEach(s => {
+      if (s.done && (s.kg || s.reps)) {
+        doneSets.push({ exercise: day.exercises[ei][0], kg: s.kg, reps: s.reps });
+      }
+    });
+  });
+
+  if (!doneSets.length) {
+    toast("Marchează cel puțin o serie bifată!");
+    return;
+  }
+
+  const durationStr = document.getElementById("timerText").textContent;
+  db.records ||= [];
+  db.records.push({
+    id: Date.now(),
+    date: new Date().toISOString(),
+    dayId: day.id,
+    dayTitle: day.title,
+    duration: durationStr,
+    sets: doneSets
+  });
+
+  db.workouts[day.id] = day.exercises.map(e => Array.from({ length: e[1] }, () => ({ done: false, kg: "", reps: "" })));
+  save();
+  resetWorkoutTimer();
+  triggerHaptic("finish");
+  toast("Antrenament salvat în istoric! Bravo!");
+  switchScreen("historyScreen");
+}
+
+function resetCurrentWorkout(){
+  openModal({
+    title: "Resetezi ziua?",
+    desc: "Toate bifările și valorile pentru ziua curentă vor fi șterse.",
+    confirmText: "Resetează",
+    danger: true,
+    onConfirm: () => {
+      const day = DAYS[currentDay];
+      db.workouts[day.id] = day.exercises.map(e => Array.from({ length: e[1] }, () => ({ done: false, kg: "", reps: "" })));
+      save();
+      renderWorkout();
+      toast("Sesiunea a fost resetată.");
+    }
+  });
+}
+
+/* ---------- Streak (consecutive weeks trained) ---------- */
+function getWeekStart(date){
+  const d = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+  const day = (d.getDay() + 6) % 7; // Monday = 0
+  d.setDate(d.getDate() - day);
+  d.setHours(0, 0, 0, 0);
+  return d.getTime();
+}
+function computeWeekStreak(){
+  const recs = getRecords();
+  if (!recs.length) return 0;
+  const weeks = new Set(recs.map(r => getWeekStart(new Date(r.date))));
+  const weekMs = 7 * 86400000;
+  let cursor = getWeekStart(new Date());
+  if (!weeks.has(cursor)) cursor -= weekMs; // current week in progress shouldn't break the streak
+  let streak = 0;
+  while (weeks.has(cursor)) { streak++; cursor -= weekMs; }
+  return streak;
+}
+function renderStreak(){
+  const streak = computeWeekStreak();
+  const el = document.getElementById("streakBadge");
+  if (streak > 0) {
+    el.style.display = "inline-flex";
+    el.textContent = `🔥 ${streak} ${streak === 1 ? "săptămână" : "săptămâni"} la rând`;
+  } else {
+    el.style.display = "none";
+  }
+}
+
+function renderHistory(){
+  const recs = getRecords().slice().reverse();
+  const totalWorkouts = recs.length;
+  let totalVolume = 0;
+  
+  recs.forEach(r => {
+    r.sets.forEach(s => {
+      const kg = parseFloat(s.kg) || 0;
+      const reps = parseFloat(s.reps) || 0;
+      totalVolume += (kg * reps);
+    });
+  });
+
+  document.getElementById("stats").innerHTML = `
+    <div class="stat-card"><strong>${totalWorkouts}</strong><span>Antrenamente</span></div>
+    <div class="stat-card"><strong>${Math.round(totalVolume)} kg</strong><span>Volum Total</span></div>
+  `;
+
+  renderCalendar();
+
+  if (!recs.length) {
+    document.getElementById("historyList").innerHTML = `<div class="empty">Nu ai nicio sesiune salvată încă.</div>`;
+    return;
+  }
+
+  document.getElementById("historyList").innerHTML = recs.map(r => {
+    const d = new Date(r.date);
+    const dateStr = d.toLocaleDateString("ro-RO", { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute:'2-digit' });
+    return `<div class="history-item">
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <strong>${r.dayTitle}</strong>
+        <span style="color:var(--muted);font-size:12px;">${r.duration || "N/A"}</span>
+      </div>
+      <div style="color:var(--muted);font-size:11px;margin:4px 0 10px;">${dateStr}</div>
+      <div style="font-size:12px;line-height:1.5;color:var(--text);">
+        ${r.sets.map(s => `• ${s.exercise}: <strong>${s.kg || 0}kg</strong> × ${s.reps || 0}`).join("<br>")}
+      </div>
+      <div class="history-actions">
+        <button class="btn ghost small" onclick="editHistoryRecord(${r.id})">✎ Editează</button>
+        <button class="btn ghost small danger-outline" onclick="deleteHistoryRecord(${r.id})">🗑 Șterge</button>
+      </div>
+    </div>`;
+  }).join("");
+}
+
+function editHistoryRecord(id){
+  const rec = db.records.find(r => r.id === id);
+  if (!rec) return;
+  const fields = [];
+  rec.sets.forEach((s, i) => {
+    fields.push({ id: `s${i}_kg`, placeholder: `${s.exercise} — kg`, value: s.kg, inputmode: "decimal" });
+    fields.push({ id: `s${i}_reps`, placeholder: `${s.exercise} — repetări`, value: s.reps, inputmode: "numeric" });
+  });
+  openModal({
+    title: "Editează sesiunea",
+    desc: `${rec.dayTitle} · ${new Date(rec.date).toLocaleDateString("ro-RO")}`,
+    fields,
+    confirmText: "Salvează",
+    onConfirm: (v) => {
+      rec.sets.forEach((s, i) => {
+        s.kg = v[`s${i}_kg`];
+        s.reps = v[`s${i}_reps`];
+      });
       save();
       renderHistory();
-      toast("Sesiune ștearsă");
+      toast("Sesiune actualizată.");
+    }
+  });
+}
+
+function deleteHistoryRecord(id){
+  openModal({
+    title: "Ștergi sesiunea?",
+    desc: "Această acțiune e permanentă și va actualiza statisticile, streak-ul și scorul de forță.",
+    confirmText: "Șterge",
+    danger: true,
+    onConfirm: () => {
+      db.records = db.records.filter(r => r.id !== id);
+      save();
+      renderHistory();
+      toast("Sesiune ștearsă.");
     }
   });
 }
 
 function renderCalendar(){
-  const titleEl = document.getElementById("calMonthTitle");
-  const gridEl = document.getElementById("calGrid");
-  
   const year = calendarDate.getFullYear();
   const month = calendarDate.getMonth();
   
   const monthNames = ["Ianuarie", "Februarie", "Martie", "Aprilie", "Mai", "Iunie", "Iulie", "August", "Septembrie", "Octombrie", "Noiembrie", "Decembrie"];
-  titleEl.textContent = `${monthNames[month]} ${year}`;
+  document.getElementById("calMonthTitle").textContent = `${monthNames[month]} ${year}`;
+
+  const firstDay = new Date(year, month, 1);
+  const lastDay = new Date(year, month + 1, 0);
   
-  const firstDayIndex = new Date(year, month, 1).getDay();
-  const adjustedFirstDay = (firstDayIndex === 0) ? 6 : firstDayIndex - 1;
-  const totalDays = new Date(year, month + 1, 0).getDate();
+  let startingDay = firstDay.getDay() - 1;
+  if (startingDay === -1) startingDay = 6;
   
-  const records = getRecords();
-  const trainedDates = {};
-  records.forEach(r => {
-    if(r.timestamp) {
-      const d = new Date(r.timestamp);
-      if(d.getFullYear() === year && d.getMonth() === month){
-        trainedDates[d.getDate()] = (trainedDates[d.getDate()] || 0) + (r.totalVolume || 1000);
-      }
+  const totalDays = lastDay.getDate();
+
+  const volumePerDay = {};
+  getRecords().forEach(r => {
+    const rd = new Date(r.date);
+    if (rd.getFullYear() === year && rd.getMonth() === month) {
+      const day = rd.getDate();
+      let vol = 0;
+      r.sets.forEach(s => { vol += (parseFloat(s.kg) || 0) * (parseFloat(s.reps) || 0); });
+      volumePerDay[day] = (volumePerDay[day] || 0) + vol;
     }
   });
-  
+  const maxVol = Math.max(1, ...Object.values(volumePerDay));
+
+  const today = new Date();
+  const isCurrentMonth = today.getFullYear() === year && today.getMonth() === month;
+
   let html = `
     <div class="cal-day-name">L</div><div class="cal-day-name">M</div><div class="cal-day-name">M</div>
     <div class="cal-day-name">J</div><div class="cal-day-name">V</div><div class="cal-day-name">S</div><div class="cal-day-name">D</div>
   `;
-  
-  for(let i = 0; i < adjustedFirstDay; i++){
-    html += `<div class="cal-cell empty"></div>`;
-  }
-  
-  const today = new Date();
-  for(let day = 1; day <= totalDays; day++){
-    const isToday = (day === today.getDate() && month === today.getMonth() && year === today.getFullYear());
-    const vol = trainedDates[day];
-    let bgStyle = "";
-    let trainedClass = "";
-    if(vol !== undefined){
-      trainedClass = "trained";
-      if(vol > 15000) bgStyle = "background:rgba(34,197,94,.85);border-color:rgba(34,197,94,.9);";
-      else if(vol > 5000) bgStyle = "background:rgba(34,197,94,.45);border-color:rgba(34,197,94,.5);";
-      else bgStyle = "background:rgba(34,197,94,.18);border-color:rgba(34,197,94,.3);";
+
+  for (let i = 0; i < startingDay; i++) html += `<div class="cal-cell empty"></div>`;
+
+  for (let day = 1; day <= totalDays; day++) {
+    const isToday = isCurrentMonth && today.getDate() === day;
+    const isTrained = !!volumePerDay[day];
+    let classes = "cal-cell";
+    if (isToday) classes += " today";
+    if (isTrained) classes += " trained";
+
+    let style = "";
+    if (isTrained) {
+      const intensity = Math.min(1, volumePerDay[day] / maxVol);
+      const alphaBg = 0.15 + intensity * 0.7;
+      const alphaBorder = Math.min(1, alphaBg + 0.1);
+      style = `style="background:rgba(34,197,94,${alphaBg.toFixed(2)});border-color:rgba(34,197,94,${alphaBorder.toFixed(2)});"`;
     }
-    
-    html += `<div class="cal-cell ${isToday ? 'today' : ''} ${trainedClass}" style="${bgStyle}">${day}</div>`;
+
+    html += `<div class="${classes}" ${style}>${day}</div>`;
   }
-  
-  gridEl.innerHTML = html;
+
+  document.getElementById("calGrid").innerHTML = html;
+}
+
+document.getElementById("calPrev").onclick = () => { calendarDate.setMonth(calendarDate.getMonth() - 1); renderCalendar(); };
+document.getElementById("calNext").onclick = () => { calendarDate.setMonth(calendarDate.getMonth() + 1); renderCalendar(); };
+
+function renderStrengthRadar(){
+  const nameToCategory = {};
+  DAYS.forEach(d => d.exercises.forEach(e => { nameToCategory[e[0]] = getExerciseCategory(e); }));
+
+  const categories = ["legs", "back", "chest", "shoulders", "arms", "core"];
+  const volumeByCat = Object.fromEntries(categories.map(c => [c, 0]));
+
+  getRecords().forEach(r => {
+    r.sets.forEach(s => {
+      const cat = nameToCategory[s.exercise];
+      if (!cat) return;
+      volumeByCat[cat] += (parseFloat(s.kg) || 0) * (parseFloat(s.reps) || 0);
+    });
+  });
+
+  const maxVol = Math.max(1, ...Object.values(volumeByCat));
+  const data = categories.map(c => Math.round((volumeByCat[c] / maxVol) * 100));
+  const labels = categories.map(c => CATEGORY_LABELS[c]);
+
+  if (chartInstances.radar) chartInstances.radar.destroy();
+  const ctx = document.getElementById("strengthRadar").getContext("2d");
+  chartInstances.radar = new Chart(ctx, {
+    type: "radar",
+    data: { labels, datasets: [{ label: "Scor relativ", data, backgroundColor: "rgba(56,189,248,.2)", borderColor: "#38bdf8", pointBackgroundColor: "#38bdf8", borderWidth: 2 }] },
+    options: {
+      responsive: true,
+      scales: {
+        r: {
+          min: 0, max: 100,
+          ticks: { display: false, stepSize: 25 },
+          grid: { color: "rgba(255,255,255,.08)" },
+          angleLines: { color: "rgba(255,255,255,.08)" },
+          pointLabels: { color: "#94a3b8", font: { size: 11, weight: 700 } }
+        }
+      },
+      plugins: { legend: { display: false } }
+    }
+  });
 }
 
 function renderProgress(){
+  const recs = getRecords();
+  const exMap = {}; // exName -> [{ts, kg}]
+
+  recs.forEach(r => {
+    const ts = new Date(r.date).getTime();
+    r.sets.forEach(s => {
+      const kg = parseFloat(s.kg) || 0;
+      if (kg > 0) {
+        exMap[s.exercise] ||= [];
+        exMap[s.exercise].push({ ts, kg });
+      }
+    });
+  });
+
   const container = document.getElementById("exerciseProgress");
-  const records = getRecords();
-  
-  if(records.length === 0){
-    container.innerHTML = `<div class="empty">Nu există date suficiente pentru grafice. Completează primul antrenament!</div>`;
+
+  if (!recs.length) {
+    container.innerHTML = `<div class="empty">Completează antrenamente pentru a vedea scorul de forță și graficele de evoluție.</div>`;
     return;
   }
-  
-  const categoryScores = { legs: 0, back: 0, chest: 0, shoulders: 0, arms: 0, core: 0 };
-  records.forEach(r => {
-    if(r.categoryVolumes){
-      for(let k in r.categoryVolumes){
-        categoryScores[k] = (categoryScores[k] || 0) + r.categoryVolumes[k];
-      }
-    }
-  });
-  
-  const maxScore = Math.max(...Object.values(categoryScores), 1);
-  
-  container.innerHTML = `
-    <div class="chart-card">
-      <h3 style="margin:0 0 14px;font-size:16px;color:#fff;">Distribuție Forță pe Grupe Musculare</h3>
-      <div style="display:flex;flex-direction:column;gap:10px;">
-        ${Object.keys(CATEGORY_LABELS).map(key => {
-          const score = categoryScores[key] || 0;
-          const percentage = Math.round((score / maxScore) * 100);
-          return `
-            <div>
-              <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px;">
-                <strong style="color:var(--text);">${CATEGORY_LABELS[key]}</strong>
-                <span style="color:var(--muted);">${score > 1000 ? (score/1000).toFixed(1) + 'k kg' : score + ' kg'}</span>
-              </div>
-              <div class="track"><div class="fill" style="width:${percentage}%"></div></div>
-            </div>
-          `;
-        }).join("")}
+
+  const keys = Object.keys(exMap);
+  let overlaySection = `<div class="empty">Adaugă greutăți la seturi pentru a vedea graficul de evoluție per exercițiu.</div>`;
+
+  if (keys.length) {
+    selectedProgressExercises = selectedProgressExercises.filter(k => keys.includes(k));
+    if (!selectedProgressExercises.length) selectedProgressExercises = [keys[0]];
+
+    overlaySection = `
+      <div class="section">Comparație exerciții</div>
+      <div class="chip-row" id="progressChips">
+        ${keys.map(k => `<button class="chip ${selectedProgressExercises.includes(k) ? "active" : ""}" data-ex="${k}">${k}</button>`).join("")}
       </div>
-    </div>
-  `;
-}
-
-/* Navigation Screen Switching */
-function showScreen(screenId){
-  currentScreen = screenId;
-  document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
-  document.getElementById(screenId).classList.add("active");
-  
-  document.querySelectorAll(".nav-btn").forEach(b => {
-    if(b.dataset.screen === screenId) b.classList.add("active");
-    else b.classList.remove("active");
-  });
-  
-  updateHeaderInfo();
-  
-  if(screenId === "workoutScreen"){
-    renderWorkout();
-  } else if(screenId === "historyScreen"){
-    renderHistory();
-  } else if(screenId === "progressScreen"){
-    renderProgress();
-  } else {
-    renderHomeScreen();
+      <div class="chart-card"><canvas id="overlayChart" height="220"></canvas></div>
+    `;
   }
-}
 
-/* Event Listeners & Initialization */
-document.addEventListener("DOMContentLoaded", () => {
-  renderHomeScreen();
-  updateHeaderInfo();
-  updateTimerDisplay();
-  if (db.activeTimerStart && !db.timerPaused) runTimerInterval();
-  
-  document.getElementById("heroStartBtn").onclick = () => {
-    startWorkoutTimer();
-    showScreen("workoutScreen");
-  };
-  
-  document.getElementById("timerToggleBtn").onclick = () => {
-    toggleTimerPause();
-  };
-  
-  document.getElementById("timerStopBtn").onclick = () => {
-    confirmStopTimer();
-  };
-  
-  document.querySelectorAll(".nav-btn").forEach(btn => {
-    btn.onclick = () => {
-      showScreen(btn.dataset.screen);
+  container.innerHTML = `
+    <div class="section">Scor de forță pe grupe musculare</div>
+    <div class="chart-card"><canvas id="strengthRadar" height="220"></canvas></div>
+    ${overlaySection}
+  `;
+
+  renderStrengthRadar();
+
+  if (!keys.length) return;
+
+  document.querySelectorAll("#progressChips .chip").forEach(c => c.onclick = () => {
+    const ex = c.dataset.ex;
+    if (selectedProgressExercises.includes(ex)) {
+      if (selectedProgressExercises.length > 1) selectedProgressExercises = selectedProgressExercises.filter(x => x !== ex);
+    } else {
+      if (selectedProgressExercises.length >= 3) selectedProgressExercises.shift();
+      selectedProgressExercises.push(ex);
+    }
+    renderProgress();
+  });
+
+  const tsSet = new Set();
+  selectedProgressExercises.forEach(ex => exMap[ex].forEach(p => tsSet.add(p.ts)));
+  const sortedTs = [...tsSet].sort((a, b) => a - b);
+  const labels = sortedTs.map(ts => new Date(ts).toLocaleDateString("ro-RO", { day: "numeric", month: "short" }));
+
+  const palette = ["#38bdf8", "#22c55e", "#f59e0b"];
+  const datasets = selectedProgressExercises.map((ex, i) => {
+    const byTs = {};
+    exMap[ex].forEach(p => { if (!(p.ts in byTs) || p.kg > byTs[p.ts]) byTs[p.ts] = p.kg; });
+    return {
+      label: ex,
+      data: sortedTs.map(ts => (ts in byTs) ? byTs[ts] : null),
+      borderColor: palette[i % palette.length],
+      backgroundColor: palette[i % palette.length] + "22",
+      borderWidth: 2,
+      fill: true,
+      tension: 0.3,
+      spanGaps: true,
+      pointBackgroundColor: palette[i % palette.length]
     };
   });
-  
-  document.getElementById("editNameBtn").onclick = () => {
-    openModal({
-      title: "Nume Sportiv",
-      fields: [{ id: "name", value: db.userName, placeholder: "Introdu numele tău" }],
-      onConfirm: (res) => {
-        db.userName = res.name.trim();
-        save();
-        renderHomeScreen();
-        toast("Nume actualizat!");
+
+  if (chartInstances.overlay) chartInstances.overlay.destroy();
+  const ctx = document.getElementById("overlayChart").getContext("2d");
+  chartInstances.overlay = new Chart(ctx, {
+    type: "line",
+    data: { labels, datasets },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: selectedProgressExercises.length > 1, labels: { color: "#94a3b8" } } },
+      scales: {
+        x: { grid: { color: "rgba(255,255,255,0.05)" }, ticks: { color: "#94a3b8" } },
+        y: { grid: { color: "rgba(255,255,255,0.05)" }, ticks: { color: "#94a3b8" } }
       }
-    });
-  };
-  
-  document.getElementById("hideInstall").onclick = () => {
-    document.getElementById("installCard").style.display = "none";
-  };
-  
-  document.getElementById("finishBtn").onclick = () => {
-    openModal({
-      title: "Finalizează Antrenamentul",
-      desc: "Felicitări pentru efort! Dorești să salvezi sesiunea curentă în istoric?",
-      confirmText: "Salvează",
-      onConfirm: () => {
-        const day = DAYS[currentDay];
-        const workoutData = getWorkout(currentDay);
-        
-        let totalVol = 0;
-        let catVols = { legs: 0, back: 0, chest: 0, shoulders: 0, arms: 0, core: 0 };
-        let exSummary = {};
-        
-        day.exercises.forEach((ex, exIdx) => {
-          const sets = workoutData[exIdx];
-          const cat = getExerciseCategory(ex);
-          let maxKgForEx = 0;
-          let setsDoneCount = 0;
-          
-          sets.forEach(s => {
-            if(s.done){
-              setsDoneCount++;
-              const kg = parseFloat(s.kg) || 0;
-              const reps = parseFloat(s.reps) || 0;
-              const vol = kg * reps;
-              totalVol += vol;
-              catVols[cat] = (catVols[cat] || 0) + vol;
-              if(kg > maxKgForEx) maxKgForEx = kg;
-            }
-          });
-          
-          exSummary[ex[0]] = { maxKg: maxKgForEx, setsCount: setsDoneCount };
-        });
-        
-        const now = new Date();
-        const records = getRecords();
-        
-        let elapsed = db.activeTimerElapsed || 0;
-        if (db.activeTimerStart && !db.timerPaused) {
-          elapsed += Math.max(0, Math.floor((Date.now() - db.activeTimerStart) / 1000));
-        }
-        const mins = Math.floor(elapsed / 60);
-        const secs = elapsed % 60;
-        const durationStr = `${mins}m ${secs}s`;
-        
-        records.push({
-          dayId: day.id,
-          dayTitle: day.title,
-          date: now.toLocaleDateString("ro-RO", { day: 'numeric', month: 'short', year: 'numeric' }),
-          timestamp: now.getTime(),
-          duration: durationStr,
-          totalVolume: totalVol,
-          categoryVolumes: catVols,
-          exercises: exSummary
-        });
-        
-        save();
-        resetWorkoutTimer();
-        triggerHaptic("finish");
-        toast("Antrenament salvat cu succes! 🎉");
-        showScreen("historyScreen");
-      }
-    });
-  };
-  
-  document.getElementById("addExBtn").onclick = () => {
-    openModal({
-      title: "Adaugă Exercițiu Nou",
-      fields: [
-        { id: "name", placeholder: "Nume exercițiu" },
-        { id: "sets", type: "number", value: "3", placeholder: "Număr serii" },
-        { id: "reps", value: "10-12", placeholder: "Repetări (ex: 10-12)" },
-        { id: "category", type: "select", options: CATEGORY_OPTIONS, value: "legs" }
-      ],
-      confirmText: "Adaugă",
-      onConfirm: (res) => {
-        if(!res.name.trim()) return;
-        const newEx = [res.name.trim(), parseInt(res.sets) || 3, res.reps.trim() || "10", null, res.category];
-        DAYS[currentDay].exercises.push(newEx);
-        
-        const workoutData = getWorkout(currentDay);
-        workoutData.push(Array.from({length: parseInt(res.sets) || 3}, () => ({done: false, kg: "", reps: ""})));
-        
-        save();
-        renderWorkout();
-        toast("Exercițiu adăugat!");
-      }
-    });
-  };
-  
-  document.getElementById("resetBtn").onclick = () => {
-    openModal({
-      title: "Resetează Sesiunea",
-      desc: "Sigur vrei să ștergi toate bifările și valorile introduse pentru acest antrenament?",
-      confirmText: "Resetează",
-      danger: true,
-      onConfirm: () => {
-        if(db.workouts) delete db.workouts[DAYS[currentDay].id];
-        save();
-        renderWorkout();
-        toast("Sesiune resetată");
-      }
-    });
-  };
-  
-  document.getElementById("exportBtn").onclick = () => {
-    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(db, null, 2));
-    const dlAnchor = document.createElement('a');
-    dlAnchor.setAttribute("href", dataStr);
-    dlAnchor.setAttribute("download", `gymtrack_backup_${new Date().toISOString().slice(0,10)}.json`);
-    document.body.appendChild(dlAnchor);
-    dlAnchor.click();
-    dlAnchor.remove();
-    toast("Backup descărcat!");
-  };
-  
-  document.getElementById("importBtn").onclick = () => {
-    document.getElementById("importInput").click();
-  };
-  
-  document.getElementById("importInput").onchange = (e) => {
-    const file = e.target.files[0];
-    if(!file) return;
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      try {
-        const imported = JSON.parse(event.target.result);
-        if(imported.days){
-          db = imported;
-          save();
-          DAYS = db.days;
-          renderHomeScreen();
-          toast("Date importate cu succes!");
-        } else {
-          toast("Fișier invalid!");
-        }
-      } catch {
-        toast("Eroare la citirea fișierului JSON.");
-      }
-    };
-    reader.readAsText(file);
-  };
-  
-  document.getElementById("forceUpdateBtn").onclick = () => {
-    if ('serviceWorker' in navigator) {
-      navigator.getRegistrations().then(registrations => {
-        for(let registration of registrations) {
-          registration.update();
-        }
-      });
     }
-    toast("⚡ Verificat actualizări noi!");
-    setTimeout(() => window.location.reload(), 1000);
+  });
+}
+
+function updateWelcome(){
+  document.getElementById("userNameDisplay").textContent = db.userName || "Sportivule";
+}
+
+// BACKUP & FORCE UPDATE LOGIC
+document.getElementById("exportBtn").onclick = () => {
+  const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(db, null, 2));
+  const dlAnchor = document.createElement('a');
+  dlAnchor.setAttribute("href", dataStr);
+  dlAnchor.setAttribute("download", `gymtrack_backup_${new Date().toISOString().slice(0,10)}.json`);
+  document.body.appendChild(dlAnchor);
+  dlAnchor.click();
+  dlAnchor.remove();
+  toast("Backup descărcat!");
+};
+
+document.getElementById("importBtn").onclick = () => {
+  document.getElementById("importInput").click();
+};
+
+document.getElementById("importInput").onchange = (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(evt) {
+    try {
+      const importedData = JSON.parse(evt.target.result);
+      if (importedData && (importedData.records || importedData.days)) {
+        db = importedData;
+        DAYS = db.days || DEFAULT_DAYS;
+        save();
+        toast("Datele au fost importate cu succes!");
+        updateWelcome();
+        renderHistory();
+      } else {
+        toast("Fișierul JSON nu are un format valid pentru GymTrack.");
+      }
+    } catch(err) {
+      toast("Eroare la citirea fișierului!");
+    }
   };
-  
-  document.getElementById("calPrev").onclick = () => {
-    calendarDate.setMonth(calendarDate.getMonth() - 1);
-    renderCalendar();
-  };
-  
-  document.getElementById("calNext").onclick = () => {
-    calendarDate.setMonth(calendarDate.getMonth() + 1);
-    renderCalendar();
-  };
+  reader.readAsText(file);
+};
+
+document.getElementById("forceUpdateBtn").onclick = async () => {
+  if ('caches' in window) {
+    const names = await caches.keys();
+    await Promise.all(names.map(name => caches.delete(name)));
+  }
+  toast("Cache golit! Se reîncarcă...");
+  setTimeout(() => window.location.reload(true), 1000);
+};
+
+// INITIALIZARE
+document.querySelectorAll(".nav-btn").forEach(b => {
+  b.onclick = () => switchScreen(b.dataset.screen);
 });
+
+document.getElementById("heroStartBtn").onclick = () => {
+  switchScreen("workoutScreen");
+};
+
+document.getElementById("finishBtn").onclick = finishWorkout;
+document.getElementById("addExBtn").onclick = addExercise;
+document.getElementById("resetBtn").onclick = resetCurrentWorkout;
+document.getElementById("hideInstall").onclick = () => {
+  document.getElementById("installCard").style.display = "none";
+};
+document.getElementById("editNameBtn").onclick = () => {
+  openModal({
+    title: "Numele tău",
+    fields: [{ id: "name", placeholder: "Numele tău", value: db.userName || "" }],
+    confirmText: "Salvează",
+    onConfirm: (v) => {
+      db.userName = v.name || "";
+      save();
+      updateWelcome();
+    }
+  });
+};
+
+if (window.navigator.standalone === true || window.matchMedia('(display-mode: standalone)').matches) {
+  document.getElementById("installCard").style.display = "none";
+}
+
+updateWelcome();
+switchScreen("homeScreen");
+if (db.activeTimerStart) runTimerInterval();
 </script>
 </body>
 </html>
