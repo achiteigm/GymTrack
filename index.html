@@ -63,7 +63,6 @@
     h1{margin:0;font-size:26px;font-weight:800;letter-spacing:-.03em;color:#fff}
     .sub{margin:2px 0 0;color:var(--muted);font-size:13px}
 
-    /* Timer Badge */
     .timer-badge{
       display:inline-flex;
       align-items:center;
@@ -96,7 +95,6 @@
     main{padding:calc(12px + env(safe-area-inset-top)) 16px 20px;max-width:760px;margin:0 auto}
     .screen{display:none}.screen.active{display:block}
     
-    /* Home */
     .home-screen{
       display:flex;
       flex-direction:column;
@@ -542,6 +540,7 @@
     <div class="actions" style="padding: 10px 0;">
       <button class="btn ghost" id="exportBtn">Export Backup (JSON)</button>
       <button class="btn ghost" id="importBtn">Import Backup</button>
+      <button class="btn ghost" id="forceUpdateBtn" style="border-color:var(--accent);color:var(--accent);">⚡ Actualizează aplicația (Force PWA Update)</button>
       <input type="file" id="importInput" accept=".json" style="display:none">
     </div>
     <div class="section">Sesiuni Recente</div>
@@ -697,6 +696,8 @@ function updateTimerDisplay(){
   document.getElementById("timerText").textContent = formatted;
 }
 
+function save(){ store.save(db); }
+
 function getWorkout(day){
   db.workouts ||= {};
   return db.workouts[DAYS[day].id] ||= DAYS[day].exercises.map(e => Array.from({length: e[1]}, () => ({done: false, kg: "", reps: ""})));
@@ -737,6 +738,30 @@ function getMaxWeightForEx(exName){
     });
   });
   return max;
+}
+
+function getLast(dayId, exIndex){
+  const dayRecs = getRecords().filter(r => r.dayId === dayId);
+  if (!dayRecs.length) return "";
+  const lastRec = dayRecs[dayRecs.length - 1];
+  const exName = DAYS.find(d => d.id === dayId)?.exercises[exIndex]?.[0];
+  const exSets = lastRec.sets.filter(s => s.exercise === exName && (s.kg || s.reps));
+  if (!exSets.length) return "";
+  return exSets.map(s => `${s.kg || 0}kg × ${s.reps || 0}`).join(", ");
+}
+
+function updateProgress(){
+  const w = getWorkout(currentDay);
+  let totalSets = 0, doneSets = 0;
+  w.forEach(sets => {
+    totalSets += sets.length;
+    doneSets += sets.filter(s => s.done).length;
+  });
+  const pct = totalSets ? Math.round((doneSets / totalSets) * 100) : 0;
+  document.getElementById("fill").style.width = pct + "%";
+  document.getElementById("progressText").textContent = pct + "%";
+  
+  if (doneSets > 0) startTimer();
 }
 
 function renderWorkout(){
@@ -917,99 +942,101 @@ function startAnimation() {
     const images = document.querySelectorAll('.exercise-img');
     images.forEach(img => {
       const folder = img.getAttribute('data-folder');
-      const currentFrame = img.getAttribute('data-frame');
-      const nextFrame = currentFrame === '0' ? '1' : '0';
-      if (!img.src.includes('placeholder')) {
-        img.src = `./exercises/${folder}/${nextFrame}.jpg`;
-        img.setAttribute('data-frame', nextFrame);
-      }
+      let currentFrame = parseInt(img.getAttribute('data-frame') || '0', 10);
+      currentFrame = (currentFrame === 0) ? 1 : 0;
+      img.setAttribute('data-frame', currentFrame);
+      img.src = `./exercises/${folder}/${currentFrame}.jpg`;
     });
-  }, 750);
-}
-
-function updateProgress(){
-  const w = getWorkout(currentDay);
-  let done = 0, total = 0;
-  w.forEach(a => a.forEach(s => { total++; if (s.done) done++; }));
-  const pct = total ? Math.round(done / total * 100) : 0;
-  document.getElementById("fill").style.width = pct + "%";
-  document.getElementById("progressText").textContent = pct + "%";
-}
-
-function save(){ db.days = DAYS; store.save(db); }
-
-function getLast(dayId, ei){
-  const arr = getRecords().filter(r => r.dayId === dayId && r.exerciseIndex === ei).sort((a, b) => b.time - a.time);
-  if (!arr.length) return "";
-  const sets = arr[0].sets.filter(s => s.kg || s.reps);
-  if (!sets.length) return "";
-  return sets.map(s => `${s.kg || "—"}kg × ${s.reps || "—"}`).slice(0, 2).join(" · ");
+  }, 1200);
 }
 
 function finishWorkout(){
-  const day = DAYS[currentDay], w = getWorkout(currentDay);
-  const flat = w.flat();
-  if (!flat.some(s => s.done)){ 
-    triggerHaptic("warn");
-    toast("Bifează cel puțin un set."); 
-    return; 
-  }
+  const day = DAYS[currentDay];
+  const w = getWorkout(currentDay);
+  const doneSets = [];
   
-  triggerHaptic("finish");
+  w.forEach((sets, ei) => {
+    sets.forEach(s => {
+      if (s.done && (s.kg || s.reps)) {
+        doneSets.push({ exercise: day.exercises[ei][0], kg: s.kg, reps: s.reps });
+      }
+    });
+  });
 
-  day.exercises.forEach((e, ei) => {
-    db.records.push({ time: Date.now(), dayId: day.id, exerciseIndex: ei, exercise: e[0], sets: w[ei].map(x => ({...x})) });
+  if (!doneSets.length) {
+    toast("Marchează cel puțin o serie bifată!");
+    return;
+  }
+
+  const durationStr = document.getElementById("timerText").textContent;
+  db.records ||= [];
+  db.records.push({
+    id: Date.now(),
+    date: new Date().toISOString(),
+    dayId: day.id,
+    dayTitle: day.title,
+    duration: durationStr,
+    sets: doneSets
   });
-  
-  db.sessions ||= [];
-  db.sessions.push({ 
-    time: Date.now(), 
-    dayId: day.id, 
-    title: day.title, 
-    sets: flat.filter(s => s.done).length,
-    duration: timerSeconds 
-  });
-  
+
   db.workouts[day.id] = day.exercises.map(e => Array.from({length: e[1]}, () => ({done: false, kg: "", reps: ""})));
-  
   save();
   resetTimer();
-  toast("🎉 Antrenamentul a fost salvat!");
+  triggerHaptic("finish");
+  toast("Antrenament salvat în istoric! Bravo!");
   switchScreen("historyScreen");
 }
 
-function resetDay(){
-  triggerHaptic("warn");
-  db.workouts[DAYS[currentDay].id] = DAYS[currentDay].exercises.map(e => Array.from({length: e[1]}, () => ({done: false, kg: "", reps: ""})));
-  save();
-  resetTimer();
-  renderWorkout();
-  toast("Ziua a fost resetată.");
+function resetCurrentWorkout(){
+  if (confirm("Resetezi toate bifările și valorile pentru ziua curentă?")){
+    const day = DAYS[currentDay];
+    db.workouts[day.id] = day.exercises.map(e => Array.from({length: e[1]}, () => ({done: false, kg: "", reps: ""})));
+    save();
+    resetTimer();
+    renderWorkout();
+    toast("Sesiunea a fost resetată.");
+  }
 }
 
 function renderHistory(){
-  const sessions = (db.sessions || []).slice().sort((a, b) => b.time - a.time);
-  const total = sessions.reduce((n, s) => n + s.sets, 0);
+  const recs = getRecords().slice().reverse();
+  const totalWorkouts = recs.length;
+  let totalVolume = 0;
   
+  recs.forEach(r => {
+    r.sets.forEach(s => {
+      const kg = parseFloat(s.kg) || 0;
+      const reps = parseFloat(s.reps) || 0;
+      totalVolume += (kg * reps);
+    });
+  });
+
   document.getElementById("stats").innerHTML = `
-    <div class="stat-card"><strong>${sessions.length}</strong><span>Sesiuni Totale</span></div>
-    <div class="stat-card"><strong>${total}</strong><span>Seturi Complete</span></div>
+    <div class="stat-card"><strong>${totalWorkouts}</strong><span>Antrenamente</span></div>
+    <div class="stat-card"><strong>${Math.round(totalVolume)} kg</strong><span>Volum Total</span></div>
   `;
 
   renderCalendar();
-  
-  document.getElementById("historyList").innerHTML = sessions.length ? sessions.slice(0, 20).map(s => {
-    const durMins = s.duration ? Math.floor(s.duration / 60) : null;
-    const durText = durMins !== null ? ` · ${durMins} min` : '';
-    return `
-    <div class="history-item">
-      <div>
-        <strong style="font-size:14px;color:#fff">${s.title}</strong>
-        <span style="font-size:12px;color:var(--muted);margin-top:2px">${new Date(s.time).toLocaleDateString("ro-RO", {day: "2-digit", month: "2-digit", year: "numeric"})}${durText}</span>
+
+  if (!recs.length) {
+    document.getElementById("historyList").innerHTML = `<div class="empty">Nu ai nicio sesiune salvată încă.</div>`;
+    return;
+  }
+
+  document.getElementById("historyList").innerHTML = recs.map(r => {
+    const d = new Date(r.date);
+    const dateStr = d.toLocaleDateString("ro-RO", { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute:'2-digit' });
+    return `<div class="history-item">
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <strong>${r.dayTitle}</strong>
+        <span style="color:var(--muted);font-size:12px;">${r.duration || "N/A"}</span>
       </div>
-      <strong style="color:var(--accent);font-size:13px">${s.sets} seturi</strong>
-    </div>
-  `}).join("") : `<div class="empty">Nu există sesiuni salvate încă.</div>`;
+      <div style="color:var(--muted);font-size:11px;margin:4px 0 10px;">${dateStr}</div>
+      <div style="font-size:12px;line-height:1.5;color:var(--text);">
+        ${r.sets.map(s => `• ${s.exercise}: <strong>${s.kg || 0}kg</strong> × ${s.reps || 0}`).join("<br>")}
+      </div>
+    </div>`;
+  }).join("");
 }
 
 function renderCalendar(){
@@ -1018,94 +1045,100 @@ function renderCalendar(){
   
   const monthNames = ["Ianuarie", "Februarie", "Martie", "Aprilie", "Mai", "Iunie", "Iulie", "August", "Septembrie", "Octombrie", "Noiembrie", "Decembrie"];
   document.getElementById("calMonthTitle").textContent = `${monthNames[month]} ${year}`;
-  
+
   const firstDay = new Date(year, month, 1);
   const lastDay = new Date(year, month + 1, 0);
   
-  let startDay = firstDay.getDay() - 1;
-  if (startDay === -1) startDay = 6;
+  let startingDay = firstDay.getDay() - 1;
+  if (startingDay === -1) startingDay = 6;
   
-  const daysInMonth = lastDay.getDate();
+  const totalDays = lastDay.getDate();
+  const trainedDays = new Set();
+  
+  getRecords().forEach(r => {
+    const rd = new Date(r.date);
+    if (rd.getFullYear() === year && rd.getMonth() === month) {
+      trainedDays.add(rd.getDate());
+    }
+  });
+
   const today = new Date();
-  
-  const sessions = db.sessions || [];
-  const trainedDays = new Set(
-    sessions.map(s => {
-      const d = new Date(s.time);
-      return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
-    })
-  );
+  const isCurrentMonth = today.getFullYear() === year && today.getMonth() === month;
 
-  let html = ['Lu','Ma','Mi','Jo','Vi','Sâ','Du'].map(d => `<div class="cal-day-name">${d}</div>`).join("");
+  let html = `
+    <div class="cal-day-name">L</div><div class="cal-day-name">M</div><div class="cal-day-name">M</div>
+    <div class="cal-day-name">J</div><div class="cal-day-name">V</div><div class="cal-day-name">S</div><div class="cal-day-name">D</div>
+  `;
 
-  for (let i = 0; i < startDay; i++) {
+  for (let i = 0; i < startingDay; i++) {
     html += `<div class="cal-cell empty"></div>`;
   }
 
-  for (let day = 1; day <= daysInMonth; day++) {
-    const isToday = today.getFullYear() === year && today.getMonth() === month && today.getDate() === day;
-    const key = `${year}-${month}-${day}`;
-    const hasTrained = trainedDays.has(key);
-
+  for (let day = 1; day <= totalDays; day++) {
+    const isToday = isCurrentMonth && today.getDate() === day;
+    const isTrained = trainedDays.has(day);
     let classes = "cal-cell";
     if (isToday) classes += " today";
-    if (hasTrained) classes += " trained";
+    if (isTrained) classes += " trained";
 
-    html += `<div class="${classes}">${day}${hasTrained ? '<div class="cal-dot"></div>' : ''}</div>`;
+    html += `<div class="${classes}">${day}${isTrained ? '<div class="cal-dot"></div>' : ''}</div>`;
   }
 
   document.getElementById("calGrid").innerHTML = html;
 }
 
+document.getElementById("calPrev").onclick = () => { calendarDate.setMonth(calendarDate.getMonth() - 1); renderCalendar(); };
+document.getElementById("calNext").onclick = () => { calendarDate.setMonth(calendarDate.getMonth() + 1); renderCalendar(); };
+
 function renderProgress(){
-  const records = getRecords();
+  const recs = getRecords();
   const exMap = {};
 
-  records.forEach(r => {
-    if (!exMap[r.exercise]) exMap[r.exercise] = [];
-    const maxKg = Math.max(...r.sets.map(s => parseFloat(s.kg) || 0));
-    if (maxKg > 0) {
-      exMap[r.exercise].push({
-        date: new Date(r.time).toLocaleDateString("ro-RO", {day: "2-digit", month: "2-digit"}),
-        kg: maxKg
-      });
-    }
+  recs.forEach(r => {
+    const dateStr = new Date(r.date).toLocaleDateString("ro-RO", { day: 'numeric', month: 'short' });
+    r.sets.forEach(s => {
+      const kg = parseFloat(s.kg) || 0;
+      if (kg > 0) {
+        exMap[s.exercise] ||= [];
+        exMap[s.exercise].push({ date: dateStr, kg: kg });
+      }
+    });
   });
 
   const container = document.getElementById("exerciseProgress");
-  const exercises = Object.keys(exMap);
+  const keys = Object.keys(exMap);
 
-  if (!exercises.length) {
-    container.innerHTML = `<div class="empty">Efectuează și salvează antrenamente pentru a vedea graficele de progres.</div>`;
+  if (!keys.length) {
+    container.innerHTML = `<div class="empty">Completează antrenamente cu greutăți pentru a vedea graficele de evoluție.</div>`;
     return;
   }
 
-  container.innerHTML = exercises.map((ex, i) => `
+  container.innerHTML = keys.map((exName, idx) => `
     <div class="chart-card">
-      <strong style="color:#fff;font-size:15px;display:block;margin-bottom:12px">${ex}</strong>
-      <canvas id="chart-${i}"></canvas>
+      <strong style="display:block;margin-bottom:12px;font-size:15px;color:#fff;">${exName}</strong>
+      <canvas id="chart-${idx}" height="180"></canvas>
     </div>
   `).join("");
 
-  exercises.forEach((ex, i) => {
-    const data = exMap[ex].slice(-10);
-    const ctx = document.getElementById(`chart-${i}`).getContext('2d');
+  keys.forEach((exName, idx) => {
+    const ctx = document.getElementById(`chart-${idx}`).getContext("2d");
+    const dataPoints = exMap[exName];
     
-    if (chartInstances[i]) chartInstances[i].destroy();
+    if (chartInstances[idx]) chartInstances[idx].destroy();
 
-    chartInstances[i] = new Chart(ctx, {
+    chartInstances[idx] = new Chart(ctx, {
       type: 'line',
       data: {
-        labels: data.map(d => d.date),
+        labels: dataPoints.map(p => p.date),
         datasets: [{
-          label: 'Max KG',
-          data: data.map(d => d.kg),
+          label: 'Greutate (kg)',
+          data: dataPoints.map(p => p.kg),
           borderColor: '#38bdf8',
           backgroundColor: 'rgba(56, 189, 248, 0.1)',
+          borderWidth: 2,
           fill: true,
           tension: 0.3,
-          pointBackgroundColor: '#38bdf8',
-          pointRadius: 4
+          pointBackgroundColor: '#22c55e'
         }]
       },
       options: {
@@ -1120,66 +1153,73 @@ function renderProgress(){
   });
 }
 
-document.querySelectorAll(".nav-btn").forEach(btn => {
-  btn.onclick = () => {
-    triggerHaptic("light");
-    switchScreen(btn.dataset.screen);
-  };
-});
-
-document.getElementById("heroStartBtn").onclick = () => {
-  triggerHaptic("light");
-  startTimer();
-  switchScreen("workoutScreen");
-};
-
-document.getElementById("calPrev").onclick = () => {
-  triggerHaptic("light");
-  calendarDate.setMonth(calendarDate.getMonth() - 1);
-  renderCalendar();
-};
-
-document.getElementById("calNext").onclick = () => {
-  triggerHaptic("light");
-  calendarDate.setMonth(calendarDate.getMonth() + 1);
-  renderCalendar();
-};
-
-document.getElementById("finishBtn").onclick = finishWorkout;
-document.getElementById("addExBtn").onclick = () => { triggerHaptic("light"); addExercise(); };
-document.getElementById("resetBtn").onclick = resetDay;
-
-document.getElementById("hideInstall").onclick = () => {
-  document.getElementById("installCard").style.display = "none";
-};
-
+// BACKUP & FORCE UPDATE LOGIC
 document.getElementById("exportBtn").onclick = () => {
-  triggerHaptic("light");
-  const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(db));
-  const dlAnchorElem = document.createElement('a');
-  dlAnchorElem.setAttribute("href", dataStr);
-  dlAnchorElem.setAttribute("download", `GymTrack_Backup_${new Date().toISOString().slice(0,10)}.json`);
-  dlAnchorElem.click();
+  const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(db, null, 2));
+  const dlAnchor = document.createElement('a');
+  dlAnchor.setAttribute("href", dataStr);
+  dlAnchor.setAttribute("download", `gymtrack_backup_${new Date().toISOString().slice(0,10)}.json`);
+  document.body.appendChild(dlAnchor);
+  dlAnchor.click();
+  dlAnchor.remove();
+  toast("Backup descărcat!");
 };
 
-document.getElementById("importBtn").onclick = () => { triggerHaptic("light"); document.getElementById("importInput").click(); };
+document.getElementById("importBtn").onclick = () => {
+  document.getElementById("importInput").click();
+};
+
 document.getElementById("importInput").onchange = (e) => {
   const file = e.target.files[0];
   if (!file) return;
   const reader = new FileReader();
-  reader.onload = (event) => {
+  reader.onload = function(evt) {
     try {
-      db = JSON.parse(event.target.result);
-      DAYS = db.days || DEFAULT_DAYS;
-      store.save(db);
-      toast("Datele au fost importate!");
-      renderHistory();
-    } catch {
-      toast("Fișier invalid!");
+      const importedData = JSON.parse(evt.target.result);
+      if (importedData && (importedData.records || importedData.days)) {
+        db = importedData;
+        DAYS = db.days || DEFAULT_DAYS;
+        save();
+        toast("Datele au fost importate cu succes!");
+        renderHistory();
+      } else {
+        alert("Fișierul JSON nu are un format valid pentru GymTrack.");
+      }
+    } catch(err) {
+      alert("Eroare la citirea fișierului!");
     }
   };
   reader.readAsText(file);
 };
+
+document.getElementById("forceUpdateBtn").onclick = async () => {
+  if ('caches' in window) {
+    const names = await caches.keys();
+    await Promise.all(names.map(name => caches.delete(name)));
+  }
+  toast("Cache golit! Se reîncarcă...");
+  setTimeout(() => window.location.reload(true), 1000);
+};
+
+// INITIALIZARE
+document.querySelectorAll(".nav-btn").forEach(b => {
+  b.onclick = () => switchScreen(b.dataset.screen);
+});
+
+document.getElementById("heroStartBtn").onclick = () => {
+  switchScreen("workoutScreen");
+};
+
+document.getElementById("finishBtn").onclick = finishWorkout;
+document.getElementById("addExBtn").onclick = addExercise;
+document.getElementById("resetBtn").onclick = resetCurrentWorkout;
+document.getElementById("hideInstall").onclick = () => {
+  document.getElementById("installCard").style.display = "none";
+};
+
+if (window.navigator.standalone === true || window.matchMedia('(display-mode: standalone)').matches) {
+  document.getElementById("installCard").style.display = "none";
+}
 
 switchScreen("homeScreen");
 </script>
