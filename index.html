@@ -63,6 +63,13 @@
     h1{margin:0;font-size:26px;font-weight:800;letter-spacing:-.03em;color:#fff}
     .sub{margin:2px 0 0;color:var(--muted);font-size:13px}
 
+    /* Timer Controls Container */
+    .timer-container{
+      display:flex;
+      align-items:center;
+      gap:6px;
+    }
+
     .timer-badge{
       display:inline-flex;
       align-items:center;
@@ -81,11 +88,32 @@
       width:8px;height:8px;border-radius:50%;background:var(--accent);
       animation:pulse 1.5s infinite;
     }
+    .timer-dot.paused{
+      background:var(--gold);
+      animation:none;
+    }
     @keyframes pulse{
       0%{opacity:1;transform:scale(1);}
       50%{opacity:0.4;transform:scale(0.8);}
       100%{opacity:1;transform:scale(1);}
     }
+
+    .timer-ctrl-btn{
+      width:30px;
+      height:30px;
+      border-radius:50%;
+      background:var(--surface2);
+      border:1px solid var(--border);
+      color:var(--muted);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:0;
+      transition:background 0.2s, color 0.2s;
+    }
+    .timer-ctrl-btn svg{width:14px;height:14px;fill:currentColor}
+    .timer-ctrl-btn:hover{color:#fff;background:rgba(255,255,255,0.1)}
+    .timer-ctrl-btn.btn-stop:hover{color:var(--danger);border-color:var(--danger)}
 
     .progress{display:flex;align-items:center;gap:12px;margin-top:14px}
     .track{height:8px;flex:1;border-radius:99px;background:rgba(255,255,255,0.06);overflow:hidden;border:1px solid rgba(255,255,255,0.03)}
@@ -558,9 +586,19 @@
       <h1 id="title">Picioare + abdomen</h1>
       <p class="sub" id="subtitle">Antrenament</p>
     </div>
-    <div class="timer-badge" id="workoutTimer">
-      <span class="timer-dot"></span>
-      <span id="timerText">00:00</span>
+    
+    <!-- Zona Timer cu Butoane de Control -->
+    <div class="timer-container">
+      <div class="timer-badge" id="workoutTimer">
+        <span class="timer-dot" id="timerDot"></span>
+        <span id="timerText">00:00</span>
+      </div>
+      <button class="timer-ctrl-btn" id="btnPauseTimer" title="Pauză / Reia">
+        <svg id="pauseIcon" viewBox="0 0 24 24"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+      </button>
+      <button class="timer-ctrl-btn btn-stop" id="btnStopTimer" title="Stop">
+        <svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"/></svg>
+      </button>
     </div>
   </div>
   <div class="progress"><div class="track"><div class="fill" id="fill"></div></div><span id="progressText">0%</span></div>
@@ -687,7 +725,6 @@ const EX_FOLDERS = {
   leverageInclineChestPress: "Leverage_Incline_Chest_Press"
 };
 
-/* folder -> muscle-group category, used for the strength radar */
 const FOLDER_CATEGORY = {
   Leg_Press: "legs", Goblet_Squat: "legs", Hyperextensions: "back", Leg_Extensions: "legs",
   Thigh_Abductor: "legs", Standing_Calf_Raises: "legs", Ab_Crunch_Machine: "core",
@@ -771,14 +808,29 @@ function triggerHaptic(type = "light"){
   }
 }
 
+// TIMING LOGIC CU PAUZĂ & STOP
 let timerInterval = null;
 
 function updateTimerDisplay(){
-  let elapsed = 0;
-  if (db.activeTimerStart) elapsed = Math.max(0, Math.floor((Date.now() - db.activeTimerStart) / 1000));
+  let elapsed = db.activeTimerElapsed || 0;
+  if (db.activeTimerStart && !db.isTimerPaused) {
+    elapsed += Math.max(0, Math.floor((Date.now() - db.activeTimerStart) / 1000));
+  }
   const mins = Math.floor(elapsed / 60);
   const secs = elapsed % 60;
   document.getElementById("timerText").textContent = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+  
+  // Update icon for pause/play
+  const pauseIcon = document.getElementById("pauseIcon");
+  const timerDot = document.getElementById("timerDot");
+  
+  if (db.isTimerPaused) {
+    pauseIcon.innerHTML = `<polygon points="5 3 19 12 5 21 5 3"/>`; // Play icon
+    timerDot.classList.add("paused");
+  } else {
+    pauseIcon.innerHTML = `<rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/>`; // Pause icon
+    timerDot.classList.remove("paused");
+  }
 }
 
 function runTimerInterval(){
@@ -792,29 +844,72 @@ function stopTimerInterval(){
 }
 
 function startWorkoutTimer(){
-  if (!db.activeTimerStart) {
+  if (!db.activeTimerStart && !db.activeTimerElapsed) {
     db.activeTimerStart = Date.now();
+    db.activeTimerElapsed = 0;
+    db.isTimerPaused = false;
     save();
+  } else if (db.isTimerPaused) {
+    togglePauseTimer();
   }
   runTimerInterval();
+}
+
+function togglePauseTimer(){
+  if (!db.activeTimerStart && !db.activeTimerElapsed) return;
+  
+  if (db.isTimerPaused) {
+    // Reia timerul
+    db.activeTimerStart = Date.now();
+    db.isTimerPaused = false;
+    runTimerInterval();
+    toast("Timer reluat");
+  } else {
+    // Pune pauză
+    if (db.activeTimerStart) {
+      db.activeTimerElapsed = (db.activeTimerElapsed || 0) + Math.max(0, Math.floor((Date.now() - db.activeTimerStart) / 1000));
+    }
+    db.activeTimerStart = null;
+    db.isTimerPaused = true;
+    stopTimerInterval();
+    toast("Timer în pauză");
+  }
+  save();
+  updateTimerDisplay();
 }
 
 function resetWorkoutTimer(){
   stopTimerInterval();
   db.activeTimerStart = null;
+  db.activeTimerElapsed = 0;
+  db.isTimerPaused = false;
   save();
   updateTimerDisplay();
 }
 
+document.getElementById("btnPauseTimer").onclick = togglePauseTimer;
+document.getElementById("btnStopTimer").onclick = () => {
+  openModal({
+    title: "Oprești cronometrul?",
+    desc: "Vrei să oprești și să resetezi timpul pentru sesiunea curentă?",
+    confirmText: "Stop & Reset",
+    danger: true,
+    onConfirm: () => {
+      resetWorkoutTimer();
+      toast("Timer oprit");
+    }
+  });
+};
+
 document.addEventListener("visibilitychange", () => {
   if (document.visibilityState === "visible") {
     updateTimerDisplay();
-    if (db.activeTimerStart) runTimerInterval();
+    if (db.activeTimerStart && !db.isTimerPaused) runTimerInterval();
   }
 });
 window.addEventListener("pageshow", () => {
   updateTimerDisplay();
-  if (db.activeTimerStart) runTimerInterval();
+  if (db.activeTimerStart && !db.isTimerPaused) runTimerInterval();
 });
 
 function save(){ store.save(db); }
@@ -1543,7 +1638,6 @@ document.querySelectorAll(".nav-btn").forEach(b => {
   b.onclick = () => switchScreen(b.dataset.screen);
 });
 
-// TIMERUL PORNEȘTE STRICT CÂND APESI BUTONUL DE START HERO
 document.getElementById("heroStartBtn").onclick = () => {
   startWorkoutTimer();
   switchScreen("workoutScreen");
@@ -1574,7 +1668,8 @@ if (window.navigator.standalone === true || window.matchMedia('(display-mode: st
 
 updateWelcome();
 switchScreen("homeScreen");
-if (db.activeTimerStart) runTimerInterval();
+if ((db.activeTimerStart || db.activeTimerElapsed) && !db.isTimerPaused) runTimerInterval();
+updateTimerDisplay();
 </script>
 </body>
 </html>
