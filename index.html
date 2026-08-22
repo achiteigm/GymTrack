@@ -93,7 +93,7 @@
     .fill{height:100%;width:0;background:linear-gradient(90deg, var(--accent), var(--done));border-radius:99px;transition:width .4s cubic-bezier(0.4, 0, 0.2, 1);box-shadow:0 0 12px var(--accent-glow)}
     .progress span{min-width:42px;text-align:right;color:var(--muted);font-size:12px;font-weight:700;font-variant-numeric:tabular-nums}
     
-    main{padding:12px 16px 20px;max-width:760px;margin:0 auto}
+    main{padding:calc(12px + env(safe-area-inset-top)) 16px 20px;max-width:760px;margin:0 auto}
     .screen{display:none}.screen.active{display:block}
     
     /* Home */
@@ -284,7 +284,6 @@
     }
     @keyframes pop { 0% { transform: scale(1); } 50% { transform: scale(1.25); } 100% { transform: scale(1.1); } }
 
-    /* Stil Insignă Subtilă PR */
     .pr-badge {
       display: none;
       align-items: center;
@@ -359,28 +358,39 @@
       padding:16px;
       margin-bottom:12px;
     }
+    .calendar-card {
+      padding: 12px;
+      overflow: hidden;
+    }
     .stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
     .stat-card strong{font-size:24px;font-weight:800;color:var(--accent)}.stat-card span{display:block;color:var(--muted);font-size:12px;margin-top:2px}
 
-    .cal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+    .cal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
     .cal-header strong{font-size:15px;color:var(--text);font-weight:700}
     .cal-nav-btn{background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:6px 12px;font-size:12px}
-    .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;text-align:center}
-    .cal-day-name{font-size:10px;font-weight:800;color:var(--muted);padding-bottom:6px;text-transform:uppercase}
+    .cal-grid{
+      display:grid;
+      grid-template-columns:repeat(7, 1fr);
+      gap:4px;
+      text-align:center;
+      width:100%;
+    }
+    .cal-day-name{font-size:10px;font-weight:800;color:var(--muted);padding-bottom:4px;text-transform:uppercase}
     .cal-cell{
-      aspect-ratio:1/1;
+      min-height: 34px;
       display:flex;
       flex-direction:column;
       align-items:center;
       justify-content:center;
-      border-radius:var(--radius-sm);
+      border-radius:8px;
       background:rgba(0,0,0,0.25);
       border:1px solid var(--border);
-      font-size:12px;
+      font-size:11px;
       color:var(--muted);
       position:relative;
+      box-sizing: border-box;
     }
-    .cal-cell.empty{background:transparent;border:0}
+    .cal-cell.empty{background:transparent;border:0;min-height:auto}
     .cal-cell.today{border-color:var(--accent);color:var(--text);font-weight:700}
     .cal-cell.trained{
       background:rgba(34,197,94,0.15);
@@ -388,7 +398,7 @@
       color:#fff;
       font-weight:800;
     }
-    .cal-dot{width:4px;height:4px;border-radius:50%;background:var(--done);position:absolute;bottom:4px;box-shadow:0 0 6px var(--done)}
+    .cal-dot{width:4px;height:4px;border-radius:50%;background:var(--done);position:absolute;bottom:3px;box-shadow:0 0 6px var(--done)}
 
     .empty{padding:32px 16px;text-align:center;color:var(--muted);background:var(--surface);border:1px dashed var(--border);border-radius:var(--radius-lg)}
     .install{
@@ -632,7 +642,6 @@ let calendarDate = new Date();
 
 const customModifiedSets = {};
 
-// Sistem Haptic
 function triggerHaptic(type = "light"){
   if (!navigator.vibrate) return;
   switch (type) {
@@ -643,7 +652,6 @@ function triggerHaptic(type = "light"){
   }
 }
 
-// Stare Cronometru
 let timerInterval = null;
 let timerSeconds = 0;
 
@@ -705,7 +713,6 @@ function switchScreen(screenId){
   if (currentScreen === "progressScreen") renderProgress();
 }
 
-// Obține maximul istoric absolut pentru un exercițiu
 function getMaxWeightForEx(exName){
   const records = getRecords().filter(r => r.exercise === exName);
   let max = 0;
@@ -845,7 +852,6 @@ function renderWorkout(){
       }
     }
 
-    // Actualizare live starea insignei PR
     const exName = day.exercises[e][0];
     const maxHist = getMaxWeightForEx(exName);
     for (let i = 0; i < w[e].length; i++) {
