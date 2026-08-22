@@ -822,6 +822,66 @@
 /* =========================================================
    EXERCISES & DB SETUP
    ========================================================= */
+
+const EX_FOLDERS = {
+  "Barbell Bench Press": "Barbell_Bench_Press",
+  "Incline Dumbbell Press": "Incline_Dumbbell_Press",
+  "Cable Chest Fly": "Cable_Chest_Fly",
+  "Triceps Pushdown": "Triceps_Pushdown_-_Rope_Attachment",
+  "Overhead Cable Triceps Extension": "Cable_Overhead_Triceps_Extension",
+  "Lat Pulldown": "Lat_Pulldown",
+  "Seated Cable Row": "Seated_Cable_Row",
+  "Face Pull": "Face_Pull",
+  "Dumbbell Biceps Curl": "Dumbbell_Biceps_Curl",
+  "Hammer Curl": "Hammer_Curl",
+  "Barbell Squat": "Barbell_Squat",
+  "Leg Press": "Leg_Press",
+  "Romanian Deadlift": "Romanian_Deadlift",
+  "Standing Calf Raise": "Standing_Calf_Raise",
+  "Dumbbell Lateral Raise": "Dumbbell_Lateral_Raise",
+  "Overhead Dumbbell Press": "Overhead_Dumbbell_Press"
+};
+
+const DEFAULT_DAYS = [
+  {
+    id: "push",
+    title: "Ziua 1 - Push",
+    sub: "Piept, Umeri, Triceps",
+    exercises: [
+      { name: "Barbell Bench Press", target: "3 x 8-10", sets: [ {w: 60, r: 10, done: false}, {w: 60, r: 10, done: false}, {w: 60, r: 8, done: false} ] },
+      { name: "Incline Dumbbell Press", target: "3 x 10-12", sets: [ {w: 22, r: 10, done: false}, {w: 22, r: 10, done: false}, {w: 22, r: 10, done: false} ] },
+      { name: "Cable Chest Fly", target: "3 x 12-15", sets: [ {w: 15, r: 12, done: false}, {w: 15, r: 12, done: false}, {w: 15, r: 12, done: false} ] },
+      { name: "Overhead Dumbbell Press", target: "3 x 10-12", sets: [ {w: 18, r: 10, done: false}, {w: 18, r: 10, done: false}, {w: 18, r: 10, done: false} ] },
+      { name: "Dumbbell Lateral Raise", target: "4 x 12-15", sets: [ {w: 10, r: 12, done: false}, {w: 10, r: 12, done: false}, {w: 10, r: 12, done: false}, {w: 10, r: 12, done: false} ] },
+      { name: "Triceps Pushdown", target: "3 x 12-15", sets: [ {w: 25, r: 12, done: false}, {w: 25, r: 12, done: false}, {w: 25, r: 12, done: false} ] },
+      { name: "Overhead Cable Triceps Extension", target: "3 x 12-15", sets: [ {w: 20, r: 12, done: false}, {w: 20, r: 12, done: false}, {w: 20, r: 12, done: false} ] }
+    ]
+  },
+  {
+    id: "pull",
+    title: "Ziua 2 - Pull",
+    sub: "Spate, Biceps, Umeri post.",
+    exercises: [
+      { name: "Lat Pulldown", target: "3 x 8-10", sets: [ {w: 55, r: 10, done: false}, {w: 55, r: 10, done: false}, {w: 55, r: 8, done: false} ] },
+      { name: "Seated Cable Row", target: "3 x 10-12", sets: [ {w: 50, r: 10, done: false}, {w: 50, r: 10, done: false}, {w: 50, r: 10, done: false} ] },
+      { name: "Face Pull", target: "4 x 12-15", sets: [ {w: 20, r: 15, done: false}, {w: 20, r: 15, done: false}, {w: 20, r: 15, done: false}, {w: 20, r: 15, done: false} ] },
+      { name: "Dumbbell Biceps Curl", target: "3 x 10-12", sets: [ {w: 12, r: 10, done: false}, {w: 12, r: 10, done: false}, {w: 12, r: 10, done: false} ] },
+      { name: "Hammer Curl", target: "3 x 10-12", sets: [ {w: 12, r: 10, done: false}, {w: 12, r: 10, done: false}, {w: 12, r: 10, done: false} ] }
+    ]
+  },
+  {
+    id: "legs",
+    title: "Ziua 3 - Legs",
+    sub: "Picioare & Gambe",
+    exercises: [
+      { name: "Barbell Squat", target: "3 x 8-10", sets: [ {w: 80, r: 8, done: false}, {w: 80, r: 8, done: false}, {w: 80, r: 8, done: false} ] },
+      { name: "Leg Press", target: "3 x 10-12", sets: [ {w: 140, r: 10, done: false}, {w: 140, r: 10, done: false}, {w: 140, r: 10, done: false} ] },
+      { name: "Romanian Deadlift", target: "3 x 10-12", sets: [ {w: 70, r: 10, done: false}, {w: 70, r: 10, done: false}, {w: 70, r: 10, done: false} ] },
+      { name: "Standing Calf Raise", target: "4 x 12-15", sets: [ {w: 50, r: 12, done: false}, {w: 50, r: 12, done: false}, {w: 50, r: 12, done: false}, {w: 50, r: 12, done: false} ] }
+    ]
+  }
+];
+
 const DB_NAME = "GymTrackDB";
 const DB_VERSION = 1;
 const STORE_NAME = "appData";
@@ -831,76 +891,126 @@ let dbInstance = null;
 function openDB() {
   return new Promise((resolve, reject) => {
     if (dbInstance) return resolve(dbInstance);
+
     const request = indexedDB.open(DB_NAME, DB_VERSION);
-    request.onupgradeneeded = (e) => {
-      const db = e.target.result;
+
+    request.onupgradeneeded = (event) => {
+      const db = event.target.result;
       if (!db.objectStoreNames.contains(STORE_NAME)) {
         db.createObjectStore(STORE_NAME);
       }
     };
-    request.onsuccess = (e) => {
-      dbInstance = e.target.result;
+
+    request.onsuccess = (event) => {
+      dbInstance = event.target.result;
       resolve(dbInstance);
     };
-    request.onerror = (e) => reject(e.target.error);
+
+    request.onerror = (event) => {
+      console.error("IndexedDB Error:", event.target.error);
+      reject(event.target.error);
+    };
   });
 }
 
 async function saveState(key, value) {
   try {
     const db = await openDB();
-    const tx = db.transaction(STORE_NAME, "readwrite");
-    tx.objectStore(STORE_NAME).put(value, key);
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction(STORE_NAME, "readwrite");
+      const store = tx.objectStore(STORE_NAME);
+      const req = store.put(value, key);
+      req.onsuccess = () => resolve(true);
+      req.onerror = () => reject(req.error);
+    });
   } catch (err) {
-    console.error("Salvare esuata:", err);
+    console.error("Eroare la salvare IndexedDB:", err);
   }
 }
 
 async function getState(key) {
   try {
     const db = await openDB();
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
       const tx = db.transaction(STORE_NAME, "readonly");
-      const req = tx.objectStore(STORE_NAME).get(key);
+      const store = tx.objectStore(STORE_NAME);
+      const req = store.get(key);
       req.onsuccess = () => resolve(req.result);
-      req.onerror = () => resolve(null);
+      req.onerror = () => reject(req.error);
     });
   } catch (err) {
+    console.error("Eroare la citire IndexedDB:", err);
     return null;
   }
 }
 
 /* =========================================================
-   WORKOUT TIMER (Baterie-Friendly / Date.now)
+   APP STATE & DOM ELEMENTS
    ========================================================= */
+
+let activeDayId = "push";
+let daysData = JSON.parse(JSON.stringify(DEFAULT_DAYS));
+let historyData = [];
+let userName = "Sportivule";
+
+// Workout Timer Variables
 let workoutStartTime = null;
 let timerInterval = null;
 let elapsedTimePaused = 0;
-let isPaused = false;
+let isTimerPaused = false;
+
+// DOM Elements
+const dayTabsEl = document.getElementById("dayTabs");
+const workoutListEl = document.getElementById("workoutList");
+const historyListEl = document.getElementById("historyList");
+const exerciseProgressEl = document.getElementById("exerciseProgress");
+const fillEl = document.getElementById("fill");
+const progressTextEl = document.getElementById("progressText");
+const titleEl = document.getElementById("title");
+const subtitleEl = document.getElementById("subtitle");
+const toastEl = document.getElementById("toast");
+const userNameDisplayEl = document.getElementById("userNameDisplay");
+const streakBadgeEl = document.getElementById("streakBadge");
+
+const headerTimerContainer = document.getElementById("headerTimerContainer");
+const headerProgressContainer = document.getElementById("headerProgressContainer");
+const workoutTimerEl = document.getElementById("workoutTimer");
+const timerTextEl = document.getElementById("timerText");
+const timerToggleBtn = document.getElementById("timerToggleBtn");
+const timerStopBtn = document.getElementById("timerStopBtn");
+
+/* =========================================================
+   TIMER LOGIC (Baterie-Friendly / Date.now)
+   ========================================================= */
 
 function updateTimerDisplay() {
-  if (!workoutStartTime || isPaused) return;
+  if (!workoutStartTime || isTimerPaused) return;
+
   const totalSeconds = Math.floor((Date.now() - workoutStartTime) / 1000);
-  const m = Math.floor(totalSeconds / 60).toString().padStart(2, '0');
-  const s = (totalSeconds % 60).toString().padStart(2, '0');
-  document.getElementById('timerText').textContent = `${m}:${s}`;
+  const minutes = Math.floor(totalSeconds / 60).toString().padStart(2, '0');
+  const seconds = (totalSeconds % 60).toString().padStart(2, '0');
+
+  timerTextEl.textContent = `${minutes}:${seconds}`;
 }
 
 function startTimer() {
   workoutStartTime = Date.now() - elapsedTimePaused;
-  isPaused = false;
-  document.getElementById('workoutTimer').className = 'timer-badge';
+  isTimerPaused = false;
+  workoutTimerEl.className = "timer-badge";
+  timerToggleBtn.textContent = "Pauza";
+  
   clearInterval(timerInterval);
   timerInterval = setInterval(updateTimerDisplay, 1000);
   updateTimerDisplay();
 }
 
 function pauseTimer() {
-  if (!isPaused && workoutStartTime) {
+  if (!isTimerPaused && workoutStartTime) {
     elapsedTimePaused = Date.now() - workoutStartTime;
-    isPaused = true;
+    isTimerPaused = true;
     clearInterval(timerInterval);
-    document.getElementById('workoutTimer').className = 'timer-badge paused';
+    workoutTimerEl.className = "timer-badge paused";
+    timerToggleBtn.textContent = "Reluare";
   }
 }
 
@@ -908,62 +1018,452 @@ function stopTimer() {
   clearInterval(timerInterval);
   workoutStartTime = null;
   elapsedTimePaused = 0;
-  isPaused = false;
-  document.getElementById('timerText').textContent = '00:00';
-  document.getElementById('workoutTimer').className = 'timer-badge stopped';
+  isTimerPaused = false;
+  timerTextEl.textContent = "00:00";
+  workoutTimerEl.className = "timer-badge stopped";
+  timerToggleBtn.textContent = "Start";
 }
 
-// Sincronizare automata la aprinderea ecranului
-document.addEventListener('visibilitychange', () => {
-  if (document.visibilityState === 'visible') {
+// Actualizare automata la deblocarea telefonului
+document.addEventListener("visibilitychange", () => {
+  if (document.visibilityState === "visible") {
     updateTimerDisplay();
   } else {
-    // Salveaza starea temporara la stingerea ecranului
-    saveState("temp_workout_time", { workoutStartTime, elapsedTimePaused, isPaused });
+    saveState("gym_days_backup", daysData);
+  }
+});
+
+timerToggleBtn.addEventListener("click", () => {
+  if (!workoutStartTime) {
+    startTimer();
+  } else if (isTimerPaused) {
+    startTimer();
+  } else {
+    pauseTimer();
+  }
+});
+
+timerStopBtn.addEventListener("click", () => {
+  if (confirm("Sigur vrei sa opresti si sa resetezi cronometrul?")) {
+    stopTimer();
+    showToast("Cronometru oprit.");
   }
 });
 
 /* =========================================================
-   NAVIGATION & UI EVENT LISTENERS
+   NAVIGATION & SCREENS
    ========================================================= */
-document.querySelectorAll('.nav-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-    
-    btn.classList.add('active');
-    const targetScreen = btn.getAttribute('data-screen');
-    document.getElementById(targetScreen).classList.add('active');
+
+document.querySelectorAll(".nav-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    const screenId = btn.getAttribute("data-screen");
+    switchScreen(screenId);
   });
 });
 
-document.getElementById('heroStartBtn').addEventListener('click', () => {
-  document.querySelector('[data-screen="workoutScreen"]').click();
-  if (!workoutStartTime) startTimer();
-});
+function switchScreen(screenId) {
+  document.querySelectorAll(".nav-btn").forEach(b => {
+    b.classList.toggle("active", b.getAttribute("data-screen") === screenId);
+  });
 
-document.getElementById('timerToggleBtn').addEventListener('click', () => {
-  if (isPaused) {
+  document.querySelectorAll(".screen").forEach(s => {
+    s.classList.toggle("active", s.id === screenId);
+  });
+
+  if (screenId === "homeScreen") {
+    headerTimerContainer.style.display = "none";
+    headerProgressContainer.style.display = "none";
+    titleEl.textContent = "Acasa";
+    subtitleEl.textContent = "Tablou de bord";
+    updateHomeData();
+  } else if (screenId === "workoutScreen") {
+    headerTimerContainer.style.display = "flex";
+    headerProgressContainer.style.display = "flex";
+    titleEl.textContent = "Antrenament";
+    subtitleEl.textContent = getActiveDay().title;
+    renderWorkout();
+  } else if (screenId === "historyScreen") {
+    headerTimerContainer.style.display = "none";
+    headerProgressContainer.style.display = "none";
+    titleEl.textContent = "Istoric";
+    subtitleEl.textContent = "Sesiuni salvate";
+    renderHistory();
+  } else if (screenId === "progressScreen") {
+    headerTimerContainer.style.display = "none";
+    headerProgressContainer.style.display = "none";
+    titleEl.textContent = "Progres";
+    subtitleEl.textContent = "Evolutie si volum";
+    renderProgress();
+  }
+}
+
+document.getElementById("heroStartBtn").addEventListener("click", () => {
+  switchScreen("workoutScreen");
+  if (!workoutStartTime) {
     startTimer();
-    document.getElementById('timerToggleBtn').textContent = 'Pauza';
-  } else {
-    pauseTimer();
-    document.getElementById('timerToggleBtn').textContent = 'Reluare';
   }
 });
 
-document.getElementById('timerStopBtn').addEventListener('click', () => {
+/* =========================================================
+   HOME LOGIC
+   ========================================================= */
+
+function updateHomeData() {
+  userNameDisplayEl.textContent = userName;
+
+  if (historyData.length > 0) {
+    let streak = 0;
+    const today = new Date().toDateString();
+    streakBadgeEl.style.display = "inline-flex";
+    streakBadgeEl.innerHTML = `🔥 ${historyData.length} Antrenamente completate`;
+  } else {
+    streakBadgeEl.style.display = "none";
+  }
+}
+
+document.getElementById("editNameBtn").addEventListener("click", () => {
+  const newName = prompt("Introduce numele tau:", userName);
+  if (newName && newName.trim() !== "") {
+    userName = newName.trim();
+    userNameDisplayEl.textContent = userName;
+    saveState("gym_username", userName);
+    showToast("Nume salvat!");
+  }
+});
+
+/* =========================================================
+   WORKOUT LOGIC & RENDERING
+   ========================================================= */
+
+function getActiveDay() {
+  return daysData.find(d => d.id === activeDayId) || daysData[0];
+}
+
+function renderTabs() {
+  dayTabsEl.innerHTML = "";
+  daysData.forEach(day => {
+    const tab = document.createElement("button");
+    tab.className = `day-tab ${day.id === activeDayId ? "active" : ""}`;
+    tab.innerHTML = `<strong>${day.title}</strong><small>${day.sub}</small>`;
+    tab.addEventListener("click", () => {
+      activeDayId = day.id;
+      subtitleEl.textContent = day.title;
+      renderTabs();
+      renderWorkout();
+    });
+    dayTabsEl.appendChild(tab);
+  });
+}
+
+function renderWorkout() {
+  renderTabs();
+  const currentDay = getActiveDay();
+  workoutListEl.innerHTML = "";
+
+  currentDay.exercises.forEach((ex, exIndex) => {
+    const card = document.createElement("div");
+    const allDone = ex.sets.length > 0 && ex.sets.every(s => s.done);
+    card.className = `card ${allDone ? "complete" : ""}`;
+
+    const folderName = EX_FOLDERS[ex.name] || ex.name.replace(/\s+/g, '_');
+    const imagePath = `assets/exercises/${folderName}/images/0.jpg`;
+
+    card.innerHTML = `
+      <div class="ex-head">
+        <button class="btn-delete-ex" title="Sterge exercitiu">✕</button>
+        <div class="visual">
+          <img class="exercise-img" src="${imagePath}" alt="${ex.name}" loading="lazy" onload="this.classList.add('visible')" onerror="this.style.display='none'">
+        </div>
+        <div class="ex-info">
+          <div class="ex-title">${ex.name}</div>
+          <div class="meta">Tinta: ${ex.target}</div>
+        </div>
+      </div>
+      <div class="set-list">
+        ${ex.sets.map((set, setIndex) => `
+          <div class="set-row">
+            <span class="set-label">#${setIndex + 1}</span>
+            <input type="number" class="field weight-field" value="${set.w}" placeholder="Kg" data-ex="${exIndex}" data-set="${setIndex}" data-type="w">
+            <input type="number" class="field reps-field" value="${set.r}" placeholder="Reps" data-ex="${exIndex}" data-set="${setIndex}" data-type="r">
+            <button class="check ${set.done ? "on" : ""}" data-ex="${exIndex}" data-set="${setIndex}">✓</button>
+          </div>
+        `).join('')}
+        <button class="btn ghost btn-add-set" data-ex="${exIndex}" style="width:100%;margin-top:6px;padding:8px;font-size:12px;">+ Adauga set</button>
+      </div>
+    `;
+
+    // Event handlers pentru exercitiu
+    card.querySelector(".btn-delete-ex").addEventListener("click", () => {
+      if (confirm(`Stergi ${ex.name}?`)) {
+        currentDay.exercises.splice(exIndex, 1);
+        saveState("gym_days", daysData);
+        renderWorkout();
+      }
+    });
+
+    card.querySelector(".btn-add-set").addEventListener("click", () => {
+      const lastSet = ex.sets[ex.sets.length - 1] || { w: 10, r: 10, done: false };
+      ex.sets.push({ w: lastSet.w, r: lastSet.r, done: false });
+      saveState("gym_days", daysData);
+      renderWorkout();
+    });
+
+    workoutListEl.appendChild(card);
+  });
+
+  // Attach event listeners pentru inputs si checks
+  workoutListEl.querySelectorAll(".field").forEach(input => {
+    input.addEventListener("change", (e) => {
+      const exIdx = e.target.getAttribute("data-ex");
+      const setIdx = e.target.getAttribute("data-set");
+      const type = e.target.getAttribute("data-type");
+      const val = parseFloat(e.target.value) || 0;
+
+      if (type === "w") currentDay.exercises[exIdx].sets[setIdx].w = val;
+      if (type === "r") currentDay.exercises[exIdx].sets[setIdx].r = val;
+
+      saveState("gym_days", daysData);
+    });
+  });
+
+  workoutListEl.querySelectorAll(".check").forEach(btn => {
+    btn.addEventListener("click", (e) => {
+      const exIdx = btn.getAttribute("data-ex");
+      const setIdx = btn.getAttribute("data-set");
+      const currentState = currentDay.exercises[exIdx].sets[setIdx].done;
+      
+      currentDay.exercises[exIdx].sets[setIdx].done = !currentState;
+      saveState("gym_days", daysData);
+      renderWorkout();
+      
+      if (!currentState && navigator.vibrate) {
+        navigator.vibrate(50);
+      }
+    });
+  });
+
+  updateProgress();
+}
+
+function updateProgress() {
+  const currentDay = getActiveDay();
+  let totalSets = 0;
+  let completedSets = 0;
+
+  currentDay.exercises.forEach(ex => {
+    ex.sets.forEach(s => {
+      totalSets++;
+      if (s.done) completedSets++;
+    });
+  });
+
+  const percentage = totalSets > 0 ? Math.round((completedSets / totalSets) * 100) : 0;
+  fillEl.style.width = `${percentage}%`;
+  progressTextEl.textContent = `${percentage}%`;
+}
+
+/* =========================================================
+   ACTIONS (FINISH, ADD EXERCISE, RESET)
+   ========================================================= */
+
+document.getElementById("addExBtn").addEventListener("click", () => {
+  const name = prompt("Numele exercițiului nou:");
+  if (!name || name.trim() === "") return;
+
+  const target = prompt("Țintă seturi / repetări (ex: 3 x 10-12):", "3 x 10-12") || "3 x 10-12";
+  const currentDay = getActiveDay();
+
+  currentDay.exercises.push({
+    name: name.trim(),
+    target: target.trim(),
+    sets: [
+      { w: 10, r: 10, done: false },
+      { w: 10, r: 10, done: false },
+      { w: 10, r: 10, done: false }
+    ]
+  });
+
+  saveState("gym_days", daysData);
+  renderWorkout();
+  showToast("Exercițiu adăugat cu succes!");
+});
+
+document.getElementById("resetBtn").addEventListener("click", () => {
+  if (confirm("Sigur dorești să resetezi bifele pentru ziua curentă?")) {
+    const currentDay = getActiveDay();
+    currentDay.exercises.forEach(ex => {
+      ex.sets.forEach(s => s.done = false);
+    });
+    saveState("gym_days", daysData);
+    renderWorkout();
+    showToast("Antrenamentul a fost resetat.");
+  }
+});
+
+document.getElementById("finishBtn").addEventListener("click", async () => {
+  const currentDay = getActiveDay();
+  let totalCompleted = 0;
+
+  currentDay.exercises.forEach(ex => {
+    ex.sets.forEach(s => { if (s.done) totalCompleted++; });
+  });
+
+  if (totalCompleted === 0) {
+    showToast("Bifează cel puțin un set înainte de finalizare!");
+    return;
+  }
+
+  const durationText = timerTextEl.textContent;
+
+  const sessionData = {
+    id: Date.now(),
+    date: new Date().toLocaleDateString("ro-RO", { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }),
+    dayTitle: currentDay.title,
+    duration: durationText,
+    exercises: JSON.parse(JSON.stringify(currentDay.exercises))
+  };
+
+  historyData.unshift(sessionData);
+  await saveState("gym_history", historyData);
+
+  // Reset bife
+  currentDay.exercises.forEach(ex => ex.sets.forEach(s => s.done = false));
+  await saveState("gym_days", daysData);
+
   stopTimer();
+  showToast("🎉 Antrenament salvat în istoric!");
+  switchScreen("historyScreen");
 });
 
-document.getElementById('hideInstall').addEventListener('click', () => {
-  document.getElementById('installCard').style.display = 'none';
+/* =========================================================
+   HISTORY & PROGRESS RENDERING
+   ========================================================= */
+
+function renderHistory() {
+  historyListEl.innerHTML = "";
+
+  if (historyData.length === 0) {
+    historyListEl.innerHTML = `<p style="color:var(--muted);text-align:center;padding:40px 0;">Nu ai nicio sesiune salvată încă.</p>`;
+    return;
+  }
+
+  historyData.forEach((session, index) => {
+    const card = document.createElement("div");
+    card.className = "card";
+    card.style.padding = "16px";
+
+    card.innerHTML = `
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+        <div>
+          <strong style="font-size:16px;color:#fff;">${session.dayTitle}</strong>
+          <div style="font-size:12px;color:var(--muted);margin-top:2px;">${session.date} • ⏱ ${session.duration || 'N/A'}</div>
+        </div>
+        <button class="btn ghost btn-del-hist" data-index="${index}" style="padding:6px 10px;font-size:11px;color:var(--danger);">Șterge</button>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:6px;">
+        ${session.exercises.map(ex => {
+          const completedSets = ex.sets.filter(s => s.done);
+          if (completedSets.length === 0) return '';
+          return `
+            <div style="font-size:13px;color:var(--text);background:rgba(0,0,0,0.2);padding:8px 10px;border-radius:8px;">
+              <strong>${ex.name}</strong>: ${completedSets.map(s => `${s.w}kg × ${s.r}`).join(', ')}
+            </div>
+          `;
+        }).join('')}
+      </div>
+    `;
+
+    card.querySelector(".btn-del-hist").addEventListener("click", async () => {
+      if (confirm("Ștergi această sesiune din istoric?")) {
+        historyData.splice(index, 1);
+        await saveState("gym_history", historyData);
+        renderHistory();
+        showToast("Sesiune ștearsă.");
+      }
+    });
+
+    historyListEl.appendChild(card);
+  });
+}
+
+function renderProgress() {
+  exerciseProgressEl.innerHTML = "";
+
+  if (historyData.length === 0) {
+    exerciseProgressEl.innerHTML = `<p style="color:var(--muted);text-align:center;padding:40px 0;">Efectuează antrenamente pentru a vedea evoluția volumului.</p>`;
+    return;
+  }
+
+  // Calcul volum total per exercitiu
+  const volumeMap = {};
+
+  historyData.forEach(session => {
+    session.exercises.forEach(ex => {
+      let exVol = 0;
+      ex.sets.forEach(s => {
+        if (s.done) exVol += (s.w * s.r);
+      });
+      if (exVol > 0) {
+        volumeMap[ex.name] = (volumeMap[ex.name] || 0) + exVol;
+      }
+    });
+  });
+
+  Object.keys(volumeMap).forEach(exName => {
+    const card = document.createElement("div");
+    card.className = "card";
+    card.style.padding = "16px";
+    card.innerHTML = `
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <strong style="color:#fff;font-size:15px;">${exName}</strong>
+        <span style="color:var(--accent);font-weight:800;font-size:14px;">${volumeMap[exName]} kg total</span>
+      </div>
+    `;
+    exerciseProgressEl.appendChild(card);
+  });
+}
+
+/* =========================================================
+   UTILITIES
+   ========================================================= */
+
+function showToast(msg) {
+  toastEl.textContent = msg;
+  toastEl.classList.add("show");
+  setTimeout(() => {
+    toastEl.classList.remove("show");
+  }, 2500);
+}
+
+document.getElementById("hideInstall").addEventListener("click", () => {
+  document.getElementById("installCard").style.display = "none";
 });
 
-// PWA Service Worker (Instalare offline)
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('./sw.js').catch(() => {});
+/* =========================================================
+   APP INITIALIZATION
+   ========================================================= */
+
+async function initApp() {
+  const savedDays = await getState("gym_days");
+  if (savedDays) daysData = savedDays;
+
+  const savedHistory = await getState("gym_history");
+  if (savedHistory) historyData = savedHistory;
+
+  const savedName = await getState("gym_username");
+  if (savedName) userName = savedName;
+
+  switchScreen("homeScreen");
+}
+
+initApp();
+
+// Service Worker Registration
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("./sw.js")
+      .then(reg => console.log("SW înregistrat:", reg.scope))
+      .catch(err => console.log("SW eroare:", err));
   });
 }
 </script>
