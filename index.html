@@ -736,23 +736,6 @@ const EX_FOLDERS = {
   leverageInclineChestPress: "Leverage_Incline_Chest_Press"
 };
 
-const FOLDER_CATEGORY = {
-  Leg_Press: "legs", Goblet_Squat: "legs", Hyperextensions: "back", Leg_Extensions: "legs",
-  Thigh_Abductor: "legs", Standing_Calf_Raises: "legs", Ab_Crunch_Machine: "core",
-  "Wide-Grip_Lat_Pulldown": "back", "Close-Grip_Front_Lat_Pulldown": "back",
-  "Bent_Over_Two-Dumbbell_Row": "back", Seated_Cable_Rows: "back",
-  Machine_Bench_Press: "chest", Seated_Dumbbell_Press: "shoulders", Side_Lateral_Raise: "shoulders",
-  Reverse_Flyes: "shoulders", Reverse_Machine_Flyes: "shoulders", Dead_Bug: "core",
-  Butterfly: "chest", "Triceps_Pushdown_-_Rope_Attachment": "arms", Dumbbell_Bicep_Curl: "arms",
-  Pallof_Press: "core", Leverage_Incline_Chest_Press: "chest"
-};
-const CATEGORY_LABELS = { legs: "Picioare", back: "Spate", chest: "Piept", shoulders: "Umeri", arms: "Brațe", core: "Core" };
-const CATEGORY_OPTIONS = Object.keys(CATEGORY_LABELS).map(k => ({ value: k, label: CATEGORY_LABELS[k] }));
-
-function getExerciseCategory(e){
-  return e[4] || FOLDER_CATEGORY[e[3]] || "core";
-}
-
 const DEFAULT_DAYS = [
   {
     id: "d1", title: "Picioare + abdomen", label: "Ziua 1", exercises: [
@@ -1177,14 +1160,13 @@ function addExercise(){
     fields: [
       { id: "name", placeholder: "Numele exercițiului" },
       { id: "sets", type: "number", inputmode: "numeric", placeholder: "Număr de serii", value: "3" },
-      { id: "reps", placeholder: "Repetări (ex: 10-12)", value: "10-12" },
-      { id: "category", type: "select", options: CATEGORY_OPTIONS, value: "legs" }
+      { id: "reps", placeholder: "Repetări (ex: 10-12)", value: "10-12" }
     ],
     confirmText: "Adaugă",
     onConfirm: (v) => {
       if (!v.name) return;
       const setsCount = parseInt(v.sets) || 3;
-      DAYS[currentDay].exercises.push([v.name, setsCount, v.reps || "10-12", "Leg_Press", v.category || "legs"]);
+      DAYS[currentDay].exercises.push([v.name, setsCount, v.reps || "10-12", "Leg_Press"]);
       db.workouts[DAYS[currentDay].id].push(Array.from({ length: setsCount }, () => ({ done: false, kg: "", reps: "", custom: false })));
       save();
       renderWorkout();
