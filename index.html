@@ -322,11 +322,12 @@
     
     .set-list{display:flex;flex-direction:column;gap:8px;padding:0 16px 16px}
     
-    /* MODIFICARE RÂND SETURI - Layout compact pe orizontală */
+    /* MODIFICARE RÂND SETURI - Adăugată spațiere egală de 12px între elemente */
     .set-row{
       display:flex;
       align-items:center;
-      gap:8px;
+      justify-content:flex-start;
+      gap:12px;
       background:rgba(12, 16, 24, 0.6);
       border:1px solid var(--border);
       border-radius:var(--radius-md);
@@ -334,12 +335,12 @@
     }
     .set-label{font-size:11px;color:var(--muted);font-weight:800;width:24px;flex:none;}
     
-    /* MODIFICARE CASETĂ INPUT - Lățime practică și restrânsă */
+    /* CASETĂ INPUT - Lățime fixă uniformă */
     .input-box {
       display:flex;
       align-items:center;
       gap:4px;
-      width:78px; /* Lățime fixă, practică pentru numere */
+      width:78px;
       flex:none;
       background:rgba(0,0,0,0.3);
       border:1px solid var(--border);
@@ -380,7 +381,7 @@
       color:transparent;
       display:grid;place-items:center;
       font-size:12px;
-      margin-left:auto; /* Împinge bifa în dreapta */
+      margin-left:auto;
       transition:all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }
     .check.on{
@@ -443,7 +444,6 @@
     .modal-actions{display:flex;gap:10px;margin-top:14px;position:sticky;bottom:-22px;background:var(--surface2);padding-top:6px;}
     .modal-actions .btn{flex:1;justify-content:center;}
     
-    /* MODIFICARE FORMULARE PE COLOANĂ - Lățime restrânsă */
     .input-wrapper{position:relative;margin-bottom:6px;width:100%;max-width:320px;}
     .input-wrapper:last-child{margin-bottom:0}
     .field{
@@ -614,7 +614,6 @@
       <p class="sub" id="subtitle">Antrenament</p>
     </div>
     
-    <!-- Zona Timer cu Butoane de Control -->
     <div class="timer-container">
       <div class="timer-badge" id="workoutTimer">
         <span class="timer-dot" id="timerDot"></span>
@@ -833,7 +832,6 @@ function triggerHaptic(type = "light"){
   }
 }
 
-// TIMING LOGIC CU PAUZĂ & STOP
 let timerInterval = null;
 
 function updateTimerDisplay(){
@@ -1036,7 +1034,6 @@ function updateProgress(){
   document.getElementById("progressText").textContent = pct + "%";
 }
 
-// LOGICĂ AUTO-COMPLETARE SMART
 function updateSetValue(e, s, type, value){
   const w = getWorkout(currentDay);
   
@@ -1610,7 +1607,6 @@ function updateWelcome(){
   document.getElementById("userNameDisplay").textContent = db.userName || "Sportivule";
 }
 
-// BACKUP & FORCE UPDATE LOGIC
 document.getElementById("exportBtn").onclick = () => {
   const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(db, null, 2));
   const dlAnchor = document.createElement('a');
@@ -1659,7 +1655,6 @@ document.getElementById("forceUpdateBtn").onclick = async () => {
   setTimeout(() => window.location.reload(true), 1000);
 };
 
-// INITIALIZARE
 document.querySelectorAll(".nav-btn").forEach(b => {
   b.onclick = () => switchScreen(b.dataset.screen);
 });
