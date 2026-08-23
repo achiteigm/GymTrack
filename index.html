@@ -321,31 +321,25 @@
     }
     
     .set-list{display:flex;flex-direction:column;gap:8px;padding:0 16px 16px}
-    
-    /* MODIFICARE RÂND SETURI - Adăugată spațiere egală de 12px între elemente */
     .set-row{
-      display:flex;
-      align-items:center;
-      justify-content:flex-start;
-      gap:12px;
+      display:flex;align-items:center;gap:8px;
       background:rgba(12, 16, 24, 0.6);
       border:1px solid var(--border);
       border-radius:var(--radius-md);
-      padding:6px 10px;
+      padding:8px 10px;
     }
-    .set-label{font-size:11px;color:var(--muted);font-weight:800;width:24px;flex:none;}
+    .set-label{font-size:10px;color:var(--muted);font-weight:800;width:22px;flex:none;}
     
-    /* CASETĂ INPUT - Lățime fixă uniformă */
+    /* Input-uri numerice */
     .input-box {
       display:flex;
       align-items:center;
       gap:4px;
-      width:78px;
-      flex:none;
+      flex:1;
       background:rgba(0,0,0,0.3);
       border:1px solid var(--border);
       border-radius:8px;
-      padding:4px 6px;
+      padding:4px 8px;
     }
     .input-box:focus-within {
       border-color:var(--accent);
@@ -381,7 +375,6 @@
       color:transparent;
       display:grid;place-items:center;
       font-size:12px;
-      margin-left:auto;
       transition:all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }
     .check.on{
@@ -413,7 +406,7 @@
     }
     @keyframes fadeIn { from { opacity: 0; transform: scale(0.8); } to { opacity: 1; transform: scale(1); } }
 
-    /* Modal - Ajustare dimensiuni formulare */
+    /* Modal */
     .modal-backdrop{
       position:fixed;inset:0;z-index:100;
       background:rgba(0,0,0,.6);
@@ -440,11 +433,11 @@
     .modal h3{margin:0 0 6px;font-size:18px;color:#fff;}
     .modal p{margin:0 0 16px;color:var(--muted);font-size:13px;line-height:1.45;}
     .modal .input-wrapper{margin-bottom:10px;position:static;}
-    .modal .field{padding:9px 12px;font-size:13px;}
+    .modal .field{padding:11px 12px;font-size:14px;}
     .modal-actions{display:flex;gap:10px;margin-top:14px;position:sticky;bottom:-22px;background:var(--surface2);padding-top:6px;}
     .modal-actions .btn{flex:1;justify-content:center;}
     
-    .input-wrapper{position:relative;margin-bottom:6px;width:100%;max-width:320px;}
+    .input-wrapper{position:relative;margin-bottom:6px}
     .input-wrapper:last-child{margin-bottom:0}
     .field{
       width:100%;
@@ -452,7 +445,7 @@
       background:rgba(0,0,0,0.3);
       color:var(--text);
       border-radius:var(--radius-sm);
-      padding:8px 12px;
+      padding:7px 22px 7px 8px;
       font-size:13px;
       font-weight:700;
       outline:none;
@@ -531,15 +524,6 @@
     .cal-legend{display:flex;align-items:center;gap:6px;justify-content:flex-end;margin-top:10px;font-size:10px;color:var(--muted);}
     .cal-legend-swatch{width:12px;height:12px;border-radius:3px;}
 
-    .chip-row{display:flex;gap:8px;overflow:auto;padding-bottom:14px;scrollbar-width:none}
-    .chip-row::-webkit-scrollbar{display:none}
-    .chip{
-      border:1px solid var(--border);background:var(--surface);color:var(--muted);
-      padding:8px 14px;border-radius:99px;font-size:12px;font-weight:700;
-      white-space:nowrap;flex:none;
-    }
-    .chip.active{background:rgba(56,189,248,.15);border-color:var(--accent);color:var(--accent);}
-
     .history-actions{display:flex;gap:8px;margin-top:10px;}
     .history-actions .btn{flex:1;}
 
@@ -614,6 +598,7 @@
       <p class="sub" id="subtitle">Antrenament</p>
     </div>
     
+    <!-- Zona Timer cu Butoane de Control -->
     <div class="timer-container">
       <div class="timer-badge" id="workoutTimer">
         <span class="timer-dot" id="timerDot"></span>
@@ -695,7 +680,7 @@
 
   <!-- Progres -->
   <section id="progressScreen" class="screen">
-    <div class="hero"><h2>Evoluție Greutăți</h2><p>Scorul de forță arată volumul relativ pe grupă musculară — 100 e grupa ta cea mai antrenată.</p></div>
+    <div class="hero"><h2>Evoluție Greutăți</h2><p>Grafice individuale pentru creșterea în timp a greutăților pe fiecare exercițiu.</p></div>
     <div id="exerciseProgress"></div>
   </section>
 </main>
@@ -820,7 +805,6 @@ let currentScreen = "homeScreen";
 let animationInterval = null;
 let chartInstances = {};
 let calendarDate = new Date();
-let selectedProgressExercises = [];
 
 function triggerHaptic(type = "light"){
   if (!navigator.vibrate) return;
@@ -832,6 +816,7 @@ function triggerHaptic(type = "light"){
   }
 }
 
+// TIMING LOGIC CU PAUZĂ & STOP
 let timerInterval = null;
 
 function updateTimerDisplay(){
@@ -1393,7 +1378,7 @@ function editHistoryRecord(id){
 function deleteHistoryRecord(id){
   openModal({
     title: "Ștergi sesiunea?",
-    desc: "Această acțiune e permanentă și va actualiza statisticile, streak-ul și scorul de forță.",
+    desc: "Această acțiune e permanentă și va actualiza statisticile și streak-ul.",
     confirmText: "Șterge",
     danger: true,
     onConfirm: () => {
@@ -1466,140 +1451,153 @@ function renderCalendar(){
 document.getElementById("calPrev").onclick = () => { calendarDate.setMonth(calendarDate.getMonth() - 1); renderCalendar(); };
 document.getElementById("calNext").onclick = () => { calendarDate.setMonth(calendarDate.getMonth() + 1); renderCalendar(); };
 
-function renderStrengthRadar(){
-  const nameToCategory = {};
-  DAYS.forEach(d => d.exercises.forEach(e => { nameToCategory[e[0]] = getExerciseCategory(e); }));
-
-  const categories = ["legs", "back", "chest", "shoulders", "arms", "core"];
-  const volumeByCat = Object.fromEntries(categories.map(c => [c, 0]));
-
-  getRecords().forEach(r => {
-    r.sets.forEach(s => {
-      const cat = nameToCategory[s.exercise];
-      if (!cat) return;
-      volumeByCat[cat] += (parseFloat(s.kg) || 0) * (parseFloat(s.reps) || 0);
-    });
-  });
-
-  const maxVol = Math.max(1, ...Object.values(volumeByCat));
-  const data = categories.map(c => Math.round((volumeByCat[c] / maxVol) * 100));
-  const labels = categories.map(c => CATEGORY_LABELS[c]);
-
-  if (chartInstances.radar) chartInstances.radar.destroy();
-  const ctx = document.getElementById("strengthRadar").getContext("2d");
-  chartInstances.radar = new Chart(ctx, {
-    type: "radar",
-    data: { labels, datasets: [{ label: "Scor relativ", data, backgroundColor: "rgba(56,189,248,.2)", borderColor: "#38bdf8", pointBackgroundColor: "#38bdf8", borderWidth: 2 }] },
-    options: {
-      responsive: true,
-      scales: {
-        r: {
-          min: 0, max: 100,
-          ticks: { display: false, stepSize: 25 },
-          grid: { color: "rgba(255,255,255,.08)" },
-          angleLines: { color: "rgba(255,255,255,.08)" },
-          pointLabels: { color: "#94a3b8", font: { size: 11, weight: 700 } }
-        }
-      },
-      plugins: { legend: { display: false } }
-    }
-  });
-}
-
+/* NOUA LOGICĂ DE PROGRES CU GRAFICE INDIVIDUALE PER EXERCIȚIU */
 function renderProgress(){
   const recs = getRecords();
-  const exMap = {};
+  const container = document.getElementById("exerciseProgress");
 
+  if (!recs.length) {
+    container.innerHTML = `<div class="empty">Completează antrenamente pentru a vedea graficele de evoluție pe fiecare exercițiu.</div>`;
+    return;
+  }
+
+  // Identificăm toate exercițiile și istoria lor de greutăți (cea mai mare greutate pe sesiune)
+  const exMap = {};
   recs.forEach(r => {
     const ts = new Date(r.date).getTime();
+    const dateLabel = new Date(r.date).toLocaleDateString("ro-RO", { day: "numeric", month: "short" });
+    
     r.sets.forEach(s => {
       const kg = parseFloat(s.kg) || 0;
       if (kg > 0) {
         exMap[s.exercise] ||= [];
-        exMap[s.exercise].push({ ts, kg });
+        const existingIndex = exMap[s.exercise].findIndex(p => p.ts === ts);
+        if (existingIndex >= 0) {
+          if (kg > exMap[s.exercise][existingIndex].kg) {
+            exMap[s.exercise][existingIndex].kg = kg;
+          }
+        } else {
+          exMap[s.exercise].push({ ts, label: dateLabel, kg });
+        }
       }
     });
   });
 
-  const container = document.getElementById("exerciseProgress");
+  const exercises = Object.keys(exMap);
 
-  if (!recs.length) {
-    container.innerHTML = `<div class="empty">Completează antrenamente pentru a vedea scorul de forță și graficele de evoluție.</div>`;
+  if (!exercises.length) {
+    container.innerHTML = `<div class="empty">Adaugă greutăți la seturi pentru a genera graficele de evoluție.</div>`;
     return;
   }
 
-  const keys = Object.keys(exMap);
-  let overlaySection = `<div class="empty">Adaugă greutăți la seturi pentru a vedea graficul de evoluție per exercițiu.</div>`;
+  // Generăm HTML pentru fiecare card de exercițiu
+  container.innerHTML = exercises.map((ex, idx) => {
+    const history = exMap[ex].sort((a, b) => a.ts - b.ts);
+    const maxKg = Math.max(...history.map(h => h.kg));
+    const firstKg = history[0].kg;
+    const lastKg = history[history.length - 1].kg;
+    const diff = +(lastKg - firstKg).toFixed(1);
+    
+    let diffBadge = `<span style="color:var(--muted); font-size:11px; font-weight:700;">Constant</span>`;
+    if (diff > 0) {
+      diffBadge = `<span style="color:var(--done); font-size:11px; font-weight:700;">+${diff} kg ↑</span>`;
+    } else if (diff < 0) {
+      diffBadge = `<span style="color:var(--danger); font-size:11px; font-weight:700;">${diff} kg ↓</span>`;
+    }
 
-  if (keys.length) {
-    selectedProgressExercises = selectedProgressExercises.filter(k => keys.includes(k));
-    if (!selectedProgressExercises.length) selectedProgressExercises = [keys[0]];
-
-    overlaySection = `
-      <div class="section">Comparație exerciții</div>
-      <div class="chip-row" id="progressChips">
-        ${keys.map(k => `<button class="chip ${selectedProgressExercises.includes(k) ? "active" : ""}" data-ex="${k}">${k}</button>`).join("")}
+    return `
+      <div class="chart-card" style="margin-bottom: 16px;">
+        <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom: 12px;">
+          <div>
+            <strong style="font-size:15px; color:#fff; display:block;">${ex}</strong>
+            <span style="font-size:11px; color:var(--muted);">${history.length} ${history.length === 1 ? 'sesiune' : 'sesiuni'} înregistrate</span>
+          </div>
+          <div style="text-align:right;">
+            <div style="font-size:12px; font-weight:800; color:var(--accent);">MAX: ${maxKg} kg</div>
+            ${history.length > 1 ? diffBadge : ''}
+          </div>
+        </div>
+        <div style="position:relative; height:180px; width:100%;">
+          <canvas id="chart_ex_${idx}"></canvas>
+        </div>
       </div>
-      <div class="chart-card"><canvas id="overlayChart" height="220"></canvas></div>
     `;
-  }
+  }).join("");
 
-  container.innerHTML = `
-    <div class="section">Scor de forță pe grupe musculare</div>
-    <div class="chart-card"><canvas id="strengthRadar" height="220"></canvas></div>
-    ${overlaySection}
-  `;
-
-  renderStrengthRadar();
-
-  if (!keys.length) return;
-
-  document.querySelectorAll("#progressChips .chip").forEach(c => c.onclick = () => {
-    const ex = c.dataset.ex;
-    if (selectedProgressExercises.includes(ex)) {
-      if (selectedProgressExercises.length > 1) selectedProgressExercises = selectedProgressExercises.filter(x => x !== ex);
-    } else {
-      if (selectedProgressExercises.length >= 3) selectedProgressExercises.shift();
-      selectedProgressExercises.push(ex);
+  // Curățăm instanțele de grafice anterioare
+  Object.keys(chartInstances).forEach(k => {
+    if (k.startsWith("ex_")) {
+      chartInstances[k].destroy();
+      delete chartInstances[k];
     }
-    renderProgress();
   });
 
-  const tsSet = new Set();
-  selectedProgressExercises.forEach(ex => exMap[ex].forEach(p => tsSet.add(p.ts)));
-  const sortedTs = [...tsSet].sort((a, b) => a - b);
-  const labels = sortedTs.map(ts => new Date(ts).toLocaleDateString("ro-RO", { day: "numeric", month: "short" }));
+  // Renderăm graficul Chart.js pentru fiecare exercițiu
+  exercises.forEach((ex, idx) => {
+    const history = exMap[ex].sort((a, b) => a.ts - b.ts);
+    const canvas = document.getElementById(`chart_ex_${idx}`);
+    if (!canvas) return;
 
-  const palette = ["#38bdf8", "#22c55e", "#f59e0b"];
-  const datasets = selectedProgressExercises.map((ex, i) => {
-    const byTs = {};
-    exMap[ex].forEach(p => { if (!(p.ts in byTs) || p.kg > byTs[p.ts]) byTs[p.ts] = p.kg; });
-    return {
-      label: ex,
-      data: sortedTs.map(ts => (ts in byTs) ? byTs[ts] : null),
-      borderColor: palette[i % palette.length],
-      backgroundColor: palette[i % palette.length] + "22",
-      borderWidth: 2,
-      fill: true,
-      tension: 0.3,
-      spanGaps: true,
-      pointBackgroundColor: palette[i % palette.length]
-    };
-  });
+    const ctx = canvas.getContext("2d");
 
-  if (chartInstances.overlay) chartInstances.overlay.destroy();
-  const ctx = document.getElementById("overlayChart").getContext("2d");
-  chartInstances.overlay = new Chart(ctx, {
-    type: "line",
-    data: { labels, datasets },
-    options: {
-      responsive: true,
-      plugins: { legend: { display: selectedProgressExercises.length > 1, labels: { color: "#94a3b8" } } },
-      scales: {
-        x: { grid: { color: "rgba(255,255,255,0.05)" }, ticks: { color: "#94a3b8" } },
-        y: { grid: { color: "rgba(255,255,255,0.05)" }, ticks: { color: "#94a3b8" } }
+    // Gradient cyan sub linia de progres
+    const gradient = ctx.createLinearGradient(0, 0, 0, 180);
+    gradient.addColorStop(0, "rgba(56, 189, 248, 0.35)");
+    gradient.addColorStop(1, "rgba(56, 189, 248, 0.0)");
+
+    chartInstances[`ex_${idx}`] = new Chart(ctx, {
+      type: "line",
+      data: {
+        labels: history.map(h => h.label),
+        datasets: [{
+          label: "Greutate (kg)",
+          data: history.map(h => h.kg),
+          borderColor: "#38bdf8",
+          borderWidth: 2.5,
+          backgroundColor: gradient,
+          fill: true,
+          tension: 0.35,
+          pointBackgroundColor: "#38bdf8",
+          pointBorderColor: "#0b0e14",
+          pointBorderWidth: 2,
+          pointRadius: 4,
+          pointHoverRadius: 6
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            backgroundColor: "#1e2635",
+            titleColor: "#f8fafc",
+            bodyColor: "#38bdf8",
+            borderColor: "rgba(255, 255, 255, 0.08)",
+            borderWidth: 1,
+            padding: 10,
+            displayColors: false,
+            callbacks: {
+              label: (ctx) => `Greutate: ${ctx.parsed.y} kg`
+            }
+          }
+        },
+        scales: {
+          x: {
+            grid: { display: false },
+            ticks: { color: "#94a3b8", font: { size: 10, weight: "600" } }
+          },
+          y: {
+            grid: { color: "rgba(255, 255, 255, 0.05)" },
+            ticks: { 
+              color: "#94a3b8", 
+              font: { size: 10, weight: "600" },
+              precision: 0
+            }
+          }
+        }
       }
-    }
+    });
   });
 }
 
@@ -1607,6 +1605,7 @@ function updateWelcome(){
   document.getElementById("userNameDisplay").textContent = db.userName || "Sportivule";
 }
 
+// BACKUP & FORCE UPDATE LOGIC
 document.getElementById("exportBtn").onclick = () => {
   const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(db, null, 2));
   const dlAnchor = document.createElement('a');
@@ -1655,6 +1654,7 @@ document.getElementById("forceUpdateBtn").onclick = async () => {
   setTimeout(() => window.location.reload(true), 1000);
 };
 
+// INITIALIZARE
 document.querySelectorAll(".nav-btn").forEach(b => {
   b.onclick = () => switchScreen(b.dataset.screen);
 });
