@@ -319,6 +319,18 @@
       border-radius:6px;
       border:1px solid rgba(56, 189, 248, 0.2);
     }
+    .btn-fill-last{
+      display:block;
+      margin-top:8px;
+      background:none;
+      border:1px solid var(--border);
+      color:var(--muted);
+      font-size:11px;
+      font-weight:700;
+      padding:5px 10px;
+      border-radius:8px;
+    }
+    .btn-fill-last:hover{color:var(--accent);border-color:var(--accent);}
     
     .set-list{display:flex;flex-direction:column;gap:8px;padding:0 16px 16px}
     .set-row{
@@ -581,6 +593,20 @@
       max-width:88%;
     }
     .toast.show{opacity:1;transform:translate(-50%,0)}
+
+    .confetti-container{
+      position:fixed;inset:0;pointer-events:none;z-index:200;overflow:hidden;
+    }
+    .confetti-piece{
+      position:absolute;top:-10px;opacity:0.9;
+      animation-name:confettiFall;
+      animation-timing-function:ease-in;
+      animation-fill-mode:forwards;
+    }
+    @keyframes confettiFall{
+      0%{ transform:translateY(0) rotate(0deg); opacity:1; }
+      100%{ transform:translateY(110vh) rotate(720deg); opacity:0.85; }
+    }
     
     @media(min-width: 520px){
       .ex-head{flex-direction:row;align-items:center}
@@ -990,6 +1016,31 @@ function getLast(dayId, exIndex){
   return exSets.map(s => `${s.kg || 0}kg × ${s.reps || 0}`).join(", ");
 }
 
+function getLastSetsData(dayId, exIndex){
+  const dayRecs = getRecords().filter(r => r.dayId === dayId);
+  if (!dayRecs.length) return null;
+  const lastRec = dayRecs[dayRecs.length - 1];
+  const exName = DAYS.find(d => d.id === dayId)?.exercises[exIndex]?.[0];
+  const exSets = lastRec.sets.filter(s => s.exercise === exName && (s.kg || s.reps));
+  return exSets.length ? exSets : null;
+}
+
+function fillFromLast(ei){
+  const day = DAYS[currentDay];
+  const w = getWorkout(currentDay);
+  const lastSets = getLastSetsData(day.id, ei);
+  if (!lastSets) return;
+  w[ei].forEach((s, si) => {
+    const src = lastSets[si] || lastSets[lastSets.length - 1];
+    s.kg = src.kg;
+    s.reps = src.reps;
+    if (si > 0) s.custom = true;
+  });
+  save();
+  renderWorkout();
+  toast("Completat cu valorile din ultima sesiune.");
+}
+
 function updateProgress(){
   const w = getWorkout(currentDay);
   let totalSets = 0, doneSets = 0;
@@ -1082,6 +1133,7 @@ function renderWorkout(){
           <div class="ex-title">${e[0]}</div>
           <div class="meta">${e[1]} serii · ${e[2]} repetări</div>
           ${last ? `<div class="last">Ultimul: ${last}</div>` : ""}
+          ${last ? `<button class="btn-fill-last" onclick="fillFromLast(${ei})">↻ Ultima dată</button>` : ""}
         </div>
       </div>
       <div class="set-list">
@@ -1239,6 +1291,7 @@ function finishWorkout(){
   resetWorkoutTimer();
   triggerHaptic("finish");
   toast("Antrenament salvat în istoric! Bravo!");
+  renderStreak();
   switchScreen("historyScreen");
 }
 
@@ -1285,6 +1338,35 @@ function renderStreak(){
   } else {
     el.style.display = "none";
   }
+  // celebrate every 4-week milestone, once each
+  if (streak > 0 && streak % 4 === 0 && streak !== db.lastCelebratedStreak) {
+    db.lastCelebratedStreak = streak;
+    save();
+    launchConfetti();
+    toast(`🎉 ${streak} săptămâni la rând — bravo!`);
+  }
+}
+
+function launchConfetti(){
+  const colors = ["#38bdf8", "#22c55e", "#f59e0b", "#7dd3fc", "#ffffff"];
+  const container = document.createElement("div");
+  container.className = "confetti-container";
+  for (let i = 0; i < 48; i++){
+    const piece = document.createElement("div");
+    piece.className = "confetti-piece";
+    const size = 6 + Math.random() * 6;
+    piece.style.left = (Math.random() * 100) + "vw";
+    piece.style.background = colors[Math.floor(Math.random() * colors.length)];
+    piece.style.width = size + "px";
+    piece.style.height = (size * 1.6) + "px";
+    piece.style.borderRadius = Math.random() > 0.5 ? "50%" : "2px";
+    piece.style.animationDuration = (1.8 + Math.random() * 1.4) + "s";
+    piece.style.animationDelay = (Math.random() * 0.4) + "s";
+    container.appendChild(piece);
+  }
+  document.body.appendChild(container);
+  triggerHaptic("finish");
+  setTimeout(() => container.remove(), 3500);
 }
 
 function renderHistory(){
