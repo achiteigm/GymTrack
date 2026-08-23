@@ -329,24 +329,44 @@
       padding:8px 10px;
     }
     .set-label{font-size:10px;color:var(--muted);font-weight:800;width:22px;flex:none;}
-    .stepper{display:flex;align-items:center;gap:4px;flex:1;justify-content:center;min-width:0;}
-    .step-btn{
-      width:26px;height:26px;flex:none;
-      border-radius:8px;
-      border:1px solid var(--border);
-      background:var(--surface2);
-      color:var(--text);
-      font-weight:800;
-      font-size:15px;
-      line-height:1;
-      display:flex;align-items:center;justify-content:center;
-    }
-    .stepper .val{
-      min-width:52px;text-align:center;font-size:13px;font-weight:800;
-      font-variant-numeric:tabular-nums;color:#fff;white-space:nowrap;
-    }
-    .stepper .unit{font-size:9px;color:var(--muted);text-transform:uppercase;margin-left:2px;font-weight:600;}
     
+    /* Input-uri numerice noi pentru seturi */
+    .input-box {
+      display:flex;
+      align-items:center;
+      gap:4px;
+      flex:1;
+      background:rgba(0,0,0,0.3);
+      border:1px solid var(--border);
+      border-radius:8px;
+      padding:4px 8px;
+    }
+    .input-box:focus-within {
+      border-color:var(--accent);
+      background:rgba(0,0,0,0.5);
+    }
+    .set-input {
+      width:100%;
+      background:transparent;
+      border:none;
+      outline:none;
+      color:#fff;
+      font-size:13px;
+      font-weight:800;
+      text-align:center;
+      font-variant-numeric:tabular-nums;
+      padding:0;
+    }
+    .set-input::-webkit-inner-spin-button, 
+    .set-input::-webkit-outer-spin-button { 
+      -webkit-appearance: none; 
+      margin: 0; 
+    }
+    .set-input[type=number] {
+      -moz-appearance: textfield;
+    }
+    .unit-tag{font-size:9px;color:var(--muted);text-transform:uppercase;font-weight:600;}
+
     .check{
       width:28px;height:28px;flex:none;
       border:1px solid rgba(255,255,255,0.15);
@@ -1014,25 +1034,29 @@ function updateProgress(){
   document.getElementById("progressText").textContent = pct + "%";
 }
 
-function adjustSet(e, s, type, dir){
+// Actualizare valoare set din tastatură
+function updateSetValue(e, s, type, value){
   const w = getWorkout(currentDay);
-  const step = type === "kg" ? 2.5 : 1;
-  let val = (parseFloat(w[e][s][type]) || 0) + dir * step;
-  val = Math.max(0, val);
-  if (type === "kg") val = Math.round(val * 10) / 10;
-  w[e][s][type] = String(val);
+  w[e][s][type] = value;
 
   const customKey = `${currentDay}_${e}_${type}`;
   customModifiedSets[customKey] ||= {};
 
   if (s === 0) {
     for (let i = 1; i < w[e].length; i++) {
-      if (!customModifiedSets[customKey][i]) w[e][i][type] = String(val);
+      if (!customModifiedSets[customKey][i]) w[e][i][type] = value;
     }
   } else {
     customModifiedSets[customKey][s] = true;
   }
   save();
+}
+
+// Protecție contra introducerii literelor și tastelor invalide (e, E, +, -)
+function validateNumericInput(evt) {
+  if (['e', 'E', '+', '-'].includes(evt.key)) {
+    evt.preventDefault();
+  }
 }
 
 function findNextIncompleteExercise(fromIdx){
@@ -1098,15 +1122,13 @@ function renderWorkout(){
           return `
           <div class="set-row">
             <span class="set-label">S${si + 1}</span>
-            <div class="stepper" data-e="${ei}" data-s="${si}" data-type="kg">
-              <button class="step-btn" data-dir="-1">–</button>
-              <span class="val">${s.kg || 0}<span class="unit">kg</span></span>
-              <button class="step-btn" data-dir="1">+</button>
+            <div class="input-box">
+              <input class="set-input" type="number" inputmode="decimal" step="any" placeholder="0" value="${s.kg !== undefined ? s.kg : ''}" data-e="${ei}" data-s="${si}" data-type="kg" onkeydown="validateNumericInput(event)">
+              <span class="unit-tag">kg</span>
             </div>
-            <div class="stepper" data-e="${ei}" data-s="${si}" data-type="reps">
-              <button class="step-btn" data-dir="-1">–</button>
-              <span class="val">${s.reps || 0}<span class="unit">rep</span></span>
-              <button class="step-btn" data-dir="1">+</button>
+            <div class="input-box">
+              <input class="set-input" type="number" inputmode="numeric" step="1" placeholder="0" value="${s.reps !== undefined ? s.reps : ''}" data-e="${ei}" data-s="${si}" data-type="reps" onkeydown="validateNumericInput(event)">
+              <span class="unit-tag">rep</span>
             </div>
             ${isPR ? `<span class="pr-badge">★ PR</span>` : ""}
             <button class="check ${s.done ? "on" : ""}" data-e="${ei}" data-s="${si}">${s.done ? "✓" : ""}</button>
@@ -1116,11 +1138,11 @@ function renderWorkout(){
     </article>`;
   }).join("");
 
-  document.querySelectorAll(".step-btn").forEach(btn => btn.onclick = () => {
-    const wrap = btn.closest(".stepper");
-    adjustSet(+wrap.dataset.e, +wrap.dataset.s, wrap.dataset.type, +btn.dataset.dir);
-    renderWorkout();
-    updateProgress();
+  document.querySelectorAll(".set-input").forEach(input => {
+    input.oninput = (evt) => {
+      const el = evt.target;
+      updateSetValue(+el.dataset.e, +el.dataset.s, el.dataset.type, el.value);
+    };
   });
 
   document.querySelectorAll(".check").forEach(b => b.onclick = () => {
